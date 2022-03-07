@@ -6,7 +6,7 @@ import urllib.parse
 import urllib.request
 
 conf = {
-    "gmap_api_key" : "AIzaSyCidWgUsmeM5UXK7uLlRMZN3t--RnYEj20"
+    "gmap_api_key" : ""
 }
 geocode_api = "https://maps.google.com/maps/api/geocode/json"
 
