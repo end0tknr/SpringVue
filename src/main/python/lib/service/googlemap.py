@@ -1,26 +1,25 @@
 #!python
 # -*- coding: utf-8 -*-
 
+import appbase
 import json
 import urllib.parse
 import urllib.request
 
-conf = {
-    "gmap_api_key" : ""
-}
 geocode_api = "https://maps.google.com/maps/api/geocode/json"
 
 
-class GoogleMapService():
+class GoogleMapService(appbase.AppBase):
     
     def __init__(self):
         pass
 
     #例 https://maps.google.com/maps/api/geocode/json?address=渋谷&key=ないしょ
     def conv_addr_to_lng_lat(self,address_str):
-
+        conf = self.get_conf()
+        
         req_params = {}
-        req_params["key"]      = conf["gmap_api_key"]
+        req_params["key"]      = conf["common"]["google_map_api_key"]
         req_params["language"] = "ja"
         req_params["address"]  = address_str
         req_params_str = urllib.parse.urlencode(req_params)
