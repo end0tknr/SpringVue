@@ -5,6 +5,7 @@ import json
 import logging.config
 import os
 import psycopg2
+import psycopg2.extras
 import sys
 
 conf_src = \
@@ -27,6 +28,9 @@ class AppBase():
     def get_logger():
         return logger
 
+    def db_cursor(self,db_conn):
+        return db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
     def db_connect(self):
         global db_conn
         
@@ -40,4 +44,5 @@ class AppBase():
             host        = conf["db"]["db_host"],
             port        = conf["db"]["db_port"] )
         return db_conn
+
 
