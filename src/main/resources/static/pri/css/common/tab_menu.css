@@ -1,0 +1,31 @@
+.tab_menu {
+    width: 100%;
+}
+
+.tab_menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+.tab_menu ul li {
+    border: 1px solid  #333;
+    width: 80px;
+    text-align: center;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+.tab_menu ul li.active {
+    border-bottom: 0;
+}
+
+.tab_menu section {
+    padding: 10px;
+    display:none;
+}
+
+.tab_menu section.active {
+    padding: 10px;
+    display: block;
+}
