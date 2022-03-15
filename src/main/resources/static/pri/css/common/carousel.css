@@ -3,6 +3,10 @@
     background: #F2F3F4;
 }
 
+ul.carousel_large div.description a {
+    color: #fff;
+    text-decoration: underline;
+}
 
 .carousel_small {
     position: relative;

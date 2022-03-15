@@ -6,13 +6,12 @@
         
         init_window: function(){
             // 外部htmlを include
-            this.load_html(".header_container",     "index_header.html");
-            this.load_html(".page_top_container",   "index_carousel_large.html" );
-            this.load_html(".page_middle_container","index_carousel_small.html" );
-            this.load_html(".page_middle_container","index_carousel_medium.html");
-            this.load_html(".column_left",          "index_bottom_left.html"    );
-            this.load_html(".column_center",        "index_bottom_center.html"  );
-            this.load_html(".column_right",         "index_bottom_right.html"   );
+            this.load_html(".header_container",     "/pri/index_header.html");
+            this.load_html(".page_top_container",   "/pri/index_carousel_large.html" );
+            this.load_html(".page_middle_container","/pri/index_carousel_small.html" );
+            this.load_html(".column_left",          "/pri/index_bottom_left.html"    );
+            this.load_html(".column_center",        "/pri/index_bottom_center.html"  );
+            this.load_html(".column_right",         "/pri/index_bottom_right.html"   );
 
             var this_obj = this;
             this.sleep(2, function(){ this_obj.init_window_sub()} );
