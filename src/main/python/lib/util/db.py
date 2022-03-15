@@ -48,7 +48,7 @@ ORDER BY isc.ORDINAL_POSITION
             cur.execute(sql)
             db_conn.commit()
         except Exception as e:
-            logger.error(" ".join([sql,tbl_name,col_name,comment]))
+            logger.error(" ".join([sql]))
             logger.error(e)
             return False
             
@@ -60,12 +60,13 @@ ORDER BY isc.ORDINAL_POSITION
         conf = self.get_conf()
         db_conn = self.db_connect()
         cur = self.db_cursor(db_conn)
-        sql = "COMMENT ON COLUMN %s IS '%s'"%(tbl_name,comment)
+        sql = "COMMENT ON TABLE %s IS '%s'"%(tbl_name,comment)
         try:
+
             cur.execute(sql)
             db_conn.commit()
         except Exception as e:
-            logger.error(" ".join([sql,tbl_name,comment]))
+            logger.error(" ".join([sql]))
             logger.error(e)
             return False
             

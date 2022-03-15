@@ -73,17 +73,18 @@ class GisService(appbase.AppBase):
         return src_path[data_name]["select_cond"]
     
 
+    # テーブル名称?を scrape
     def find_db_tbl_comment(self,index_page_url):
-        print("HOGE 1")
         html_content = urllib.request.urlopen(index_page_url).read()
-        print("HOGE 2")
         soup = BeautifulSoup(html_content, 'html.parser')
-        print("HOGE 3")
         ahrefs = soup.select("div.breadcrumb-list a")
-        print("HOGE 4")
-        ret_val = ahrefs[-1].text.strip()
-        print("HOGE 5")
-        return ret_val
+
+        re_result = re.compile("^([^（\(]+)").search(
+            ahrefs[-1].text.strip() )
+
+        if re_result:
+            return re_result.group(1)
+        return None
         
 
     # nlftp.mlit.go.jp からの shape ファイルは変換し、db登録されますが

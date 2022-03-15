@@ -19,24 +19,27 @@ def main():
     data_names = gis_service.get_data_names()
     for data_name in data_names:
         print(data_name)
-        if data_name != 'gis_youto_chiiki':
-            continue
+        # if data_name != 'gis_youto_chiiki':
+        #     continue
 
         index_page_url = gis_service.get_index_page_url(data_name)
         print( index_page_url )
         
-        data_urls = gis_service.find_data_urls(index_page_url)
-        data_url = data_urls[-1] # 最終行のものが、最新のはず
+        # data_urls = gis_service.find_data_urls(index_page_url)
+        # data_url = data_urls[-1] # 最終行のものが、最新のはず
         #print( data_url )
 
-        sqls = gis_service.download_master(data_url["url"], data_name )
-        print( sqls[0]["create"] )
+        # sqls = gis_service.download_master(data_url["url"], data_name )
+        # print( sqls[0]["create"] )
 
         #result = gis_service.create_master_tbl( sqls[0]["create"] )
         #print( result )
 
         tbl_comment = gis_service.find_db_tbl_comment(index_page_url)
-        print("HOGE:", tbl_comment )
+        print(tbl_comment)
+
+        result = util_db.save_tbl_comment(data_name,tbl_comment)
+        print(result)
         continue
     
         col_defs = util_db.col_defs(data_name)
