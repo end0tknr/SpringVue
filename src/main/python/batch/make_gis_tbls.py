@@ -31,11 +31,14 @@ def main():
 
         sqls = gis_service.download_master(data_url["url"], data_name )
         print( sqls[0]["create"] )
+
+        #result = gis_service.create_master_tbl( sqls[0]["create"] )
+        #print( result )
+
+        tbl_comment = gis_service.find_db_tbl_comment(index_page_url)
+        print("HOGE:", tbl_comment )
         continue
-
-        result = gis_service.create_master_tbl( sqls[0]["create"] )
-        print( result )
-
+    
         col_defs = util_db.col_defs(data_name)
         col_names = []
         for col_def in col_defs:

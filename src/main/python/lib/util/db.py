@@ -53,3 +53,20 @@ ORDER BY isc.ORDINAL_POSITION
             return False
             
         return True
+    
+    def save_tbl_comment(self,tbl_name,comment):
+        logger.info( " ".join([tbl_name,comment]) )
+
+        conf = self.get_conf()
+        db_conn = self.db_connect()
+        cur = self.db_cursor(db_conn)
+        sql = "COMMENT ON COLUMN %s IS '%s'"%(tbl_name,comment)
+        try:
+            cur.execute(sql)
+            db_conn.commit()
+        except Exception as e:
+            logger.error(" ".join([sql,tbl_name,comment]))
+            logger.error(e)
+            return False
+            
+        return True
