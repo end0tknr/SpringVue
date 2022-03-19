@@ -6,7 +6,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>16db</title>
   <link rel="stylesheet" href="/pri/css/common.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <style>
+    label       { cursor: pointer; }
+    label:hover { text-decoration: underline; }
+    table { border-collapse:collapse; }
+    tr    { border-bottom: 1px #000 solid ; }
+    td    { padding:8px 4px; vertical-align:middle; }
+    td div.col_description {overflow-y: scroll;
+			    display: flex;
+			    align-items: center;
+			    height: 30px;}
+    td div.col_description.full  {height: auto;}
+  </style>
 </head>
 <body>
 
@@ -18,54 +29,68 @@
 
   <div class="container_title">
   </div><!--.container_title-->
+
+  <button type="button"
+	  onClick="gps_coordinate()"
+	  >GPS範囲</button>
   
   <div class="page_middle">
-    
-    <div id="app">
-      <h1>{{ message }}</h1>
+    <div class="page_middle_container">
 
-      <table class="table table-bordered">
-        <thead  class="thead-dark">
-          <tr>
-            <th>年度</th>
-            <th>調査価格</th>
-            <th>対前年変動率</th>
-            <th>住居漢字</th>
-            <th>地積</th>
-            <th>利用の現況</th>
-            <th>建物構造</th>
-            <th>供給施設</th>
-            <th>駅からの距離</th>
-            <th>用途区分</th>
-            <th>防火区分</th>
-            <th>都市計画区分</th>
-            <th>建ぺい率</th>
-            <th>容積率</th>
-            <th>基準地行政区域コード</th>
-            <th>基準地市区町村名称</th>
-            <th>所在及び地番</th>
-            <th>住居表示</th>
-            <th>地積</th>
-            <th>利用現況</th>
-            <th>利用状況表示</th>
-            <th>利用区分</th>
-            <th>建物構造</th>
-            <th>周辺の土地利用の状況</th>
-            <th>用途区分</th>
-            <th>防火区分</th>
-            <th>都市計画区分</th>
-            <th>高度地区</th>
-            <th>建ぺい率</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+      <div id="vueapp">
+        <h1>GISデータ一覧</h1>
+        
+        <button type="button"
+                v-on:click="get_gis_datanames"
+                >データ一覧取得</button>
+        <button type="button"
+                v-on:click="toggle_col_desc"
+                >項目欄切り替え</button>
+        <table>
+          <thead>
+            <tr>
+              <th>名称</th>
+              <th>KBYTE</th>
+              <th>項目</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="gis_data in gis_datas">
+              <td style="white-space:nowrap">
+                <label>
+                  <input type="checkbox" name="gis_data"
+                         :value="gis_data.data_name"/>
+                  {{ gis_data.description }}
+                </label>
+              </td>
+              <td style="text-align:right;">{{ gis_data.kbyte }}</td>
+              <td><div :class="col_desc_class">
+		  {{ gis_data.columns }}
+	      </div></td>
+            </tr>
+          </tbody>
+        </table>
 
-    </div>
-    
+	<div>
+	  <button type="button"
+		  v-on:click="map_coordinate"
+		  >地図範囲</button>
+	  ne:{{map_latlang.ne.lat}},{{map_latlang.ne.lng}}
+	  sw:{{map_latlang.sw.lat}},{{map_latlang.sw.lng}}
+	</div>
+	<div>
+	  <button type="button"
+		  v-on:click="find_gis_data"
+		  >GISデータ探索</button>
+	</div>
+	<div id="map"
+	     style="width:100%; height:400px; border:1px #000 solid;">
+	</div>
+      </div><!--#vueapp-->
+      
+    </div><!--.page_middle_container-->
   </div><!--.page_middle-->
-
+  
   <div class="container_title">
   </div><!--.container_title-->
 
@@ -81,7 +106,7 @@
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.3.1/dist/echarts.min.js">
   </script>
-  <script src="gis.js"></script>
+  <script src="chart2d.js"></script>
 </body>
 </html>
 
