@@ -21,11 +21,17 @@ public interface GisRepository {
 
     @SelectProvider(
             type=GisRepositorySqlProvider.class,
+            method="getDescedColumnDefs" )
+    List<GisEntity> getDescedColumnDefs(
+    		@Param("dbName") String dbName,
+    		@Param("tblName") String tblName);
+
+    @SelectProvider(
+            type=GisRepositorySqlProvider.class,
             method="getDataNames" )
     List<GisEntity> getDataNames(
     		@Param("dbName") String dbName,
     		@Param("tblName") String tblName);
-
 
     class GisRepositorySqlProvider{
 
@@ -47,6 +53,22 @@ public interface GisRepository {
         	 return sqlStr;
         }
 
+        public String getDescedColumnDefs(String dbName, String tblName ) {
+
+        	String sqlStr =
+        			" select isc.column_name, isc.data_type, pd.description "+
+        			" from pg_stat_user_tables as psut "+
+        			" join information_schema.columns as isc "+
+        			" on (psut.relname=isc.table_name) "+
+        			" left join pg_description as pd " +
+        			" on (pd.objoid=psut.relid and pd.objsubid=isc.ordinal_position) ";
+        	sqlStr += " WHERE isc.table_catalog=#{dbName} ";
+        	sqlStr += "  AND isc.table_name =#{tblName} ";
+        	sqlStr += "  AND pd.description IS NOT NULL ";
+        	sqlStr += " ORDER BY isc.ORDINAL_POSITION ";
+
+        	 return sqlStr;
+        }
         public String getColumnDefs(String dbName, String tblName ) {
 
         	String sqlStr =
