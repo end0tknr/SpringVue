@@ -72,6 +72,29 @@ class GisService(appbase.AppBase):
             return {}
         return src_path[data_name]["select_cond"]
     
+    def chk_col_name_and_comment(self,col_name,col_name_tmp,comment):
+        if col_name==col_name_tmp:
+            return comment
+
+        # 以降は「20XX年合算先メッシュ（GASSAN_20XX）」のような場合の対応
+        # 例 https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-mesh1000h30.html
+        
+        # 西暦の下2桁を抽出
+        re_result = re.compile("20(\d\d)").search(col_name)
+        if not re_result:
+            return None
+        
+        yy = re_result.group(1)
+
+        re_compile = re.compile("20(XX)",re.IGNORECASE)
+        col_name_tmp = re.sub(re_compile,"20"+yy,col_name_tmp)
+
+        if col_name==col_name_tmp:
+            comment = re.sub(re_compile,"20"+yy,comment)
+            return comment
+
+        return None
+
 
     # テーブル名称?を scrape
     def find_db_tbl_comment(self,index_page_url):
