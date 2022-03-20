@@ -19,6 +19,7 @@ public class Chart2DRestController {
     @Autowired
     GisService gisService;
 
+
 	@RequestMapping("/api/char2d")
     public List<GisChikaEntity> index() {
         return gisChikaService.findByAddress("東京都　国分寺市%");
