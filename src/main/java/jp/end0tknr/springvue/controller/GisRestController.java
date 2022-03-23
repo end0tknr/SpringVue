@@ -2,42 +2,41 @@ package jp.end0tknr.springvue.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jp.end0tknr.springvue.entity.GisChikaEntity;
 import jp.end0tknr.springvue.entity.GisEntity;
-import jp.end0tknr.springvue.service.GisChikaService;
 import jp.end0tknr.springvue.service.GisService;
+import jp.end0tknr.springvue.service.GisServiceFactory;
 
 @RestController
 @CrossOrigin
 public class GisRestController {
 
     @Autowired
-    GisChikaService gisChikaService;
-    @Autowired
     GisService gisService;
-
-	@RequestMapping("/api/gis/chika")
-    public List<GisChikaEntity> index() {
-        return gisChikaService.findByAddress("東京都　国分寺市%");
-    }
+    @Autowired
+    ApplicationContext context;
 
 	@RequestMapping("/api/gis/datanames")
     public List<GisEntity> getDataNames() {
         return gisService.getDataNames();
     }
 	@RequestMapping("/api/gis/coldefs/{dataName}")
-    public List<GisEntity> tblColDefs
+    public HashMap<String,String> tblColDefs
     ( @PathVariable("dataName") String dataName ) {
-        return gisService.getColumnDefs(dataName);
+		String gisBeanName = GisServiceFactory.toBeanName(dataName);
+		GisServiceFactory gisFactory
+		= (GisServiceFactory)context.getBean(gisBeanName);
+		return gisFactory.getDescedColumnDefs();
     }
 
 	@RequestMapping("/api/gis/find/{dataName}")
@@ -51,6 +50,10 @@ public class GisRestController {
 			coords.add(Double.valueOf(tmpStr));
 		}
 
-		return gisChikaService.findByCoord(coords);
+		String gisBeanName = GisServiceFactory.toBeanName(dataName);
+		GisServiceFactory gisFactory
+		= (GisServiceFactory)context.getBean(gisBeanName);
+
+		return gisFactory.findByCoord(coords);
     }
 }
