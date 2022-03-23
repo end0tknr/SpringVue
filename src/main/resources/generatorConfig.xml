@@ -25,8 +25,7 @@
 	targetProject="SpringVue/src/main/java"/>
   -->
 
-
-    <table schema="" tableName="gis_jinko_suikei_1km" domainObjectName="GisJinkoSuikei1kmEntity">
+    <table schema="" tableName="gis_youto_chiiki" domainObjectName="GisYoutoChiikiEntity">
 		<property name="useActualColumnNames" value="true" />
     </table>
 

@@ -14,7 +14,7 @@ public interface GisChikaRepository {
 
     @SelectProvider(
             type=GisChikaSqlProvider.class,
-            method="findByCoord" )
+            method="sqlFindByCoord" )
     List<GisChikaEntity> findByCoord(
     		@Param("coord") List<Double> coord);
 

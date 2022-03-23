@@ -2,7 +2,7 @@ package jp.end0tknr.springvue.entity;
 
 import java.util.List;
 
-public class GisJinkoSuikei1kmEntity extends GisEntityAbstract {
+public class GisJinkoSuikei500mEntity extends GisEntityAbstract {
     private Integer gid;
     private Double mesh_id;
     private Integer shicode;
