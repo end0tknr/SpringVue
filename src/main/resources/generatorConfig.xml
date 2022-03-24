@@ -9,27 +9,25 @@
 	driverClass="org.postgresql.Driver" password="testuser"
 	userId="testuser" />
 
-    <!-- Entity Models -->
     <javaModelGenerator
 	targetPackage="jp.end0tknr.springvue.entity"
 	targetProject="SpringVue/src/main/java" >
 	</javaModelGenerator>
 
-    <!-- Sql Xml files -->
-    <!--
-    <sqlMapGenerator
-	targetPackage="jp.end0tknr.springvue.mapper"
-	targetProject="SpringVue/src/main/resources" />
- -->
-    <!-- Mappers -->
+	<!-- <sqlMapGenerator
+	 targetPackage="jp.end0tknr.springvue.mapper"
+	  targetProject="SpringVue/src/main/resources"
+		/>
+	 -->
     <!--
     <javaClientGenerator type="XMLMAPPER"
 	targetPackage="jp.end0tknr.springvue.mapper"
 	targetProject="SpringVue/src/main/java"/>
   -->
-    <!-- Target tables -->
-    <table schema="" tableName="gis_chika" domainObjectName="GisChikaEntity">
+
+    <table schema="" tableName="gis_youto_chiiki" domainObjectName="GisYoutoChiikiEntity">
 		<property name="useActualColumnNames" value="true" />
     </table>
+
   </context>
 </generatorConfiguration>

@@ -2,35 +2,13 @@ package jp.end0tknr.springvue.entity;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+public class GisChikaEntity extends GisEntityAbstract {
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jp.end0tknr.springvue.repository.GisRepository;
-
-public class GisChikaEntity extends GisAbstract {
-
-    @Autowired
-    GisRepository gisRepository;
-    static String tblName ="gis_chika";
+    //static String tblName ="gis_chika";
 
 	public List<Double> getGeom() {
 		return convGeomText2Coords(geom_text);
 	}
-
-	public String toString() {
-        ObjectMapper mapper = new ObjectMapper();
-        String json;
-		try {
-			json = mapper.writeValueAsString(this);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-			return "{}";
-		}
-        return json;
-	}
-
 
 	private Integer gid;
 	private String l02_001;

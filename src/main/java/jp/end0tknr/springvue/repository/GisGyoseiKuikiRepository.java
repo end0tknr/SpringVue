@@ -6,16 +6,16 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.SelectProvider;
 
-import jp.end0tknr.springvue.entity.GisChikaEntity;
-import jp.end0tknr.springvue.sql.GisChikaSqlProvider;
+import jp.end0tknr.springvue.entity.GisGyoseiKuikiEntity;
+import jp.end0tknr.springvue.sql.GisGyoseiKuikiSqlProvider;
 
 @Mapper
-public interface GisChikaRepository {
+public interface GisGyoseiKuikiRepository {
 
     @SelectProvider(
-            type=GisChikaSqlProvider.class,
+            type=GisGyoseiKuikiSqlProvider.class,
             method="sqlFindByCoord" )
-    List<GisChikaEntity> findByCoord(
+    List<GisGyoseiKuikiEntity> findByCoord(
     		@Param("coord") List<Double> coord);
 
 }

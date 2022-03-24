@@ -8,14 +8,18 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import jp.end0tknr.springvue.entity.GisChikaEntity;
-import jp.end0tknr.springvue.repository.GisChikaRepository;
+import jp.end0tknr.springvue.entity.GisJinkoSuikei1kmEntity;
+import jp.end0tknr.springvue.repository.GisJinkoSuikei1kmRepository;
 
 @Service
-public class GisChikaService extends GisServiceFactory {
+public class GisJinkoSuikei1kmService extends GisServiceFactory {
 
     @Autowired
-    GisChikaRepository gisChikaRepository;
+    GisJinkoSuikei1kmRepository gisJinkoSuikei1kmRepository;
+
+	public String tblName() {
+    	return "gis_jinko_suikei_1km";
+	}
 
     public  List<HashMap> findByCoord(List coord) {
 
@@ -26,8 +30,9 @@ public class GisChikaService extends GisServiceFactory {
 
     	HashMap<String,String> colDefs	= getDescedColumnDefs();
 
-    	for( GisChikaEntity tmpEntity :
-    		(List<GisChikaEntity>) gisChikaRepository.findByCoord(coord) ) {
+    	for( GisJinkoSuikei1kmEntity tmpEntity :
+    		(List<GisJinkoSuikei1kmEntity>)
+    		gisJinkoSuikei1kmRepository.findByCoord(coord) ) {
 
     		HashMap<String,Object> retEntity = new HashMap();
 

@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Value;
 
-abstract class GisAbstract {
+abstract class GisEntityAbstract {
 
 	@Value("${spring.datasource.dbname}")
 	private String dbName;
@@ -18,9 +18,6 @@ abstract class GisAbstract {
 	public List<Double> convGeomText2Coords(String geom_text) {
         Pattern re = Pattern.compile( "[\\d\\.]+" );
         Matcher m = re.matcher(geom_text);
-
-        System.out.println(geom_text);
-        System.out.println(m.groupCount());
 
         List<Double> coords = new ArrayList<Double>();
         while( m.find()) {
