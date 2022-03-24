@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Value;
 
-abstract class GisEntityAbstract {
+public abstract class GisEntityAbstract {
 
 	@Value("${spring.datasource.dbname}")
 	private String dbName;
@@ -27,5 +27,6 @@ abstract class GisEntityAbstract {
         return coords;
 	}
 
+	abstract public List<Double> getGeom();
 
 }
