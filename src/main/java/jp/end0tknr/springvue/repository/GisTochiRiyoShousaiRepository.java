@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.SelectProvider;
 
-import jp.end0tknr.springvue.entity.GisChikaEntity;
+import jp.end0tknr.springvue.entity.GisTochiRiyoShousaiEntity;
 import jp.end0tknr.springvue.sql.GisTochiRiyoShousaiSqlProvider;
 
 @Mapper
@@ -15,7 +15,7 @@ public interface GisTochiRiyoShousaiRepository {
     @SelectProvider(
             type=GisTochiRiyoShousaiSqlProvider.class,
             method="sqlFindByCoord" )
-    List<GisChikaEntity> findByCoord(
+    List<GisTochiRiyoShousaiEntity> findByCoord(
     		@Param("coord") List<Double> coord);
 
 }

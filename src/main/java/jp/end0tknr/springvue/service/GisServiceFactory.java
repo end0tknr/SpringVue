@@ -19,14 +19,14 @@ public abstract class GisServiceFactory {
 	@Value("${spring.datasource.dbname}")
 	private String dbName;
 
-//    public String getClassName() {
-//		String className = this.getClass().getSimpleName();
-//        return className;
-//	}
-
-    public  HashMap<String,String> getDescedColumnDefs() {
+	public String tblName() {
     	String tblName	= toSnakeStr( this.getClass().getSimpleName() );
     	tblName = tblName.replace("_service","");
+    	return tblName;
+	}
+
+    public  HashMap<String,String> getDescedColumnDefs() {
+    	String tblName	= tblName();
 
     	HashMap<String,String> retMap = new HashMap<>();
     	List<GisEntity> entries =
