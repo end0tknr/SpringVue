@@ -35,18 +35,19 @@ src_path = {
     "gis_youto_chiiki" :
     {"index_page": "/ksj/gml/datalist/KsjTmplt-A29-v2_1.html",
      "select_cond": {}},
-    "gis_tochi_riyo" :
-    {"index_page": "/ksj/gml/datalist/KsjTmplt-L03-a.html",
-     "select_cond": {}},
-    "gis_tochi_riyo_saibun" :
-    {"index_page": "/ksj/gml/datalist/KsjTmplt-L03-b.html",
-     "select_cond": {}},
+    # 土地利用や土地利用細分はtableのcolumnが日本語の為、使用しない
+    #"gis_tochi_riyo" :
+    #{"index_page": "/ksj/gml/datalist/KsjTmplt-L03-a.html",
+    # "select_cond": {}},
+    #"gis_tochi_riyo_saibun" :
+    #{"index_page": "/ksj/gml/datalist/KsjTmplt-L03-b.html",
+    # "select_cond": {}},
     "gis_tochi_riyo_shousai" :
     {"index_page": "/ksj/gml/datalist/KsjTmplt-L03-b-c.html",
      "select_cond": {}},
     "gis_jinko_shuchu" :
     {"index_page": "/ksj/gml/datalist/KsjTmplt-A16-v2_3.html",
-     "select_cond": {}},
+     "select_cond": default_select_cond},
     "gis_jinko_suikei_1km" :
     {"index_page": "/ksj/gml/datalist/KsjTmplt-mesh1000h30.html",
      "select_cond": {}},
@@ -202,30 +203,6 @@ class GisService(appbase.AppBase):
             
         return ret_urls
 
-    # def set_db_client_encoding(self,encoding):
-    #     db_conn = self.db_connect()
-    #     cursor = db_conn.cursor()
-    #     sql = "set client_encoding to %s" % (encoding)
-    #     cursor.execute(sql)
-    #     db_conn.commit()
-    #     return True
-    
-    # def reset_db_client_encoding(self):
-    #     db_conn = self.db_connect()
-    #     cursor = db_conn.cursor()
-    #     sql = "reset client_encoding"
-    #     cursor.execute(sql)
-    #     db_conn.commit()
-    #     return True
-    
-    # def drop_master_tbl(self, tbl_name ):
-    #     db_conn = self.db_connect()
-    #     cursor = db_conn.cursor()
-    #     sql = "DROP TABLE IF EXISTS %s" % (tbl_name)
-    #     cursor.execute(sql)
-    #     db_conn.commit()
-    #     return True
-    
     def create_master_tbl(self, sql ):
         logger.info("start " + sql)
         try:
@@ -239,7 +216,23 @@ class GisService(appbase.AppBase):
             logger.error(sql)
             return False
         return True
-        
+
+    def add_column_lng_lat(self, tbl_name):
+
+        try:
+            db_conn = self.db_connect()
+            cursor = db_conn.cursor()
+            for col_name in ["lng","lat"]:
+                sql = "ALTER TABLE %s ADD COLUMN %s DOUBLE PRECISION" \
+                % (tbl_name,col_name);
+                cursor.execute(sql)
+                db_conn.commit()
+        except Exception as e:
+            logger.error(e)
+            logger.error(sql)
+            return False
+        return True
+
     def insert_master_tbl(self, sql ):
 
         if len(sql) > 200:
@@ -251,10 +244,10 @@ class GisService(appbase.AppBase):
             db_conn = self.db_connect()
             cursor = db_conn.cursor()
             cursor.execute(sql)
-            db_conn.commit()
+            #db_conn.commit()
         except Exception as e:
             logger.error(e)
-            logger.error(sql)
+            #logger.error(sql)
             return False
         return True
 
@@ -361,3 +354,48 @@ class GisService(appbase.AppBase):
             return None
 
         return result.stdout
+
+    def save_lng_lat_from_geom(self,data_name):
+
+        sql = """
+update %s set lng=ST_X(ST_Centroid(geom)),lat=ST_Y(ST_Centroid(geom))
+"""
+        sql = sql % (data_name)
+        logger.debug(sql)
+        
+        try:
+            db_conn = self.db_connect()
+            cursor = db_conn.cursor()
+            cursor.execute(sql)
+            db_conn.commit()
+        except Exception as e:
+            logger.error(e)
+            logger.error(sql)
+            return False
+        
+        return True
+
+
+    def calc_lng_lat_from_geom(self,data_name):
+        sql = "SELECT gid, ST_AsText(ST_Centroid(geom)) AS lng_lat FROM %s" \
+            % (data_name)
+
+        ret_vals = []
+        try:
+            db_conn = self.db_connect()
+            cursor = db_conn.cursor()
+            cursor.execute(sql)
+        except Exception as e:
+            logger.error(e)
+            logger.error(sql)
+            return ret_vals
+
+        re_compile = re.compile("([\d\.]+) ([\d\.]+)")
+        for row in cursor.fetchall():
+            re_result = re.compile("20(\d\d)").search(row['lng_lat'])
+            if not re_result:
+                continue
+
+            ret_vals.append([row['gid'], re_result.group(1), re_result.group(2)])
+
+        return ret_vals;
