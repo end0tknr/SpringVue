@@ -23,6 +23,7 @@
     let vueapp = Vue.createApp({
         data(){
             return { gis_datas : [],
+		     selected_gis_data : "",
                      col_desc_class : ["col_description"] }
         },
         mounted(){
@@ -51,16 +52,16 @@
             set_marker_color(data_name){
                 for( let marker_color of marker_colors ){
                     if (marker_color[2]){
-			continue;
+                        continue;
                     }
                     marker_color[2] = data_name;
 
-		    for (let gis_data of this.gis_datas ){
-			if (data_name != gis_data.data_name ){
-			    continue;
-			}
-			gis_data.color = marker_color[0];
-		    }
+                    for (let gis_data of this.gis_datas ){
+                        if (data_name != gis_data.data_name ){
+                            continue;
+                        }
+                        gis_data.color = marker_color[0];
+                    }
                     return marker_color;
                 }
                 return;
@@ -99,19 +100,17 @@
                     }
 
                     let col_descs = [];
-                    for( let col_def of col_defs ){
-                        if(! "description" in col_def ||
-                           ! col_def["description"] ){
-                            continue;
-                        }
-                        col_descs.push( col_def["description"] );
+                    for( let col_name in col_defs ){
+                        col_descs.push( col_defs[col_name] );
                     }
 
-                    data_name["columns"] = col_descs.join(" ");
+                    data_name["columns"] = col_descs.sort().join(" ");
                     data_name["kbyte"] =
                         Number(data_name["kbyte"]).toLocaleString();
                     this.gis_datas.push(data_name);
                 }
+
+                this.selected_gis_data = data_names[0].data_name;
             },
             clear_gis_data(){
                 for (let data_name in markers ){
@@ -123,19 +122,19 @@
                 markers = {};
             },
             async find_gis_data(){
-		let data_name = 'gis_chika';
-		
+                let data_name = this.selected_gis_data;
+                
                 let latlngBounds = map.getBounds();
                 let neLatlng = latlngBounds.getNorthEast();
                 let swLatlng = latlngBounds.getSouthWest();
-		let coord = [neLatlng.lat(),
+                let coord = [neLatlng.lat(),
                              neLatlng.lng(),
                              swLatlng.lat(),
                              swLatlng.lng()];
                 let req_url =
                     app_conf.api_base_url+'/api/gis/find/' + data_name +
-		    "?co="+coord.join(",");
-		let gis_datas = [];
+                    "?co="+coord.join(",");
+                let gis_datas = [];
                 try {
                     let axios_res = await axios.get(req_url);
                     gis_datas = axios_res.data;
@@ -149,16 +148,16 @@
                     return;
                 }
 
-		let i = 0;
-		for(let gis_data of gis_datas){
-		    i += 1;
-		    let marker = this.make_map_marker(gis_data, marker_color, i);
+                let i = 0;
+                for(let gis_data of gis_datas){
+                    i += 1;
+                    let marker = this.make_map_marker(gis_data, marker_color, i);
 
                     if( data_name in markers == false) {
-			markers[data_name] = [];
+                        markers[data_name] = [];
                     }
                     markers[data_name].push(marker);
-		}
+                }
             },
             
             make_map_marker( gis_data, marker_color,i){
@@ -177,16 +176,17 @@
                     map  : map,
                     icon : marker_icon,
                     label: marker_label });
-		
+                
                 let infoWindow = new google.maps.InfoWindow({
-                    content: gis_data["調査価格"].toLocaleString()
+                    content: gis_data["公示価格"].toLocaleString()
+                    //content: gis_data["調査価格"].toLocaleString()
                 });
-		
+                
                 marker.addListener('click',function() {
                     infoWindow.open(map, marker);
                 });
 
-		return marker;
+                return marker;
             },
         }
     })
