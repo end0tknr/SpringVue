@@ -1,7 +1,5 @@
 package jp.end0tknr.springvue.entity;
 
-import java.util.List;
-
 public class GisJinkoSuikei1kmEntity extends GisEntityAbstract {
     private Integer gid;
     private Double mesh_id;
@@ -238,12 +236,12 @@ public class GisJinkoSuikei1kmEntity extends GisEntityAbstract {
     private Double rtc_2050;
     private Double rtd_2050;
     private Double rte_2050;
-    private String geom;
-	private String geom_text;
 
-	public List<Double> getGeom() {
-		return convGeomText2Coords(geom_text);
-	}
+	private Double lng;
+	private Double lat;
+	public Double getLng() {		return lng;		}
+	public Double getLat() {		return lat;		}
+
     public Integer getGid() {	return gid;}
     public Double getMesh_id() {	return mesh_id;}
     public Integer getShicode() {	return shicode;}

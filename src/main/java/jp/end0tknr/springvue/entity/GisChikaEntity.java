@@ -1,14 +1,8 @@
 package jp.end0tknr.springvue.entity;
 
-import java.util.List;
-
 public class GisChikaEntity extends GisEntityAbstract {
 
     //static String tblName ="gis_chika";
-
-	public List<Double> getGeom() {
-		return convGeomText2Coords(geom_text);
-	}
 
 	private Integer gid;
 	private String l02_001;
@@ -143,7 +137,11 @@ public class GisChikaEntity extends GisEntityAbstract {
 	private String l02_130;
 	private String l02_131;
 	private String geom;
-	private String geom_text;
+
+	private Double lng;
+	private Double lat;
+	public Double getLng() {		return lng;		}
+	public Double getLat() {		return lat;		}
 
 	public Integer getGid() {		return gid;		}
 	public String getL02_001() {	return l02_001;	}

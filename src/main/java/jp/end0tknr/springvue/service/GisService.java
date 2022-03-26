@@ -18,22 +18,6 @@ public class GisService {
 	@Value("${spring.datasource.dbname}")
 	private String dbName;
 
-//    public  List<GisEntity> getColumnDefs(String tblName) {
-//        return gisRepository.getColumnDefs(dbName, tblName);
-//    }
-//
-//    public  HashMap<String,String> getDescedColumnDefs(String tblName) {
-//    	System.out.println("HGOE 2-1");
-//    	HashMap<String,String> retMap = new HashMap<>();
-//    	for (GisEntity entity : gisRepository.getDescedColumnDefs(dbName, tblName) ) {
-//        	System.out.println("HGOE 2-2");
-//    		retMap.put(entity.getColumn_name(),entity.getDescription());
-//        	System.out.println("HGOE 2-3");
-//    	}
-//    	System.out.println("HGOE 2-4");
-//        return retMap;
-//    }
-
     public  List<GisEntity> getDataNames() {
         return gisRepository.getDataNames(dbName, "gis_%");
     }

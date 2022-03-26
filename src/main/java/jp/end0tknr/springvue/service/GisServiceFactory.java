@@ -29,6 +29,26 @@ public abstract class GisServiceFactory {
     	return tblName;
 	}
 
+    public  HashMap<String,String> getDescedColumnDefs4Disp() {
+    	HashMap<String,String> colDefs	= getDescedColumnDefs();
+    	String[] descsForDisp = descsForDisp();
+
+    	List<String> delColNames = new ArrayList<String>();
+
+        for (String colName : colDefs.keySet()) {
+            String description = colDefs.get(colName);
+            if(Arrays.asList(descsForDisp).contains(description)){
+            	continue;
+            }
+            delColNames.add(colName);
+        }
+
+        for (String colName : delColNames) {
+            colDefs.remove(colName);
+        }
+        return colDefs;
+    }
+
     public  HashMap<String,String> getDescedColumnDefs() {
     	String tblName	= tblName();
 
@@ -100,8 +120,7 @@ public abstract class GisServiceFactory {
     		return retEntities;
     	}
 
-    	HashMap<String,String> colDefs	= getDescedColumnDefs();
-    	String[] descsForDisp = descsForDisp();
+    	HashMap<String,String> colDefs	= getDescedColumnDefs4Disp();
 
     	for( GisEntityAbstract tmpEntity :
     		(List<GisEntityAbstract>) findByCoordFromRepo(coord) ) {
@@ -112,12 +131,8 @@ public abstract class GisServiceFactory {
     	    	field.setAccessible(true);
 
     	    	String fieldName = field.getName();
-    	    	if (! colDefs.containsKey(fieldName) ) {
-    	    		continue;
-    	    	}
 
-    	    	String description = colDefs.get(fieldName);
-    	    	if (! Arrays.asList(descsForDisp).contains(description) ) {
+    	    	if (! colDefs.containsKey(fieldName) ) {
     	    		continue;
     	    	}
 
@@ -128,7 +143,6 @@ public abstract class GisServiceFactory {
 				}
     	    }
     	    retEntity.put( "geom", tmpEntity.getGeom() );
-    	    //System.out.println(retEntity);
     	    retEntities.add(retEntity);
     	}
 

@@ -41,6 +41,7 @@ public interface GisRepository {
         			" SELECT "+
         			"   pc.relname as data_name,"+
         			"   pc.relpages/8 as kbyte,"+
+        			"   pc.reltuples as rows, "+
         			"   pd.description "+
         			" FROM pg_class pc "+
         			" JOIN pg_stat_user_tables psut "+
