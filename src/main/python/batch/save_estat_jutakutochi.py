@@ -1,14 +1,8 @@
 #!python3
 # -*- coding: utf-8 -*-
 
-from bs4 import BeautifulSoup
-import tempfile
-import openpyxl
-import getopt
 import os
-import re
 import sys
-import urllib.request
 sys.path.append( os.path.join(os.path.dirname(__file__), '../lib') )
 from service.estat_jutakutochi import EstatJutakuTochiService
 

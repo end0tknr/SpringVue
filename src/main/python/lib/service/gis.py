@@ -4,7 +4,6 @@
 from bs4 import BeautifulSoup
 from jeraconv import jeraconv
 import appbase
-import csv
 import glob
 import os
 import pprint
