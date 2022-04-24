@@ -1,6 +1,12 @@
 #!python
 # -*- coding: utf-8 -*-
 
+# refer urls are below.
+# https://gigazine.net/news/20151201-household-income-map/
+# https://gunmagisgeek.com/datavis/mimanCity/
+# http://www.e-stat.go.jp/SG1/estat/NewList.do?tid=000001063455
+# https://github.com/shimizu/H25_yearly_income
+
 from bs4 import BeautifulSoup
 from psycopg2  import extras # for bulk insert
 
