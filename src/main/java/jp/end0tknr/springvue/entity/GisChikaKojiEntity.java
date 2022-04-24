@@ -1,16 +1,14 @@
 package jp.end0tknr.springvue.entity;
 
-import java.util.List;
-
 public class GisChikaKojiEntity extends GisEntityAbstract {
 
-	public List<Double> getGeom() {
-		return convGeomText2Coords(geom_text);
-	}
+	private Double lng;
+	private Double lat;
+	public Double getLng() {		return lng;		}
+	public Double getLat() {		return lat;		}
 
-    private Integer gid;
+	private Integer gid;
     private String geom;
-	private String geom_text;
     private String l01_001;
     private String l01_002;
     private String l01_003;

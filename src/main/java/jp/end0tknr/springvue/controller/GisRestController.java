@@ -36,7 +36,9 @@ public class GisRestController {
 		String gisBeanName = GisServiceFactory.toBeanName(dataName);
 		GisServiceFactory gisFactory
 		= (GisServiceFactory)context.getBean(gisBeanName);
-		return gisFactory.getDescedColumnDefs();
+
+		return gisFactory.getDescedColumnDefs4Disp();
+
     }
 
 	@RequestMapping("/api/gis/find/{dataName}")

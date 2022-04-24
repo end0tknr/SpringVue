@@ -1,5 +1,8 @@
 package jp.end0tknr.springvue.service;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -8,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import jp.end0tknr.springvue.entity.GisEntity;
+import jp.end0tknr.springvue.entity.GisEntityAbstract;
 import jp.end0tknr.springvue.repository.GisRepository;
 
 
@@ -24,6 +28,26 @@ public abstract class GisServiceFactory {
     	tblName = tblName.replace("_service","");
     	return tblName;
 	}
+
+    public  HashMap<String,String> getDescedColumnDefs4Disp() {
+    	HashMap<String,String> colDefs	= getDescedColumnDefs();
+    	String[] descsForDisp = descsForDisp();
+
+    	List<String> delColNames = new ArrayList<String>();
+
+        for (String colName : colDefs.keySet()) {
+            String description = colDefs.get(colName);
+            if(Arrays.asList(descsForDisp).contains(description)){
+            	continue;
+            }
+            delColNames.add(colName);
+        }
+
+        for (String colName : delColNames) {
+            colDefs.remove(colName);
+        }
+        return colDefs;
+    }
 
     public  HashMap<String,String> getDescedColumnDefs() {
     	String tblName	= tblName();
@@ -83,5 +107,46 @@ public abstract class GisServiceFactory {
         return snake;
     }
 
-    public abstract List<HashMap> findByCoord(List coord);
+
+    //public abstract List<HashMap> findByCoord(List coord);
+    public abstract List<GisEntityAbstract> findByCoordFromRepo(List coord);
+    public abstract String[] descsForDisp();
+
+
+    public  List<HashMap> findByCoord(List coord) {
+
+    	List<HashMap> retEntities = new ArrayList<HashMap>();
+    	if( coord.size() != 4) {
+    		return retEntities;
+    	}
+
+    	HashMap<String,String> colDefs	= getDescedColumnDefs4Disp();
+
+    	for( GisEntityAbstract tmpEntity :
+    		(List<GisEntityAbstract>) findByCoordFromRepo(coord) ) {
+
+    		HashMap<String,Object> retEntity = new HashMap();
+
+    	    for (Field field : tmpEntity.getClass().getDeclaredFields() ){
+    	    	field.setAccessible(true);
+
+    	    	String fieldName = field.getName();
+
+    	    	if (! colDefs.containsKey(fieldName) ) {
+    	    		continue;
+    	    	}
+
+    	    	try {
+					retEntity.put( colDefs.get(fieldName), field.get(tmpEntity));
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+    	    }
+    	    retEntity.put( "geom", tmpEntity.getGeom() );
+    	    retEntities.add(retEntity);
+    	}
+
+    	return retEntities;
+    }
+
 }

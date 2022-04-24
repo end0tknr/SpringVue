@@ -26,7 +26,6 @@ public abstract class GisSqlProviderAbstract {
 
     public String sqlFindByCoord(List<Double> coord) {
 
-
     	String sqlStr =
     			" SELECT *, ST_AsText(geom) as geom_text "+
     			" FROM " + toTblName() +
@@ -35,36 +34,11 @@ public abstract class GisSqlProviderAbstract {
                 coord.get(1).toString() +" AND " +
                 " lat BETWEEN "+ coord.get(2).toString() +" AND " +
                 coord.get(0).toString() +
-    			" ORDER BY ST_AsText(geom) "+
+    			" ORDER BY lat DESC, lng "+
     			" LIMIT "+selectLimit;
-    	System.out.println( sqlStr );
+    	//System.out.println( sqlStr );
 
     	 return sqlStr;
     }
-
-//    public String sqlFindByCoord(List<Double> coord) {
-//
-//        String[] coordTmp = {
-//    			coord.get(1).toString() +" "+ coord.get(0).toString(),
-//    			coord.get(1).toString() +" "+ coord.get(2).toString(),
-//    			coord.get(3).toString() +" "+ coord.get(2).toString(),
-//    			coord.get(3).toString() +" "+ coord.get(0).toString(),
-//    			coord.get(1).toString() +" "+ coord.get(0).toString() };
-//
-//    	String sqlStr =
-//    			" SELECT *, ST_AsText(geom) as geom_text "+
-//    			" FROM " + toTblName() +
-//    			" WHERE "+
-//    			" ST_Intersects( "+
-//    			"  ST_GeographyFromText('POLYGON(("+
-//    			   String.join(",", coordTmp) +"))'),"+
-//    			"  geom) "+
-//    			" ORDER BY ST_AsText(geom) "+
-//    			" LIMIT "+selectLimit;
-//    	System.out.println( sqlStr );
-//
-//    	 return sqlStr;
-//    }
-
 
 }

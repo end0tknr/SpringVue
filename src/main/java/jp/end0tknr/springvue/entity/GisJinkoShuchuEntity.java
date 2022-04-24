@@ -1,8 +1,5 @@
 package jp.end0tknr.springvue.entity;
 
-import java.util.Date;
-import java.util.List;
-
 public class GisJinkoShuchuEntity extends GisEntityAbstract {
 
     private Integer gid;
@@ -16,9 +13,12 @@ public class GisJinkoShuchuEntity extends GisEntityAbstract {
     private Double a16_008;
     private Double a16_009;
     private Double a16_010;
-    private Date a16_011;
-    private String geom;
-	private String geom_text;
+    private Integer a16_011;
+
+	private Double lng;
+	private Double lat;
+	public Double getLng() {		return lng;		}
+	public Double getLat() {		return lat;		}
 
     public Integer getGid() {		return gid;}
     public Integer getA16_001(){	return a16_001;}
@@ -31,8 +31,5 @@ public class GisJinkoShuchuEntity extends GisEntityAbstract {
     public Double getA16_008() {	return a16_008;}
     public Double getA16_009() {	return a16_009;}
     public Double getA16_010() {	return a16_010;}
-    public Date getA16_011() {	    return a16_011;}
-	public List<Double> getGeom() {
-		return convGeomText2Coords(geom_text);
-	}
+    public Integer getA16_011() {	return a16_011;}
 }
