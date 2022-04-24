@@ -23,7 +23,7 @@
     let vueapp = Vue.createApp({
         data(){
             return { gis_datas : [],
-		     selected_gis_data : "",
+                     selected_gis_data : "",
                      col_desc_class : ["col_description"] }
         },
         mounted(){
@@ -107,6 +107,8 @@
                     data_name["columns"] = col_descs.sort().join(" ");
                     data_name["kbyte"] =
                         Number(data_name["kbyte"]).toLocaleString();
+                    data_name["rows"] =
+                        Number(data_name["rows"]).toLocaleString();
                     this.gis_datas.push(data_name);
                 }
 
@@ -176,10 +178,25 @@
                     map  : map,
                     icon : marker_icon,
                     label: marker_label });
-                
+
+                let contens = [];
+                for( let atri_key in gis_data ){
+                    if (atri_key=="geom"){
+                        continue;
+                    }
+
+                    if( gis_data[atri_key] == null ){
+                        contens.push(atri_key +":" );
+                    } else if( parseFloat(gis_data[atri_key]) ){
+                        contens.push(atri_key +":"+
+                                     gis_data[atri_key].toLocaleString() );
+                    } else {
+                        contens.push(atri_key +":"+gis_data[atri_key]);
+                    }
+                }
+
                 let infoWindow = new google.maps.InfoWindow({
-                    content: gis_data["公示価格"].toLocaleString()
-                    //content: gis_data["調査価格"].toLocaleString()
+                    content: contens.join("<br/>")
                 });
                 
                 marker.addListener('click',function() {

@@ -7,12 +7,16 @@ import appbase
 import csv
 import glob
 import os
+import pprint
+import psycopg2.extras
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
 import urllib.request
+
+from service.googlemap  import GoogleMapService
 
 # soup.select() において、以下errorとなることがある為
 # RecursionError: maximum recursion depth exceeded
@@ -62,6 +66,64 @@ class GisService(appbase.AppBase):
     def __init__(self):
         pass
 
+    def correct_lng_lat_by_gmap(self, data_name ):
+        gmap = GoogleMapService()
+        sql = "select gid, lng, lat from %s" % (data_name)
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                    rows = db_cur.fetchall()
+                except Exception as e:
+                    logger.error(e)
+                    return False
+
+        i = 0
+        for row in rows:
+            row = dict(row)
+            i += 1
+            print(str(i)+"/"+str(len(rows)))
+
+            addr_info = gmap.load_addr_to_lng_lat( row['lng'],
+                                                   row['lat'] )
+            if addr_info:
+                continue
+
+            addr_info = gmap.conv_lng_lat_to_addr(row['lng'],
+                                                  row['lat'] )
+            if not addr_info:
+                continue
+
+            addr_info_tmp = gmap.load_addr_to_lng_lat( addr_info['lng'],
+                                                       addr_info['lat'] )
+            if not addr_info_tmp:
+                gmap.save_addr_info(addr_info)
+            
+            self.save_lng_lat( data_name,
+                               row['gid'],
+                               addr_info['lng'],
+                               addr_info['lat'] )
+            
+
+    def save_lng_lat(self, tbl_name, gid, lng, lat ):
+
+        sql = "update %s SET lng=round(%s,4), lat=round(%s,4) WHERE gid=%s"
+        sql = sql % (tbl_name,lng,lat,gid)
+        
+        with  self.db_connect() as db_conn:
+            with db_conn.cursor() as db_cur:
+
+                try:
+                    db_cur.execute(sql)
+                    db_conn.commit()
+                    db_cur.close()
+                except Exception as e:
+                    logger.error(e)
+                    return False
+        
+        return True
+            
     def get_data_names(self):
         return sorted(list( src_path.keys() ))
         
@@ -358,7 +420,9 @@ class GisService(appbase.AppBase):
     def save_lng_lat_from_geom(self,data_name):
 
         sql = """
-update %s set lng=ST_X(ST_Centroid(geom)),lat=ST_Y(ST_Centroid(geom))
+update %s
+set lng=round(ST_X(ST_Centroid(ST_makeValid(geom)))::NUMERIC, 4),
+    lat=round(ST_Y(ST_Centroid(ST_makeValid(geom)))::NUMERIC, 4)
 """
         sql = sql % (data_name)
         logger.debug(sql)

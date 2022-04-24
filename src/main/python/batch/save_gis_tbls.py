@@ -22,8 +22,8 @@ def main():
     for data_name in data_names:
         print(data_name)
 
-        # if data_name != 'gis_jinko_shuchu':
-        #     continue
+        if data_name != 'gis_chika_koji':
+            continue
 
         # index_page_url = gis_service.get_index_page_url(data_name)
         # print( index_page_url )
@@ -49,7 +49,8 @@ def main():
         #         result = gis_service.insert_master_tbl( sql["insert"] )
         #         print( result )
 
-        gis_service.save_lng_lat_from_geom( data_name )
+        # gis_service.save_lng_lat_from_geom( data_name )
+        gis_service.correct_lng_lat_by_gmap( data_name )
         
 if __name__ == '__main__':
     main()
