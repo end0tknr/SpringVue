@@ -27,7 +27,7 @@ target_tbl_name = "".join([
     "世帯の年間収入階級(5区分)，",
     "現住居以外の土地の所有状況(4区分)別普通世帯数―市区町村"])
 target_tbl_url = re.compile("^/stat-search/file-download")
-bulk_insert_size = 3
+bulk_insert_size = 20
 
 
 logger = appbase.AppBase.get_logger()

@@ -20,3 +20,16 @@ setai_nushi_age   varchar(1024),
 setai_year_income varchar(1024),
 primary key(city) );
 
+
+CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki (
+id              serial,
+shurui          varchar(16),
+chiiki          varchar(16),
+pref            varchar(4),
+city            varchar(16),
+street          varchar(16),
+price           bigint,
+area_m2         int,
+build_year      int,
+trade_year      int,
+primary key(id) );

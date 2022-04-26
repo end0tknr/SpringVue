@@ -12,8 +12,10 @@ target_host = "http://www.e-stat.go.jp"
 def main():
     fudosan_tochi_service = MlitFudousanTorihikiService()
     csv_infos = fudosan_tochi_service.download_master()
-    print( csv_infos )
-    
+
+    for csv_info in csv_infos:
+        fudosan_tochi_service.save_tbl_rows( csv_info[1] )
+
 if __name__ == '__main__':
     main()
     
