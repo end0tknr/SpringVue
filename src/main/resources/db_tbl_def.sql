@@ -33,3 +33,27 @@ area_m2         int,
 build_year      int,
 trade_year      int,
 primary key(id) );
+
+CREATE TABLE IF NOT EXISTS population_city (
+pref            varchar(4),
+city            varchar(8),
+pop             bigint,
+pop_2015        bigint,
+pop_density     int,
+avg_age         int,
+aget_14         int,
+aget_15_64      int,
+aget_65         int,
+setai           int,
+setai_2015      int,
+primary key(pref,city) );
+COMMENT ON TABLE population_city IS
+'国勢調査 人口 https://www.e-stat.go.jp/stat-search/files?toukei=00200521&tstat=000001049104';
+COMMENT ON COLUMN population_city.pop_2015    IS '2015年の人口';
+COMMENT ON COLUMN population_city.pop_density IS '人口密度. 人/km2';
+COMMENT ON COLUMN population_city.aget_14     IS '年齢別人口. ～14歳';
+COMMENT ON COLUMN population_city.aget_15_64  IS '年齢別人口. 15～64歳';
+COMMENT ON COLUMN population_city.aget_65     IS '年齢別人口. 65歳～';
+COMMENT ON COLUMN population_city.pop_density IS '人口密度. 人/km2';
+COMMENT ON COLUMN population_city.setai_2015  IS '2015年の世帯数';
+
