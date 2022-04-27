@@ -71,7 +71,6 @@ VALUES %s
             db_conn.commit()
         return True
     
-
     def divide_rows(self, org_rows, chunk_size):
         i = 0
         chunk = []
@@ -96,9 +95,6 @@ VALUES %s
             ret_rows.append(chunk)
 
         return ret_rows
-
-    def __divide_rows(self, org_rows, chunk_size):
-        pass
 
     def __filter_data(self,org_row):
 

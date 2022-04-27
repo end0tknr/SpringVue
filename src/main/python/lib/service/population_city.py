@@ -41,13 +41,14 @@ class PopulationCityService(appbase.AppBase):
 
     def save_tbl_rows(self, rows):
         logger.info("start")
-        logger.info(rows[0])
         
         row_groups = self.__divide_rows(rows, bulk_insert_size)
+
         sql = """
-INSERT INTO estat_jutakutochi (city,setai,setai_nushi_age,setai_year_income)
+INSERT INTO population_city 
+ (pref,city,pop,pop_2015,pop_density,avg_age,
+  aget_14,aget_15_64,aget_65,setai,setai_2015)
 VALUES %s
- ON CONFLICT DO NOTHING
 """
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:
@@ -71,12 +72,18 @@ VALUES %s
         chunk = []
         ret_rows = []
         for org_row in org_rows:
-            chunk.append( ( org_row['city'],
-                            org_row['setai'],
-                            json.dumps(org_row['setai_nushi_age'],
-                                       ensure_ascii=False),
-                            json.dumps(org_row['setai_year_income'],
-                                       ensure_ascii=False) ) )
+            chunk.append( (
+                org_row['pref'],
+                org_row['city'],
+                org_row['pop']          or None,
+                org_row['pop_2015']     or None,
+                org_row['pop_density']  or None,
+                org_row['avg_age']      or None,
+                org_row['aget_14']      or None,
+                org_row['aget_15_64']   or None,
+                org_row['aget_65']      or None,
+                org_row['setai']        or None,
+                org_row['setai_2015']   or None) )
             
             if len(chunk) >= chunk_size:
                 ret_rows.append(chunk)
@@ -87,7 +94,6 @@ VALUES %s
             ret_rows.append(chunk)
 
         return ret_rows
-
     
     def download_master(self):
         logger.info("start "+download_url)
@@ -130,11 +136,11 @@ VALUES %s
                  "pop_2015":   wsheet.cell(column=8, row=row_no).value,
                  "pop_density":wsheet.cell(column=12,row=row_no).value,
                  "avg_age":    wsheet.cell(column=13,row=row_no).value,
-                 "aget_14":    wsheet.cell(column=14,row=row_no).value,
-                 "aget_15_64": wsheet.cell(column=15,row=row_no).value,
-                 "aget_65":    wsheet.cell(column=16,row=row_no).value,
-                 "setai":      wsheet.cell(column=25,row=row_no).value,
-                 "setai_2015": wsheet.cell(column=28,row=row_no).value
+                 "aget_14":    wsheet.cell(column=15,row=row_no).value,
+                 "aget_15_64": wsheet.cell(column=16,row=row_no).value,
+                 "aget_65":    wsheet.cell(column=17,row=row_no).value,
+                 "setai":      wsheet.cell(column=36,row=row_no).value,
+                 "setai_2015": wsheet.cell(column=39,row=row_no).value
                  }
             row_no += 1
 
@@ -152,6 +158,13 @@ VALUES %s
             if key_vals["pref"] == key_vals["city"]:
                 continue
 
+            for atri_key in ["pop","pop_2015","pop_density","avg_age",
+                             "aget_14","aget_15_64","aget_65","setai",
+                             "setai_2015"]:
+                if key_vals[atri_key] == "-":
+                    key_vals[atri_key] = None
+
+            
             ret_data.append( key_vals )
             
             if row_no % 100 == 0:

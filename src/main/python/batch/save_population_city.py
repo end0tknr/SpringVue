@@ -9,10 +9,8 @@ from service.population_city import PopulationCityService
 def main():
     population_city_service = PopulationCityService()
     excel_infos = population_city_service.download_master()
-    print( excel_infos )
     
-    # for csv_info in csv_infos:
-    #     fudosan_tochi_service.save_tbl_rows( csv_info[1] )
+    population_city_service.save_tbl_rows( excel_infos )
 
 if __name__ == '__main__':
     main()
