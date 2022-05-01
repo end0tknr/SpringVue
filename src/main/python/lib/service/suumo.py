@@ -349,13 +349,14 @@ INSERT INTO suumo_search_result_url (build_type,url) VALUES %s
             return None
 
         # 中央値を返す
-        re_compile_val_2 = re.compile("([\d\.]{2,10})m2.+([\d\.]{2,10})m2")
+        re_compile_val_2 = \
+            re.compile("([\d\.]{2,10})(?:m2|㎡).+?([\d\.]{2,10})(?:m2|㎡)")
         re_result = re_compile_val_2.search( org_val )
         if re_result:
             ret_val = float(re_result.group(1)) + float(re_result.group(2))
-            return ret_val / 2
+            return ret_val /2
         
-        re_compile_val_1 = re.compile("([\d\.]{2,10})m2")
+        re_compile_val_1 = re.compile("([\d\.]{2,10})(?:m2|㎡)")
         re_result = re_compile_val_1.search( org_val )
         if re_result:
             ret_val = float(re_result.group(1))
@@ -367,18 +368,29 @@ INSERT INTO suumo_search_result_url (build_type,url) VALUES %s
     def conv_price(self, org_val ):
         if not org_val:
             return None
+        if org_val in ["未定"]:
+            return None
 
         # 中央値(万円)を返す
-        re_compile_val_2 = re.compile("([\d\.]{2,10})万.+([\d\.]{2,10})万")
+        re_compile_val_2 = re.compile("([\d\.]{1,10})(万|億).+?([\d\.]{1,10})(万|億)")
         re_result = re_compile_val_2.search( org_val )
         if re_result:
-            ret_val = int(re_result.group(1)) + int(re_result.group(2))
-            return ret_val / 2 * 10000
+            ret_val = (int(re_result.group(1)) + int(re_result.group(3))) /2
+            if re_result.group(2) == "万":
+                ret_val *= 10000
+            elif re_result.group(2) == "億":
+                ret_val *= 100000000
+            return ret_val
         
-        re_compile_val_1 = re.compile("([\d\.]{2,10})万")
+        re_compile_val_1 = re.compile("([\d\.]{1,10})(万|億)")
         re_result = re_compile_val_1.search( org_val )
         if re_result:
             ret_val = int(re_result.group(1)) * 10000
+        
+            if re_result.group(2) == "万":
+                ret_val *= 10000
+            elif re_result.group(2) == "億":
+                ret_val *= 100000000
             return ret_val
 
         logger.error( org_val )
