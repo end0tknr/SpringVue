@@ -57,3 +57,23 @@ COMMENT ON COLUMN population_city.aget_65     IS '年齢別人口. 65歳～';
 COMMENT ON COLUMN population_city.pop_density IS '人口密度. 人/km2';
 COMMENT ON COLUMN population_city.setai_2015  IS '2015年の世帯数';
 
+
+CREATE TABLE IF NOT EXISTS suumo_search_result_url (
+build_type      varchar(32),
+url             varchar(256),
+primary key(url) );
+
+CREATE TABLE IF NOT EXISTS suumo_bukken (
+id              serial,
+build_type      varchar(32),
+bukken_name     varchar(64),
+price           bigint,
+price_org       varchar(64),
+address         varchar(128),
+plan            varchar(32),
+build_area_m2   int,
+build_area_org  varchar(64),
+land_area_m2    int,
+land_area_org   varchar(64),
+build_year      int,
+primary key(id) );
