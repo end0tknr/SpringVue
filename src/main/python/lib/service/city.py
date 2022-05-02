@@ -121,6 +121,25 @@ class CityService(appbase.AppBase):
                 
                 return dict( ret_rows[0] )
                 
+    def find_def_by_city(self,city):
+        sql = "SELECT * from city where city = %s"
+        sql_args = (city,)
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql, sql_args)
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(city)
+                    return {}
+
+                ret_rows = db_cur.fetchall()
+                if len(ret_rows) == 0:
+                    return None
+                
+                return dict( ret_rows[0] )
+                
     
     def save_tbl_rows(self, rows):
         logger.info("start")

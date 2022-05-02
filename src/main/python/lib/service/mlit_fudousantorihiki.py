@@ -10,7 +10,6 @@ import copy
 import csv
 import glob
 import json
-import xlrd # for xls
 import os
 import re
 import tempfile
