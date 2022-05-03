@@ -58,6 +58,15 @@ pv                      bigint,
 double_sash             bigint,
 primary key(pref,city,own_type) );
 
+CREATE TABLE IF NOT EXISTS estat_jutakutochi_e033 (
+pref            varchar(4),
+city            varchar(8),
+damage          varchar(8),
+build_year      varchar(16),
+owned_house     bigint,
+rented_house    bigint,
+primary key(pref,city,damage,build_year) );
+
 CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki (
 id              serial,
 shurui          varchar(16),
