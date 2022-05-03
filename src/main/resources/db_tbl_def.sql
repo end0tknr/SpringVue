@@ -39,6 +39,25 @@ owned_house     bigint,
 rented_house    bigint,
 primary key(pref,city) );
 
+CREATE TABLE IF NOT EXISTS estat_jutakutochi_e006 (
+pref            varchar(4),
+city            varchar(8),
+build_year      varchar(16),
+total           bigint,
+owned_house     bigint,
+rented_house    bigint,
+primary key(pref,city,build_year) );
+
+CREATE TABLE IF NOT EXISTS estat_jutakutochi_e030 (
+pref            varchar(4),
+city            varchar(8),
+own_type        varchar(4),
+total           bigint,
+solar_water_heater      bigint,
+pv                      bigint,
+double_sash             bigint,
+primary key(pref,city,own_type) );
+
 CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki (
 id              serial,
 shurui          varchar(16),

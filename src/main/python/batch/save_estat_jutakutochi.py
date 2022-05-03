@@ -6,12 +6,16 @@ import sys
 sys.path.append( os.path.join(os.path.dirname(__file__), '../lib') )
 from service.estat_jutakutochi_d001 import EstatJutakuTochiD001Service
 from service.estat_jutakutochi_d002 import EstatJutakuTochiD002Service
+from service.estat_jutakutochi_e006 import EstatJutakuTochiE006Service
+from service.estat_jutakutochi_e030 import EstatJutakuTochiE030Service
 
 def main():
 
     service_classes = [
         # EstatJutakuTochiD001Service(),
-        EstatJutakuTochiD002Service()
+        # EstatJutakuTochiD002Service(),
+        # EstatJutakuTochiE006Service(),
+        EstatJutakuTochiE030Service(),
     ]
 
     for service_class in service_classes:

@@ -7,7 +7,9 @@ import appbase
 import os
 import re
 import urllib.request
-import xlrd # for xls
+import xlrd     # for xls
+import openpyxl # for xlsx
+import tempfile
 
 logger = appbase.AppBase().get_logger()
 
@@ -63,7 +65,26 @@ class EstatJutakuTochiService(appbase.AppBase):
         download_url = self.get_download_url()
         logger.info( download_url )
         downloaded = self.download_file( download_url )
+
+        re_compile = re.compile("\.(xls|xlsx)$")
+        re_result = re_compile.search(downloaded["filename"],
+                                      re.IGNORECASE )
+        if not re_result:
+            logger.error("unknown file type "+ downloaded["filename"])
+            return []
+
+        file_ext = re_result.group(1).lower()
         
+        if file_ext == "xls":
+            return self.download_src_data_xls(downloaded)
+        if file_ext == "xlsx":
+            return self.download_src_data_xlsx(downloaded)
+
+        logger.error("unknown file type "+ downloaded["filename"])
+        return []
+        
+    
+    def download_src_data_xls(self, downloaded):
         ret_data = []
         wbook = xlrd.open_workbook( file_contents=downloaded["content"] )
         
@@ -73,7 +94,35 @@ class EstatJutakuTochiService(appbase.AppBase):
 
             tmp_ret_data = self.load_wsheet( wsheet )
             ret_data.extend( tmp_ret_data )
+        return ret_data
 
+    def download_src_data_xlsx(self, downloaded):
+        ret_data = []
+        # xlrd と異なり、openpyxl では、一度、fileに出力した上で読み込み
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_xlsx_path =os.path.join(tmp_dir, downloaded["filename"] )
+
+            try:
+                with open(tmp_xlsx_path, mode="wb") as fh:
+                    fh.write( downloaded["content"] )
+                
+                logger.info("loading xlsx size(kbyte) %d" %
+                            ( len(downloaded["content"])/1000) )
+                
+                wbook = openpyxl.load_workbook(tmp_xlsx_path,
+                                               read_only=True,
+                                               data_only=True)
+                for sheetname in wbook.sheetnames:
+                    logger.info("start %s" % (sheetname) )
+
+                    tmp_ret_data = self.load_wsheet( wbook[sheetname] )
+                    ret_data.extend( tmp_ret_data )
+                
+            except Exception as e:
+                logger.error("fail", downloaded["filename"] )
+                logger.error(e)
+                return []
+            
         return ret_data
 
 
