@@ -106,7 +106,7 @@ class EstatJutakuTochiService(appbase.AppBase):
                 with open(tmp_xlsx_path, mode="wb") as fh:
                     fh.write( downloaded["content"] )
                 
-                logger.info("loading xlsx size(kbyte) %d" %
+                logger.info("loading xlsx %d kbyte" %
                             ( len(downloaded["content"])/1000) )
                 
                 wbook = openpyxl.load_workbook(tmp_xlsx_path,
