@@ -20,6 +20,24 @@ setai_nushi_age   varchar(1024),
 setai_year_income varchar(1024),
 primary key(city) );
 
+CREATE TABLE IF NOT EXISTS estat_jutakutochi_d001 (
+pref            varchar(4),
+city            varchar(8),
+house             bigint,
+lived_house       bigint,
+nolived_house     bigint,
+primary key(pref,city) );
+
+CREATE TABLE IF NOT EXISTS estat_jutakutochi_d002 (
+pref            varchar(4),
+city            varchar(8),
+total           bigint,
+detached_house  bigint,
+tenement_houses bigint,
+apartment       bigint,
+owned_house     bigint,
+rented_house    bigint,
+primary key(pref,city) );
 
 CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki (
 id              serial,
@@ -77,3 +95,9 @@ land_area_m2    int,
 land_area_org   varchar(64),
 build_year      int,
 primary key(id) );
+
+CREATE TABLE IF NOT EXISTS mlit_seisanryokuchi (
+city            varchar(8),
+area_ha         int,
+area_count      int,
+primary key(city) );

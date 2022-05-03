@@ -9,7 +9,9 @@ from service.mlit_seisanryokuchi import MlitSeisanRyokuchiService
 def main():
     seisan_yrokuchi_service = MlitSeisanRyokuchiService()
     infos = seisan_yrokuchi_service.download_master()
-    print( infos )
+    # print( infos )
+
+    seisan_yrokuchi_service.save_tbl_rows( infos )
 
 if __name__ == '__main__':
     main()

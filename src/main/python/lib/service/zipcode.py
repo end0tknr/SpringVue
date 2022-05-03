@@ -13,6 +13,7 @@ master_src_url = \
     "https://www.post.japanpost.jp/zipcode/dl/kogaki/zip/ken_all.zip"
 master_csv_zip = "ken_all.zip"
 master_csv = "KEN_ALL.CSV"
+logger = None
 
 master_heads = [
     "全国地方公共団体コード","旧郵便番号","郵便番号",
@@ -22,7 +23,8 @@ master_heads = [
 class ZipcodeService():
     
     def __init__(self):
-        pass
+        global logger
+        logger = self.get_logger()
 
     def download_master(self):
         ret_data = []

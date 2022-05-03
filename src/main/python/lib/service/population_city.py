@@ -30,14 +30,13 @@ download_url = \
     "?statInfId=000032143614&fileKind=0"
 master_xlsx  = "major_results_2020.xlsx"
 bulk_insert_size = 20
-
-
-logger = appbase.AppBase.get_logger()
+logger = None
 
 class PopulationCityService(appbase.AppBase):
 
     def __init__(self):
-        pass
+        global logger
+        logger = self.get_logger()
 
     def save_tbl_rows(self, rows):
         logger.info("start")

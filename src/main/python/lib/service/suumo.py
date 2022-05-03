@@ -53,15 +53,13 @@ http_conf = {
 }
 
 bulk_insert_size = 20
-
-
-logger = appbase.AppBase.get_logger()
+logger = None
 
 class SuumoService(appbase.AppBase):
     
     def __init__(self):
-        pass
-    
+        global logger
+        logger = self.get_logger()
 
     def init_browser(self):
         driver_path = self.get_conf()["common"]["browser_driver"]

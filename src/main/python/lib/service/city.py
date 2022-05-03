@@ -12,14 +12,14 @@ import urllib.request
 master_src_url = "https://www.soumu.go.jp/main_content/000730858.xlsx"
 master_xlsx = "000730858.xlsx"
 bulk_insert_size = 20
-
-logger = appbase.AppBase.get_logger()
+logger = None
 
 
 class CityService(appbase.AppBase):
     
     def __init__(self):
-        pass
+        global logger
+        logger = self.get_logger()
 
     def download_master(self):
         logger.info("start")
@@ -121,9 +121,9 @@ class CityService(appbase.AppBase):
                 
                 return dict( ret_rows[0] )
                 
-    def find_def_by_city(self,city):
-        sql = "SELECT * from city where city = %s"
-        sql_args = (city,)
+    def find_def_by_pref_city(self,pref, city):
+        sql = "SELECT * from city where pref = %s and city = %s"
+        sql_args = (pref,city)
         
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:

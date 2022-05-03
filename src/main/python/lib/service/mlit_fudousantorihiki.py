@@ -35,14 +35,13 @@ col_filters = {"種類"            :"shurui",
                "建築年"          :"build_year",
                "取引時点"        :"trade_year" }
 bulk_insert_size = 20
-
-
-logger = appbase.AppBase.get_logger()
+logger = None
 
 class MlitFudousanTorihikiService(appbase.AppBase):
 
     def __init__(self):
-        pass
+        global logger
+        logger = self.get_logger()
 
     def save_tbl_rows(self, rows):
         logger.info("start")

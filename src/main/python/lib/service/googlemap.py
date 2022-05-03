@@ -9,13 +9,13 @@ import urllib.parse
 import urllib.request
 
 geocode_api = "https://maps.google.com/maps/api/geocode/json"
-
-logger = appbase.AppBase.get_logger()
+logger = None
 
 class GoogleMapService(appbase.AppBase):
     
     def __init__(self):
-        pass
+        global logger
+        logger = self.get_logger()
 
     def load_addr_to_lng_lat(self,lng, lat):
         sql = "select * from gmap_latlng_addr where lng=%s and lat=%s"

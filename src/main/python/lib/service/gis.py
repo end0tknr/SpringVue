@@ -59,11 +59,13 @@ src_path = {
      "select_cond": {}},
 }
 
-logger = appbase.AppBase.get_logger()
+logger = None
 
 class GisService(appbase.AppBase):
+
     def __init__(self):
-        pass
+        global logger
+        logger = self.get_logger()
 
     def correct_lng_lat_by_gmap(self, data_name ):
         gmap = GoogleMapService()

@@ -25,7 +25,7 @@ class AppBase():
     def get_conf(self):
         return conf
 
-    def get_logger():
+    def get_logger(self):
         return logger
 
     def db_cursor(self,db_conn):
