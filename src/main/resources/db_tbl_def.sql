@@ -130,6 +130,19 @@ reform_insulation       bigint,
 reform_other            bigint,
 primary key(pref,city,build_year) );
 
+CREATE TABLE IF NOT EXISTS estat_jutakutochi_g158 (
+pref            varchar(4),
+city            varchar(8),
+year_income     varchar(32),
+reform_plan             bigint,
+reform_kitchen_bath     bigint,
+reform_floor_inner_wall bigint,
+reform_roof_outer_wall  bigint,
+reform_pillar_basic     bigint,
+reform_insulation       bigint,
+reform_other            bigint,
+primary key(pref,city,year_income) );
+
 CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki (
 id              serial,
 shurui          varchar(16),

@@ -14,6 +14,7 @@ from service.estat_jutakutochi_e048 import EstatJutakuTochiE048Service
 from service.estat_jutakutochi_e049 import EstatJutakuTochiE049Service
 from service.estat_jutakutochi_e101 import EstatJutakuTochiE101Service
 from service.estat_jutakutochi_g157 import EstatJutakuTochiG157Service
+from service.estat_jutakutochi_g158 import EstatJutakuTochiG158Service
 
 def main():
 
@@ -27,7 +28,8 @@ def main():
         # EstatJutakuTochiE048Service(),
         # EstatJutakuTochiE049Service(),
         # EstatJutakuTochiE101Service(),
-        EstatJutakuTochiG157Service(),
+        # EstatJutakuTochiG157Service(),
+        EstatJutakuTochiG158Service(),
     ]
 
     for service_class in service_classes:
