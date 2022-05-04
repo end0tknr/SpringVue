@@ -105,6 +105,12 @@ rent_200000             bigint,
 rent_unknown            bigint,
 primary key(pref,city,owner_age) );
 
+CREATE TABLE IF NOT EXISTS estat_jutakutochi_e101 (
+pref            varchar(4),
+city            varchar(8),
+build_year      varchar(16),
+primary key(pref,city,build_year) );
+
 CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki (
 id              serial,
 shurui          varchar(16),
