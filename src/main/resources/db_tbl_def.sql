@@ -88,6 +88,23 @@ owner_age_65    bigint,
 owner_age_unknown bigint,
 primary key(pref,city,build_year) );
 
+CREATE TABLE IF NOT EXISTS estat_jutakutochi_e049 (
+pref            varchar(4),
+city            varchar(8),
+owner_age       varchar(8),
+rent_0                  bigint,
+rent_1_9999             bigint,
+rent_10000_19999        bigint,
+rent_20000_39999        bigint,
+rent_40000_59999        bigint,
+rent_60000_79999        bigint,
+rent_90000_99999        bigint,
+rent_100000_149999      bigint,
+rent_150000_199999      bigint,
+rent_200000             bigint,
+rent_unknown            bigint,
+primary key(pref,city,owner_age) );
+
 CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki (
 id              serial,
 shurui          varchar(16),
