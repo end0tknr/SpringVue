@@ -109,6 +109,25 @@ CREATE TABLE IF NOT EXISTS estat_jutakutochi_e101 (
 pref            varchar(4),
 city            varchar(8),
 build_year      varchar(16),
+buy_new         bigint,
+buy_used        bigint,
+build_new       bigint,
+rebuild         bigint,
+inheritance     bigint,
+other           bigint,
+primary key(pref,city,build_year) );
+
+CREATE TABLE IF NOT EXISTS estat_jutakutochi_g157 (
+pref            varchar(4),
+city            varchar(8),
+build_year      varchar(16),
+reform_plan             bigint,
+reform_kitchen_bath     bigint,
+reform_floor_inner_wall bigint,
+reform_roof_outer_wall  bigint,
+reform_pillar_basic     bigint,
+reform_insulation       bigint,
+reform_other            bigint,
 primary key(pref,city,build_year) );
 
 CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki (
