@@ -75,6 +75,19 @@ year_income       varchar(32),
 setai             bigint,
 primary key(pref,city,own_type,year_income) );
 
+CREATE TABLE IF NOT EXISTS estat_jutakutochi_e048 (
+pref              varchar(4),
+city            varchar(8),
+build_year      varchar(16),
+owner_age_24    bigint,
+owner_age_25_34 bigint,
+owner_age_35_44 bigint,
+owner_age_45_54 bigint,
+owner_age_55_64 bigint,
+owner_age_65    bigint,
+owner_age_unknown bigint,
+primary key(pref,city,build_year) );
+
 CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki (
 id              serial,
 shurui          varchar(16),
