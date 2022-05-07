@@ -1,3 +1,24 @@
+
+CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki (
+id              serial,
+shurui          varchar(16),
+chiiki          varchar(16),
+pref            varchar(4),
+city            varchar(16),
+street          varchar(16),
+price           bigint,
+area_m2         int,
+build_year      int,
+trade_year      int,
+primary key(id) );
+COMMENT ON TABLE mlit_fudousantorihiki IS
+'https://www.land.mlit.go.jp/webland/download.html';
+COMMENT ON COLUMN mlit_fudousantorihiki.shurui
+     IS '宅地(土地と建物), 宅地(土地), 中古マンション等市町村code';
+COMMENT ON COLUMN mlit_fudousantorihiki.chiiki IS '住宅地, 宅地見込地';
+COMMENT ON COLUMN mlit_fudousantorihiki.street IS '地区名';
+
+
 CREATE TABLE IF NOT EXISTS gmap_latlng_addr (
 lng             double precision,
 lat             double precision,
@@ -264,41 +285,82 @@ COMMENT ON COLUMN estat_jutakutochi_g158.reform_pillar_basic
 COMMENT ON COLUMN estat_jutakutochi_g158.reform_insulation
                                      IS '窓・壁等の断熱・結露防止工事';
 
-CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki (
-id              serial,
-shurui          varchar(16),
-chiiki          varchar(16),
-pref            varchar(4),
-city            varchar(16),
-street          varchar(16),
-price           bigint,
-area_m2         int,
-build_year      int,
-trade_year      int,
-primary key(id) );
-
-CREATE TABLE IF NOT EXISTS population_city (
+CREATE TABLE IF NOT EXISTS kokusei_population_b01 (
 pref            varchar(4),
 city            varchar(8),
 pop             bigint,
 pop_2015        bigint,
 pop_density     int,
-avg_age         int,
-aget_14         int,
-aget_15_64      int,
-aget_65         int,
 setai           int,
 setai_2015      int,
 primary key(pref,city) );
-COMMENT ON TABLE population_city IS
-'国勢調査 人口 https://www.e-stat.go.jp/stat-search/files?toukei=00200521&tstat=000001049104';
-COMMENT ON COLUMN population_city.pop_2015    IS '2015年の人口';
-COMMENT ON COLUMN population_city.pop_density IS '人口密度. 人/km2';
-COMMENT ON COLUMN population_city.aget_14     IS '年齢別人口. ～14歳';
-COMMENT ON COLUMN population_city.aget_15_64  IS '年齢別人口. 15～64歳';
-COMMENT ON COLUMN population_city.aget_65     IS '年齢別人口. 65歳～';
-COMMENT ON COLUMN population_city.pop_density IS '人口密度. 人/km2';
-COMMENT ON COLUMN population_city.setai_2015  IS '2015年の世帯数';
+
+COMMENT ON TABLE kokusei_population_b01 IS
+'https://www.e-stat.go.jp/stat-search/files
+  ?layout=datalist&toukei=00200521&tstat=000001136464&cycle=0&tclass1=000001136466
+総人口・総世帯数・男女・年齢・配偶関係 1-1
+  男女別人口，世帯の種類別世帯数及び世帯人員並びに2015年（平成27年）の人口
+  （組替），2015年（平成27年）の世帯数（組替），5年間の人口増減数，
+  5年間の人口増減率，5年間の世帯増減数，5年間の世帯増減率，人口性比，
+  面積（参考）及び人口密度－全国，都道府県，市区町村（2000年（平成12年）
+   市区町村含む）';
+COMMENT ON COLUMN kokusei_population_b01.pop_2015    IS '2015年の人口';
+COMMENT ON COLUMN kokusei_population_b01.pop_density IS '人口密度. 人/km2';
+COMMENT ON COLUMN kokusei_population_b01.setai_2015  IS '2015年の世帯数';
+
+CREATE TABLE IF NOT EXISTS kokusei_population_b02 (
+pref            varchar(4),
+city            varchar(8),
+pop_0_4         bigint,
+pop_5_9         bigint,
+pop_10_14       bigint,
+pop_15_19       bigint,
+pop_20_24       bigint,
+pop_25_29       bigint,
+pop_30_34       bigint,
+pop_35_39       bigint,
+pop_40_44       bigint,
+pop_45_49       bigint,
+pop_50_54       bigint,
+pop_55_59       bigint,
+pop_60_64       bigint,
+pop_65_69       bigint,
+pop_70_74       bigint,
+pop_75_79       bigint,
+pop_80_84       bigint,
+pop_85_89       bigint,
+pop_90_94       bigint,
+pop_95_99       bigint,
+pop_100         bigint,
+primary key(pref,city) );
+
+COMMENT ON TABLE kokusei_population_b02 IS
+'https://www.e-stat.go.jp/stat-search/files
+  ?layout=datalist&toukei=00200521&tstat=000001136464&cycle=0&tclass1=000001136466
+総人口・総世帯数・男女・年齢・配偶関係 2-7
+男女，年齢（5歳階級及び3区分），国籍総数か日本人別人口，平均年齢，
+年齢中位数及び人口構成比［年齢別］－全国，都道府県，
+市区町村（2000年（平成12年）市区町村含む）';
+
+
+CREATE TABLE IF NOT EXISTS kokusei_population_b06 (
+pref            varchar(4),
+city            varchar(8),
+setai_total     bigint,
+setai_1         bigint,
+setai_pop       real,
+primary key(pref,city) );
+
+COMMENT ON TABLE kokusei_population_b06 IS
+'https://www.e-stat.go.jp/stat-search/files
+  ?layout=datalist&toukei=00200521&tstat=000001136464&cycle=0&tclass1=000001136466
+世帯の種類・世帯人員・世帯の家族類型 6-3
+世帯人員の人数別一般世帯数，会社などの独身寮の単身者数，
+間借り・下宿などの単身者数，一般世帯人員及び一般世帯の1世帯当たり人員－全国，
+都道府県，市区町村';
+COMMENT ON COLUMN kokusei_population_b06.setai_total IS '一般世帯数 総数';
+COMMENT ON COLUMN kokusei_population_b06.setai_1     IS '一般世帯数 世帯人員が1人';
+COMMENT ON COLUMN kokusei_population_b06.setai_pop   IS '1世帯当たり人員';
 
 
 CREATE TABLE IF NOT EXISTS suumo_search_result_url (

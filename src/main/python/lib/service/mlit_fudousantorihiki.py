@@ -19,11 +19,14 @@ from service.city       import CityService
 
 # refer urls are below.
 #   https://www.land.mlit.go.jp/webland/download.html
+
+# 事前にブラウザでダウンロードを実行することで
+# 初めてダウンロード用 zipが作成されます
 target_host  = 'https://www.land.mlit.go.jp'
-target_path  = '/webland/zip/All_20111_20213.zip'
+target_path  = '/webland/zip/All_20111_20214.zip'
 #target_path  = '/webland/zip/All_20212_20213.zip'
 
-row_filters = {"種類" : ["宅地(土地と建物)"],
+row_filters = {"種類" : ["宅地(土地と建物)","宅地(土地)","中古マンション等"],
                "地域" : ["住宅地","宅地見込地"] }
 col_filters = {"種類"            :"shurui",
                "地域"            :"chiiki",
@@ -180,3 +183,26 @@ VALUES %s
 
         return ret_data
         
+    def get_group_by_city(self,trade_year):
+        sql = """
+select
+  pref, city, trade_year, count(*) as count,
+  avg(price)::numeric::bigint as price
+from mlit_fudousantorihiki
+where shurui='宅地(土地と建物)' and trade_year=%s
+group by pref,city,trade_year
+"""
+        ret_data = []
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql % (trade_year))
+                    for ret_row in  db_cur.fetchall():
+                        ret_data.append( dict( ret_row ))
+                    
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+        return ret_data
