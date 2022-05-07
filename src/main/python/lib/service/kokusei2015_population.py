@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from bs4 import BeautifulSoup
+from psycopg2  import extras # for bulk insert
 
 import appbase
 import os

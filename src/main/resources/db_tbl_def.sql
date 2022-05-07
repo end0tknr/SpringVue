@@ -448,6 +448,25 @@ build_type      varchar(32),
 url             varchar(256),
 primary key(url) );
 
+CREATE TABLE IF NOT EXISTS kokusei2015_population_007 (
+pref            varchar(4),
+city            varchar(8),
+setai_total     bigint,
+setai_1         bigint,
+setai_pop       real,
+primary key(pref,city) );
+
+COMMENT ON TABLE kokusei2015_population_007 IS
+'https://www.e-stat.go.jp/stat-search/files?toukei=00200521&tstat=000001080615
+ 世帯数・世帯人員 7
+ 世帯の種類(2区分)，施設等の世帯の種類(6区分)，世帯人員(10区分/4区分)別世帯数，
+ 世帯人員及び1世帯当たり人員(間借り・下宿などの単身者及び会社などの独身寮の単身者
+ －特掲) － 都道府県※，都道府県市部・郡部，市区町村※，平成12年市町村';
+COMMENT ON COLUMN kokusei2015_population_007.setai_total IS '一般世帯数 総数';
+COMMENT ON COLUMN kokusei2015_population_007.setai_1
+                                                IS '一般世帯数 世帯人員が1人';
+COMMENT ON COLUMN kokusei2015_population_007.setai_pop   IS '1世帯当たり人員';
+
 CREATE TABLE IF NOT EXISTS suumo_bukken (
 id              serial,
 build_type      varchar(32),
