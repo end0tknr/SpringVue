@@ -490,7 +490,30 @@ COMMENT ON COLUMN kokusei2015_population_013.total_setai   IS '総数';
 COMMENT ON COLUMN kokusei2015_population_013.family_setai  IS '親族のみの世帯';
 COMMENT ON COLUMN kokusei2015_population_013.other_setai   IS '非親族を含む世帯';
 COMMENT ON COLUMN kokusei2015_population_013.single_setai  IS '単独世帯';
-COMMENT ON COLUMN kokusei2015_population_013.unknown_setai IS '世帯の家族類型 不詳';
+COMMENT ON COLUMN kokusei2015_population_013.unknown_setai
+                                                        IS '世帯の家族類型 不詳';
+
+CREATE TABLE IF NOT EXISTS kokusei2015_population_018 (
+pref            varchar(4),
+city            varchar(8),
+owned_house     bigint,
+public_rented   bigint,
+private_rented  bigint,
+company_house   bigint,
+primary key(pref,city) );
+
+COMMENT ON TABLE kokusei2015_population_018 IS
+'https://www.e-stat.go.jp/stat-search/files?toukei=00200521&tstat=000001080615
+住居の状態 18-2
+住居の種類・住宅の所有の関係(6区分)別一般世帯数，一般世帯人員及び1世帯当たり人員
+－ 都道府県※，都道府県市部・郡部，市区町村※，平成12年市町村';
+
+COMMENT ON COLUMN kokusei2015_population_018.owned_house    IS '持ち家';
+COMMENT ON COLUMN kokusei2015_population_018.public_rented
+                                IS '公営・都市再生機構・公社の借家';
+COMMENT ON COLUMN kokusei2015_population_018.private_rented IS '民営の借家';
+COMMENT ON COLUMN kokusei2015_population_018.company_house  IS '給与住宅';
+
 
 
 CREATE TABLE IF NOT EXISTS suumo_bukken (
