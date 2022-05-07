@@ -100,6 +100,7 @@ class CityService(appbase.AppBase):
                     logger.error(e)
                     return False
         return True
+    
 
     def find_def_by_code_city(self,code,city):
         sql = "SELECT * from city where code like %s and city like %s"

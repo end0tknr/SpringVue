@@ -467,6 +467,32 @@ COMMENT ON COLUMN kokusei2015_population_007.setai_1
                                                 IS '一般世帯数 世帯人員が1人';
 COMMENT ON COLUMN kokusei2015_population_007.setai_pop   IS '1世帯当たり人員';
 
+
+CREATE TABLE IF NOT EXISTS kokusei2015_population_013 (
+pref            varchar(4),
+city            varchar(8),
+owner_age       varchar(8),
+total_setai     bigint,
+family_setai    bigint,
+other_setai     bigint,
+single_setai    bigint,
+unknown_setai   bigint,
+primary key(pref,city,owner_age) );
+
+COMMENT ON TABLE kokusei2015_population_013 IS
+'https://www.e-stat.go.jp/stat-search/files?toukei=00200521&tstat=000001080615
+世帯の家族類型・世帯主との続き柄 13-2
+世帯の家族類型(16区分)，世帯主の年齢(5歳階級)，世帯主の男女別一般世帯数及び
+一般世帯人員(3世代世帯，間借り・下宿などの単身者及び会社などの独身寮の単身者
+－特掲) － 都道府県※，都道府県市部・郡部，市区町村※';
+
+COMMENT ON COLUMN kokusei2015_population_013.total_setai   IS '総数';
+COMMENT ON COLUMN kokusei2015_population_013.family_setai  IS '親族のみの世帯';
+COMMENT ON COLUMN kokusei2015_population_013.other_setai   IS '非親族を含む世帯';
+COMMENT ON COLUMN kokusei2015_population_013.single_setai  IS '単独世帯';
+COMMENT ON COLUMN kokusei2015_population_013.unknown_setai IS '世帯の家族類型 不詳';
+
+
 CREATE TABLE IF NOT EXISTS suumo_bukken (
 id              serial,
 build_type      varchar(32),
