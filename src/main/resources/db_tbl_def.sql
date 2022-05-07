@@ -363,6 +363,54 @@ COMMENT ON COLUMN kokusei_population_b06.setai_1     IS '一般世帯数 世帯�
 COMMENT ON COLUMN kokusei_population_b06.setai_pop   IS '1世帯当たり人員';
 
 
+CREATE TABLE IF NOT EXISTS kokusei_population_b12 (
+pref            varchar(4),
+city            varchar(8),
+owner_age       varchar(8),
+total_setai     bigint,
+family_setai    bigint,
+other_setai     bigint,
+single_setai    bigint,
+unknown_setai   bigint,
+primary key(pref,city,owner_age) );
+
+COMMENT ON TABLE kokusei_population_b12 IS
+'https://www.e-stat.go.jp/stat-search/files
+  ?layout=datalist&toukei=00200521&tstat=000001136464&cycle=0&tclass1=000001136466
+世帯の種類・世帯人員・世帯の家族類型 12-3
+世帯主の男女，世帯主の年齢（5歳階級），世帯の家族類型別一般世帯数－全国，
+都道府県，市区町村';
+
+COMMENT ON COLUMN kokusei_population_b12.total_setai   IS '総数';
+COMMENT ON COLUMN kokusei_population_b12.family_setai  IS '親族のみの世帯';
+COMMENT ON COLUMN kokusei_population_b12.other_setai   IS '非親族を含む世帯';
+COMMENT ON COLUMN kokusei_population_b12.single_setai  IS '単独世帯';
+COMMENT ON COLUMN kokusei_population_b12.unknown_setai IS '世帯の家族類型 不詳';
+
+
+CREATE TABLE IF NOT EXISTS kokusei_population_b18 (
+pref            varchar(4),
+city            varchar(8),
+owned_house     bigint,
+public_rented   bigint,
+private_rented  bigint,
+company_house   bigint,
+primary key(pref,city) );
+
+COMMENT ON TABLE kokusei_population_b18 IS
+'https://www.e-stat.go.jp/stat-search/files
+  ?layout=datalist&toukei=00200521&tstat=000001136464&cycle=0&tclass1=000001136466
+住宅の所有関係・住宅の建て方 18-4
+住宅の所有の関係別一般世帯数－全国，都道府県，
+市区町村（2000年（平成12年）市区町村含む）';
+
+COMMENT ON COLUMN kokusei_population_b18.owned_house    IS '持ち家';
+COMMENT ON COLUMN kokusei_population_b18.public_rented
+                                IS '公営・都市再生機構・公社の借家';
+COMMENT ON COLUMN kokusei_population_b18.private_rented IS '民営の借家';
+COMMENT ON COLUMN kokusei_population_b18.company_house  IS '給与住宅';
+
+
 CREATE TABLE IF NOT EXISTS suumo_search_result_url (
 build_type      varchar(32),
 url             varchar(256),
