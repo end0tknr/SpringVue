@@ -1,7 +1,6 @@
 #!python
 # -*- coding: utf-8 -*-
 
-from bs4 import BeautifulSoup
 from jeraconv import jeraconv
 from psycopg2  import extras # for bulk insert
 

@@ -7,7 +7,6 @@
 # https://qiita.com/niyalist/items/d70f471c259211aa1554
 # https://www.e-stat.go.jp/gis/statmap-search?page=1&type=1&toukeiCode=00200521
 
-from bs4 import BeautifulSoup
 from psycopg2  import extras # for bulk insert
 
 import appbase

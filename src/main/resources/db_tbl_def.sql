@@ -411,6 +411,38 @@ COMMENT ON COLUMN kokusei_population_b18.private_rented IS '民営の借家';
 COMMENT ON COLUMN kokusei_population_b18.company_house  IS '給与住宅';
 
 
+CREATE TABLE IF NOT EXISTS kokusei2015_population_003 (
+pref            varchar(4),
+city            varchar(8),
+pop_0_4         bigint,
+pop_5_9         bigint,
+pop_10_14       bigint,
+pop_15_19       bigint,
+pop_20_24       bigint,
+pop_25_29       bigint,
+pop_30_34       bigint,
+pop_35_39       bigint,
+pop_40_44       bigint,
+pop_45_49       bigint,
+pop_50_54       bigint,
+pop_55_59       bigint,
+pop_60_64       bigint,
+pop_65_69       bigint,
+pop_70_74       bigint,
+pop_75_79       bigint,
+pop_80_84       bigint,
+pop_85_89       bigint,
+pop_90_94       bigint,
+pop_95_99       bigint,
+pop_100         bigint,
+primary key(pref,city) );
+
+COMMENT ON TABLE kokusei2015_population_003 IS
+'https://www.e-stat.go.jp/stat-search/files?toukei=00200521&tstat=000001080615
+ 男女・年齢・配偶関係 3-2
+ 年齢(各歳)，男女別人口，年齢別割合，平均年齢及び年齢中位数(総数及び日本人)
+ － 都道府県※，都道府県市部・郡部，市区町村※，平成12年市町村';
+
 CREATE TABLE IF NOT EXISTS suumo_search_result_url (
 build_type      varchar(32),
 url             varchar(256),
