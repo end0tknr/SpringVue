@@ -1,9 +1,10 @@
 #!python
 # -*- coding: utf-8 -*-
 
+from psycopg2  import extras # for bulk insert
 import appbase
 
-logger = appbase.AppBase.get_logger()
+logger = appbase.AppBase().get_logger()
 
 class Db(appbase.AppBase):
     
@@ -71,3 +72,51 @@ ORDER BY isc.ORDINAL_POSITION
             return False
             
         return True
+
+
+    def save_tbl_rows(self, tbl_name, atri_keys, rows):
+        logger.info("start")
+        logger.info(rows[0])
+
+        bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
+        row_groups = self.divide_rows(rows, bulk_insert_size, atri_keys )
+        
+        sql = "INSERT INTO %s (%s) VALUES %s" % (tbl_name, ",".join(atri_keys),"%s")
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+
+                for row_group in row_groups:
+                    try:
+                        # bulk insert
+                        extras.execute_values(db_cur,sql,row_group)
+                    except Exception as e:
+                        logger.error(e)
+                        logger.error(sql)
+                        logger.error(row_group)
+                        return False
+                    
+            db_conn.commit()
+        return True
+
+    # for bulk insert
+    def divide_rows(self, org_rows, chunk_size, atri_keys):
+        i = 0
+        chunk = []
+        ret_rows = []
+        for org_row in org_rows:
+            new_tuple = ()
+            for atri_key in atri_keys:
+                new_tuple += (org_row[atri_key],)
+            chunk.append( new_tuple )
+            
+            if len(chunk) >= chunk_size:
+                ret_rows.append(chunk)
+                chunk = []
+            i += 1
+
+        if len(chunk) > 0:
+            ret_rows.append(chunk)
+
+        return ret_rows
+

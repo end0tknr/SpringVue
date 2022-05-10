@@ -443,11 +443,6 @@ COMMENT ON TABLE kokusei2015_population_003 IS
  年齢(各歳)，男女別人口，年齢別割合，平均年齢及び年齢中位数(総数及び日本人)
  － 都道府県※，都道府県市部・郡部，市区町村※，平成12年市町村';
 
-CREATE TABLE IF NOT EXISTS suumo_search_result_url (
-build_type      varchar(32),
-url             varchar(256),
-primary key(url) );
-
 CREATE TABLE IF NOT EXISTS kokusei2015_population_007 (
 pref            varchar(4),
 city            varchar(8),
@@ -515,6 +510,11 @@ COMMENT ON COLUMN kokusei2015_population_018.private_rented IS '民営の借家'
 COMMENT ON COLUMN kokusei2015_population_018.company_house  IS '給与住宅';
 
 
+CREATE TABLE IF NOT EXISTS suumo_search_result_url (
+build_type      varchar(32),
+url             varchar(256),
+primary key(url) );
+
 
 CREATE TABLE IF NOT EXISTS suumo_bukken (
 id              serial,
@@ -536,3 +536,14 @@ city            varchar(8),
 area_ha         int,
 area_count      int,
 primary key(city) );
+
+
+CREATE TABLE IF NOT EXISTS site_access (
+site            varchar(64),
+client_ip       varchar(16),
+lng             double precision,
+lat             double precision,
+pref            varchar(4),
+city            varchar(16),
+address_other   varchar(64),
+primary key(site,client_ip) );

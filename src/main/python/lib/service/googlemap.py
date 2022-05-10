@@ -113,7 +113,66 @@ VALUES (%s,%s,%s,%s)
 
         return {"formatted_address":re_result.group(2),
                 "zip_code":re_result.group(1) }
+    
+    def parse_address_components(self, components ):
+
+        components = list( reversed(components) )
+        ret_vals = []
+        found_jp = None
+        for component in components:
+            
+            if found_jp:
+                ret_vals.append( component["long_name"] )
+                continue
+            
+            if component["long_name"] == "日本":
+                found_jp = True
+
+        return ret_vals
+
+    # browser(selenium)の起動がある為、複数の座標をまとめての変換がお得
+    def conv_lng_lat_to_addrs(self,lng_lats):
+        browser = self.get_browser()
+        re_compile = re.compile(" (.+)、(.+)")
         
+        for lng_lat in lng_lats:
+            req_url = "https://www.google.co.jp/maps/search/%s,%s" \
+                % (lng_lat["lat"],lng_lat["lng"])
+            browser.get(req_url)
+            browser.save_screenshot("/home/end0tknr/tmp/screenshot_hoge.png")
+
+            div_elms  = browser.find_elements_by_css_selector("div.LCF4w")
+            lng_lat["address_other"] = div_elms[0].text
+            re_result = re_compile.search( div_elms[1].text )
+            if not re_result:
+                lng_lat["pref"] = "?"
+                lng_lat["city"] = "?"
+                logger.error("%s,%s -> %s %s %s" %
+                             (lng_lat["lat"],lng_lat["lng"],
+                              lng_lat["pref"],lng_lat["city"],lng_lat["address_other"]))
+                continue
+
+            lng_lat["pref"] = re_result.group(2)
+            lng_lat["city"] = re_result.group(1)
+            
+            if not lng_lat["pref"][-1] in ["都","道","府","県"] or \
+               not lng_lat["city"][-1] in ["市","区","町","村"] :
+                
+                lng_lat["pref"] = "?"
+                lng_lat["city"] = "?"
+                
+                logger.warning("%s,%s -> %s %s %s" %
+                               (lng_lat["lat"],lng_lat["lng"],
+                                lng_lat["pref"],lng_lat["city"],lng_lat["address_other"]))
+                continue
+            
+            logger.info("%s,%s -> %s %s %s" %
+                        (lng_lat["lat"],lng_lat["lng"],
+                         lng_lat["pref"],lng_lat["city"],lng_lat["address_other"]))
+            
+        return lng_lats
+
+    
     def conv_lng_lat_to_addr(self,lng,lat):
         conf = self.get_conf()
 
@@ -124,6 +183,7 @@ VALUES (%s,%s,%s,%s)
         req_params_str = urllib.parse.urlencode(req_params)
 
         req_url = geocode_api +"?"+ req_params_str
+        #print( req_url )
 
         req = urllib.request.Request(req_url)
         try:
@@ -154,9 +214,13 @@ VALUES (%s,%s,%s,%s)
         
         org_address = content["results"][0]["formatted_address"]
         ret_data.update( self.parse_formatted_address(org_address) )
-
+        
         logger.debug(
             req_params["latlng"] + "->" + ret_data["formatted_address"] )
+        
+        ret_data["address_components"] = \
+            self.parse_address_components(
+                content["results"][0]["address_components"] )
 
         return ret_data
         
