@@ -517,7 +517,6 @@ primary key(url) );
 
 
 CREATE TABLE IF NOT EXISTS suumo_bukken (
-id              serial,
 build_type      varchar(32),
 bukken_name     varchar(64),
 price           bigint,
@@ -529,7 +528,13 @@ build_area_org  varchar(64),
 land_area_m2    int,
 land_area_org   varchar(64),
 build_year      int,
-primary key(id) );
+create_date     date,
+keep_date       date,
+primary key(id),
+UNIQUE suumo_bukken_unique
+    (build_type,bukken_name,address,plan,
+     build_area_org,land_area_org,build_year)
+);
 
 CREATE TABLE IF NOT EXISTS mlit_seisanryokuchi (
 city            varchar(8),

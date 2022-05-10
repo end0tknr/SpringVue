@@ -6,8 +6,10 @@ from psycopg2  import extras # for bulk insert
 from selenium import webdriver # ex. pip install selenium==4.1.3
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from util.db import Db
 
 import appbase
+import datetime
 import json
 import re
 import time
@@ -61,20 +63,6 @@ class SuumoService(appbase.AppBase):
         global logger
         logger = self.get_logger()
 
-    def init_browser(self):
-        driver_path = self.get_conf()["common"]["browser_driver"]
-        browser_service = Service( executable_path=driver_path )
-
-        browser_opts = Options()
-        for tmp_opt in browser_conf["browser_options"]:
-            browser_opts.add_argument( tmp_opt )
-
-        browser = webdriver.Edge(service = browser_service,
-                                 options = browser_opts )
-        # 要素が見つかるまで、最大 ?秒 待つ
-        browser.implicitly_wait( browser_conf["implicitly_wait"] )
-        return browser
-
        
     def load_search_result_list_urls(self):
         logger.info("start")
@@ -100,14 +88,22 @@ class SuumoService(appbase.AppBase):
     def save_bukken_infos(self, build_type, bukken_infos):
         logger.info("start "+ build_type)
 
-        row_groups = self.divide_rows_info(build_type, bukken_infos, bulk_insert_size)
+        date_str = datetime.datetime.now().strftime('%Y-%m-%d')
+        row_groups = self.divide_rows_info(build_type,
+                                           bukken_infos,
+                                           bulk_insert_size,
+                                           date_str )
 
         sql = """
 INSERT INTO suumo_bukken
- (build_type,bukken_name,price,price_org,address,plan,
-  build_area_m2,build_area_org,land_area_m2,land_area_org,build_year)
-VALUES %s
+  (build_type,bukken_name,price,price_org,address,plan,build_area_m2,
+   build_area_org,land_area_m2,land_area_org,build_year,create_date)
+  VALUES %s
+ON CONFLICT ON CONSTRAINT suumo_bukken_unique
+  DO UPDATE SET keep_date='%s'
 """
+        sql = sql % ("%s", date_str)
+        
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:
 
@@ -124,7 +120,7 @@ VALUES %s
             db_conn.commit()
         return True
     
-    def divide_rows_info(self, build_type, org_rows, chunk_size):
+    def divide_rows_info(self, build_type, org_rows, chunk_size,date_str):
         i = 0
         chunk = []
         ret_rows = []
@@ -139,7 +135,8 @@ VALUES %s
                             org_row['build_area_org'],
                             org_row['land_area_m2'],
                             org_row['land_area_org'],
-                            org_row['build_year'] )
+                            org_row['build_year'] or 0,
+                            date_str )
                          )
             
             if len(chunk) >= chunk_size:
@@ -152,32 +149,36 @@ VALUES %s
 
         return ret_rows
     
-    def save_search_result_list_urls(self, build_type, rows):
-        logger.info("start "+ build_type)
-        
-        row_groups = self.divide_rows_list(build_type, rows, bulk_insert_size)
+    def del_search_result_list_urls(self):
+        logger.info("start")
 
-        sql = """
-INSERT INTO suumo_search_result_url (build_type,url) VALUES %s
-"""
+        sql = "delete from suumo_search_result_url"
 
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:
-
-                for row_group in row_groups:
-                    
-                    try:
-                        # bulk insert
-                        extras.execute_values(db_cur,sql, row_group )
-                    except Exception as e:
-                        logger.error(e)
-                        logger.error(sql)
-                        logger.error(row_group)
-                        return False
-                    
+                try:
+                    db_cur.execute(sql)
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return False
+                
             db_conn.commit()
+            
         return True
-    
+
+        
+    def save_search_result_list_urls(self, build_type, urls):
+        logger.info("start "+ build_type)
+
+        save_rows = []
+        for url in urls:
+            save_rows.append({"build_type":build_type,"url":url})
+
+        util_db = Db()
+        util_db.save_tbl_rows("suumo_search_result_url",
+                              ["build_type","url"],
+                              save_rows )
 
 
     def divide_rows_list(self, build_type, org_rows, chunk_size):
@@ -230,7 +231,8 @@ INSERT INTO suumo_search_result_url (build_type,url) VALUES %s
 
     def find_search_result_list_url_sub(self, base_url, pref_name):
         logger.info("%s %s" % (base_url, pref_name))
-        browser = self.init_browser()
+
+        browser = self.get_browser()
         
         req_url = base_url + pref_name +"/city/"
         browser.get( req_url )
@@ -370,7 +372,8 @@ INSERT INTO suumo_search_result_url (build_type,url) VALUES %s
             return None
 
         # 中央値(万円)を返す
-        re_compile_val_2 = re.compile("([\d\.]{1,10})(万|億).+?([\d\.]{1,10})(万|億)")
+        re_compile_val_2 = \
+            re.compile("([\d\.]{1,10})(万|億).+?([\d\.]{1,10})(万|億)")
         re_result = re_compile_val_2.search( org_val )
         if re_result:
             ret_val = (int(re_result.group(1)) + int(re_result.group(3))) /2

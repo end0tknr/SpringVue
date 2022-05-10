@@ -17,6 +17,7 @@ def main():
 
         suumo_service.save_bukken_infos(build_type,bukken_infos)
 
+
 if __name__ == '__main__':
     main()
 
