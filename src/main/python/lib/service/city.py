@@ -12,6 +12,12 @@ import urllib.request
 master_src_url = "https://www.soumu.go.jp/main_content/000730858.xlsx"
 master_xlsx = "000730858.xlsx"
 bulk_insert_size = 20
+
+seirei_cities = ["大阪市","名古屋市","京都市","横浜市","神戸市","北九州市",
+                 "札幌市","川崎市","福岡市","広島市","仙台市","千葉市",
+                 "さいたま市","静岡市","堺市","新潟市","浜松市","岡山市",
+                 "相模原市","熊本市"]
+
 logger = None
 
 
@@ -21,6 +27,9 @@ class CityService(appbase.AppBase):
         global logger
         logger = self.get_logger()
 
+    def is_seirei_city(self, city_name):
+        return city_name in seirei_cities
+        
     def download_master(self):
         logger.info("start")
         

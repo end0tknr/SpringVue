@@ -72,7 +72,24 @@ ORDER BY isc.ORDINAL_POSITION
             return False
             
         return True
+    
 
+    def del_tbl_rows(self,tbl_name):
+        logger.info("start "+ tbl_name )
+
+        conf = self.get_conf()
+        db_conn = self.db_connect()
+        db_cur = self.db_cursor(db_conn)
+        sql = "delete from " + tbl_name
+        try:
+            db_cur.execute(sql)
+            db_conn.commit()
+        except Exception as e:
+            logger.error(e)
+            logger.error(" ".join([sql]))
+            return False
+            
+        return True
 
     def save_tbl_rows(self, tbl_name, atri_keys, rows):
         logger.info("start")
@@ -81,7 +98,8 @@ ORDER BY isc.ORDINAL_POSITION
         bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
         row_groups = self.divide_rows(rows, bulk_insert_size, atri_keys )
         
-        sql = "INSERT INTO %s (%s) VALUES %s" % (tbl_name, ",".join(atri_keys),"%s")
+        sql = "INSERT INTO %s (%s) VALUES %s" % (tbl_name,
+                                                 ",".join(atri_keys),"%s")
         
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:

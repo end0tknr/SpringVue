@@ -517,23 +517,21 @@ primary key(url) );
 
 
 CREATE TABLE IF NOT EXISTS suumo_bukken (
-build_type      varchar(32),
-bukken_name     varchar(64),
+build_type      varchar(32)  NOT NULL DEFAULT '',
+bukken_name     varchar(64)  NOT NULL DEFAULT '',
 price           bigint,
 price_org       varchar(64),
-address         varchar(128),
-plan            varchar(32),
+address         varchar(128) NOT NULL DEFAULT '',
+plan            varchar(64)  NOT NULL DEFAULT '',
 build_area_m2   int,
-build_area_org  varchar(64),
+build_area_org  varchar(64)  NOT NULL DEFAULT '',
 land_area_m2    int,
-land_area_org   varchar(64),
-build_year      int,
-create_date     date,
-keep_date       date,
-primary key(id),
-UNIQUE suumo_bukken_unique
-    (build_type,bukken_name,address,plan,
-     build_area_org,land_area_org,build_year)
+land_area_org   varchar(64)  NOT NULL DEFAULT '',
+build_year      int          NOT NULL DEFAULT 0,
+found_date      date,
+check_date      date,
+primary key ( build_type,bukken_name,address,plan,
+              build_area_org,land_area_org,build_year)
 );
 
 CREATE TABLE IF NOT EXISTS mlit_seisanryokuchi (

@@ -12,6 +12,8 @@
 #   市区町村含む）
 
 from service.city import CityService
+from util.db import Db
+
 import re
 import service.kokusei_population
 
@@ -37,11 +39,23 @@ class KokuseiPopulationB01Service(
     def get_insert_sql(self):
         return insert_sql
 
+    def del_tbl_rows(self):
+        logger.info("start")
+        util_db = Db()
+        util_db.del_tbl_rows("kokusei_population_b01")
+
+    def save_tbl_rows(self, rows):
+        logger.info("start")
+        util_db = Db()
+        util_db.save_tbl_rows("kokusei_population_b01",insert_cols,rows )
+
     def load_wsheet( self, wsheet ):
         
         re_compile = re.compile("(\d+)_(.+)")
         city_service = CityService()
         ret_data = []
+
+        pref_cities = {}
         
         for row_vals in wsheet.iter_rows(min_row=15, values_only=True):
             row_vals = list(row_vals)
@@ -56,6 +70,10 @@ class KokuseiPopulationB01Service(
             city_def = city_service.find_def_by_code_city(city_code,
                                                           city_name)
             if not city_def:
+                continue
+
+            # 政令指定都市は、区のレベルで登録
+            if city_service.is_seirei_city(city_def["city"]):
                 continue
 
             for col_no in [7,10,15,16,19]:
@@ -75,4 +93,23 @@ class KokuseiPopulationB01Service(
             ret_data.append(new_info)
 
         return ret_data
+    
+    def get_group_by_city(self):
+        sql = "select * from kokusei_population_b01"
+        
+        ret_data = []
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                    for ret_row in  db_cur.fetchall():
+                        ret_data.append( dict( ret_row ))
+                    
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+        return ret_data
+
 

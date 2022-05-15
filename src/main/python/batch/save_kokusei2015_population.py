@@ -19,7 +19,10 @@ def main():
     ]
 
     for service_class in service_classes:
+        service_class.del_tbl_rows()
+        
         src_datas = service_class.download_src_data()
+        
         service_class.save_tbl_rows(src_datas)
 
 if __name__ == '__main__':

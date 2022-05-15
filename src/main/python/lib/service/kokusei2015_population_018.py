@@ -8,6 +8,8 @@
 # － 都道府県※，都道府県市部・郡部，市区町村※，平成12年市町村
 
 from service.city import CityService
+from util.db import Db
+
 import csv
 import io
 import re
@@ -35,6 +37,16 @@ class Kokusei2015Population018Service(
     def get_insert_sql(self):
         return insert_sql
 
+    def del_tbl_rows(self):
+        logger.info("start")
+        util_db = Db()
+        util_db.del_tbl_rows("kokusei2015_population_018")
+
+    def save_tbl_rows(self, rows):
+        logger.info("start")
+        util_db = Db()
+        util_db.save_tbl_rows("kokusei2015_population_018",insert_cols,rows )
+
     def load_csv_content( self, csv_content ):
         
         city_service = CityService()
@@ -52,6 +64,10 @@ class Kokusei2015Population018Service(
             if not city_def or not city_def["city"]:
                 continue
 
+            # 政令指定都市は、区のレベルで登録
+            if city_service.is_seirei_city(city_def["city"]):
+                continue
+
             for col_no in [10,11,12,13]:
                 if cols[col_no] == "-":
                     cols[col_no] = 0
@@ -67,3 +83,4 @@ class Kokusei2015Population018Service(
             ret_data.append(new_info)
 
         return ret_data
+    

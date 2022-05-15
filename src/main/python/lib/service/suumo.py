@@ -97,10 +97,11 @@ class SuumoService(appbase.AppBase):
         sql = """
 INSERT INTO suumo_bukken
   (build_type,bukken_name,price,price_org,address,plan,build_area_m2,
-   build_area_org,land_area_m2,land_area_org,build_year,create_date)
+   build_area_org,land_area_m2,land_area_org,build_year,
+   found_date)
   VALUES %s
-ON CONFLICT ON CONSTRAINT suumo_bukken_unique
-  DO UPDATE SET keep_date='%s'
+ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
+  DO UPDATE SET check_date='%s'
 """
         sql = sql % ("%s", date_str)
         
@@ -120,24 +121,47 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_unique
             db_conn.commit()
         return True
     
+    def make_tuple_for_insert(self, build_type, org_row, date_str):
+        
+        ret_tuple = ( build_type                or "",
+                      org_row['bukken_name']    or "",
+                      org_row['price'],
+                      org_row['price_org'],
+                      org_row['address']        or "",
+                      org_row['plan'],
+                      org_row['build_area_m2'],
+                      org_row['build_area_org'] or "",
+                      org_row['land_area_m2'],
+                      org_row['land_area_org']  or "",
+                      org_row['build_year']     or 0,
+                      date_str )
+        tuple_key = "\t".join([ ret_tuple[0],
+                                ret_tuple[1],
+                                ret_tuple[4],
+                                ret_tuple[7],
+                                ret_tuple[9],
+                                str( ret_tuple[10]) ] )
+        return ret_tuple, tuple_key
+
+        
     def divide_rows_info(self, build_type, org_rows, chunk_size,date_str):
         i = 0
         chunk = []
         ret_rows = []
+        tuple_keys = {}
         for org_row in org_rows:
-            chunk.append( ( build_type,
-                            org_row['bukken_name'],
-                            org_row['price'],
-                            org_row['price_org'],
-                            org_row['address'],
-                            org_row['plan'],
-                            org_row['build_area_m2'],
-                            org_row['build_area_org'],
-                            org_row['land_area_m2'],
-                            org_row['land_area_org'],
-                            org_row['build_year'] or 0,
-                            date_str )
-                         )
+            
+            org_tuple, tuple_key = self.make_tuple_for_insert(build_type,
+                                                              org_row,
+                                                              date_str)
+
+            if tuple_key in tuple_keys:
+                logger.warning("duplicate bukken "+ tuple_key)
+                continue
+            
+            tuple_keys[tuple_key] = 1
+            
+            chunk.append( org_tuple )
             
             if len(chunk) >= chunk_size:
                 ret_rows.append(chunk)
@@ -386,7 +410,7 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_unique
         re_compile_val_1 = re.compile("([\d\.]{1,10})(万|億)")
         re_result = re_compile_val_1.search( org_val )
         if re_result:
-            ret_val = int(re_result.group(1)) * 10000
+            ret_val = int( re_result.group(1) )
         
             if re_result.group(2) == "万":
                 ret_val *= 10000

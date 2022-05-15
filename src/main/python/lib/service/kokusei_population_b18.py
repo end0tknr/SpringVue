@@ -9,6 +9,8 @@
 # 市区町村（2000年（平成12年）市区町村含む）
 
 from service.city import CityService
+from util.db import Db
+
 import re
 import service.kokusei_population
 
@@ -35,6 +37,17 @@ class KokuseiPopulationB18Service(
     def get_insert_sql(self):
         return insert_sql
 
+    def del_tbl_rows(self):
+        logger.info("start")
+        util_db = Db()
+        util_db.del_tbl_rows("kokusei_population_b18")
+
+    def save_tbl_rows(self, rows):
+        logger.info("start")
+        util_db = Db()
+        util_db.save_tbl_rows("kokusei_population_b18",insert_cols,rows )
+
+
     def load_wsheet( self, wsheet ):
         
         re_compile = re.compile("^(\d+)_(.+)")
@@ -56,6 +69,10 @@ class KokuseiPopulationB18Service(
             if not city_def:
                 continue
 
+            # 政令指定都市は、区のレベルで登録
+            if city_service.is_seirei_city(city_def["city"]):
+                continue
+            
             for col_no in [10,11,12,13]:
                 if row_vals[col_no] == "-":
                     row_vals[col_no] = 0
