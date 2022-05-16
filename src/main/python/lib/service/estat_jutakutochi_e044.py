@@ -12,6 +12,7 @@
 #   １世帯当たり居住室数及び１世帯当たり居住室の畳数－全国，都道府県，市区町村
 
 from service.city import CityService
+from util.db      import Db
 import re
 import service.estat_jutakutochi
 
@@ -62,6 +63,11 @@ class EstatJutakuTochiE044Service(
                 row_no += 1
                 continue
             
+            # 政令指定都市は、区のレベルで登録
+            if city_service.is_seirei_city(city_def["city"]):
+                row_no += 1
+                continue
+
             if row_no % 100 == 0:
                 logger.info( "%d %s" % (row_no,city_code_name[1]))
 
@@ -93,3 +99,55 @@ class EstatJutakuTochiE044Service(
             row_no += 1
             
         return ret_data
+
+
+    def get_group_by_city_income(self):
+        sql = """
+select *
+from estat_jutakutochi_e044
+order by pref,city,year_income,own_type
+"""
+        pre_pref_city = None
+        ret_data_tmp = {}
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                    for ret_row in  db_cur.fetchall():
+                        ret_row = dict( ret_row )
+                        pref_city_income = "\t".join([ ret_row["pref"],
+                                                       ret_row["city"],
+                                                       ret_row["year_income"] ])
+                        if not pref_city_income in ret_data_tmp:
+                            ret_data_tmp[pref_city_income] = {}
+
+                        own_type = ret_row["own_type"]
+                        ret_data_tmp[pref_city_income][own_type] = \
+                            ret_row["setai"]
+                    
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+                
+        ret_data = []
+        for pref_city_income in ret_data_tmp:
+            keys = pref_city_income.split("\t")
+            vals = ret_data_tmp[pref_city_income]
+            vals["pref"]        = keys[0]
+            vals["city"]        = keys[1]
+            vals["year_income"] = keys[2]
+            ret_data.append(vals)
+            
+        return ret_data
+    
+    def del_tbl_rows(self):
+        logger.info("start")
+        util_db = Db()
+        util_db.del_tbl_rows("estat_jutakutochi_e044")
+
+    def save_tbl_rows(self, rows):
+        logger.info("start")
+        util_db = Db()
+        util_db.save_tbl_rows("estat_jutakutochi_e044",insert_cols,rows )

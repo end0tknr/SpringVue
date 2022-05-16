@@ -9,7 +9,9 @@
 # 年齢中位数及び人口構成比［年齢別］－全国，都道府県，
 # 市区町村（2000年（平成12年）市区町村含む）
 
-from service.city import CityService
+from service.city                       import CityService
+from service.kokusei2015_population_003 import Kokusei2015Population003Service
+from util.db      import Db
 import re
 import service.kokusei_population
 
@@ -63,6 +65,10 @@ class KokuseiPopulationB02Service(
             if not city_def:
                 continue
 
+            # 政令指定都市は、区のレベルで登録
+            if city_service.is_seirei_city(city_def["city"]):
+                continue
+            
             for col_no in range(10,31):
                 if row_vals[col_no] == "-":
                     row_vals[col_no] = 0
@@ -96,3 +102,68 @@ class KokuseiPopulationB02Service(
 
         return ret_data
 
+    def del_tbl_rows(self):
+        logger.info("start")
+        util_db = Db()
+        util_db.del_tbl_rows("kokusei_population_b02")
+
+    def save_tbl_rows(self, rows):
+        logger.info("start")
+        util_db = Db()
+        util_db.save_tbl_rows("kokusei_population_b02",insert_cols,rows )
+        
+
+    def get_vals(self):
+        sql = "select * from kokusei_population_b02"
+        
+        ret_data = []
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                    for ret_row in  db_cur.fetchall():
+                        ret_data.append( dict( ret_row ))
+                    
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+        return ret_data
+
+
+    def get_trend(self):
+        kokusei2015_pop_003_service = Kokusei2015Population003Service()
+        pre_vals_tmp = kokusei2015_pop_003_service.get_vals()
+
+        pre_vals = {}
+        for pre_val in pre_vals_tmp:
+            pref_city = "\t".join([pre_val["pref"],
+                                   pre_val["city"] ])
+            del pre_val["pref"]
+            del pre_val["city"]
+            pre_vals[pref_city] = pre_val
+
+        now_vals = self.get_vals()
+
+        val_keys = ["pop_0_4","pop_5_9","pop_10_14","pop_15_19","pop_20_24",
+                    "pop_25_29","pop_30_34","pop_35_39","pop_40_44","pop_45_49",
+                    "pop_50_54","pop_55_59","pop_60_64","pop_65_69","pop_70_74",
+                    "pop_75_79","pop_80_84","pop_85_89","pop_90_94","pop_95_99",
+                    "pop_100"]
+
+        for now_val in now_vals:
+            pref_city = "\t".join([now_val["pref"],
+                                   now_val["city"] ])
+            if not pref_city in pre_vals:
+                for val_key in val_keys:
+                    now_val[val_key + "_2015"]   = 0
+                continue
+
+            for val_key in val_keys:
+                now_val[val_key + "_2015"] = pre_vals[pref_city][val_key]
+            
+        return now_vals
+
+    
+    

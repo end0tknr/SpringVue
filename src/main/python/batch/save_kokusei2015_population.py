@@ -12,9 +12,9 @@ from service.kokusei2015_population_018 import Kokusei2015Population018Service
 def main():
 
     service_classes = [
-        # Kokusei2015Population003Service(),
+        Kokusei2015Population003Service(),
         # Kokusei2015Population007Service(),
-        Kokusei2015Population013Service(),
+        # Kokusei2015Population013Service(),
         # Kokusei2015Population018Service(),
     ]
 

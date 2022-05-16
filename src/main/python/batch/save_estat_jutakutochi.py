@@ -24,15 +24,17 @@ def main():
         # EstatJutakuTochiE006Service(),
         # EstatJutakuTochiE030Service(),
         # EstatJutakuTochiE033Service(),
-        # EstatJutakuTochiE044Service(),
+        EstatJutakuTochiE044Service(),
         # EstatJutakuTochiE048Service(),
         # EstatJutakuTochiE049Service(),
         # EstatJutakuTochiE101Service(),
         # EstatJutakuTochiG157Service(),
-        EstatJutakuTochiG158Service(),
+        # EstatJutakuTochiG158Service(),
     ]
 
     for service_class in service_classes:
+        service_class.del_tbl_rows()
+        
         src_datas = service_class.download_src_data()
         service_class.save_tbl_rows(src_datas)
 

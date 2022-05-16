@@ -8,6 +8,7 @@
 # － 都道府県※，都道府県市部・郡部，市区町村※，平成12年市町村
 
 from service.city import CityService
+from util.db      import Db
 import csv
 import io
 import re
@@ -58,6 +59,10 @@ class Kokusei2015Population003Service(
             if not city_def:
                 continue
 
+            # 政令指定都市は、区のレベルで登録
+            if city_service.is_seirei_city(city_def["city"]):
+                continue
+            
             for col_no in range(112,133):
                 if cols[col_no] =="-":
                     cols[col_no] = 0 
@@ -90,3 +95,34 @@ class Kokusei2015Population003Service(
             ret_data.append(new_info)
             
         return ret_data
+
+
+    def del_tbl_rows(self):
+        logger.info("start")
+        util_db = Db()
+        util_db.del_tbl_rows("kokusei2015_population_003")
+
+    def save_tbl_rows(self, rows):
+        logger.info("start")
+        util_db = Db()
+        util_db.save_tbl_rows("kokusei2015_population_003",insert_cols,rows )
+        
+
+    def get_vals(self):
+        sql = "select * from kokusei2015_population_003"
+        
+        ret_data = []
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                    for ret_row in  db_cur.fetchall():
+                        ret_data.append( dict( ret_row ))
+                    
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+        return ret_data
+    
