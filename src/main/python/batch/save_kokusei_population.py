@@ -17,8 +17,8 @@ def main():
         # KokuseiPopulationB01Service(),
         # KokuseiPopulationB02Service(),
         # KokuseiPopulationB06Service(),
-        # KokuseiPopulationB12Service(),
-        KokuseiPopulationB18Service(),
+        KokuseiPopulationB12Service(),
+        # KokuseiPopulationB18Service(),
     ]
 
     for service_class in service_classes:

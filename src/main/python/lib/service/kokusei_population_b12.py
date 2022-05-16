@@ -8,6 +8,9 @@
 # 世帯主の男女，世帯主の年齢（5歳階級），世帯の家族類型別一般世帯数
 # －全国，都道府県，市区町村
 from service.city import CityService
+from service.kokusei2015_population_013 import Kokusei2015Population013Service
+from util.db import Db
+
 import re
 import service.kokusei_population
 
@@ -34,6 +37,16 @@ class KokuseiPopulationB12Service(
     def get_insert_sql(self):
         return insert_sql
 
+    def del_tbl_rows(self):
+        logger.info("start")
+        util_db = Db()
+        util_db.del_tbl_rows("kokusei_population_b12")
+
+    def save_tbl_rows(self, rows):
+        logger.info("start")
+        util_db = Db()
+        util_db.save_tbl_rows("kokusei_population_b12",insert_cols,rows )
+
     def load_wsheet( self, wsheet ):
         
         re_compile = re.compile("^(\d+)_(.+)")
@@ -57,10 +70,16 @@ class KokuseiPopulationB12Service(
             if not city_def:
                 continue
 
+            # 政令指定都市は、区のレベルで登録
+            if city_service.is_seirei_city(city_def["city"]):
+                continue
+
             re_result = re_compile.search(row_vals[4])
             if not re_result:
                 continue
             owner_age = re_result.group(2)
+            if owner_age == "年齢「不詳」":
+                continue
 
             for col_no in [5,6,23,24,25]:
                 if row_vals[col_no] == "-":
@@ -80,3 +99,121 @@ class KokuseiPopulationB12Service(
 
         return ret_data
 
+    def get_trend(self):
+        kokusei2015_pop_013_service = Kokusei2015Population013Service()
+        pre_vals_tmp = kokusei2015_pop_013_service.get_vals()
+
+        pre_vals = {}
+        for pre_val in pre_vals_tmp:
+            pref_city_age = "\t".join([pre_val["pref"],
+                                       pre_val["city"],
+                                       pre_val["owner_age"] ])
+            del pre_val["pref"]
+            del pre_val["city"]
+            del pre_val["owner_age"]
+
+            pre_vals[pref_city_age] = pre_val
+
+        now_vals = self.get_vals()
+            
+        for now_val in now_vals:
+            pref_city_age = "\t".join([now_val["pref"],
+                                       now_val["city"],
+                                       now_val["owner_age"] ])
+            if not pref_city_age in pre_vals:
+                now_val["total_setai_2015"]   = 0
+                now_val["family_setai_2015"]  = 0
+                now_val["other_setai_2015"]   = 0
+                now_val["single_setai_2015"]  = 0
+                now_val["unknown_setai_2015"] = 0
+                continue
+
+            now_val["total_setai_2015"]   = pre_vals[pref_city_age]["total_setai"]
+            now_val["family_setai_2015"]  = pre_vals[pref_city_age]["family_setai"]
+            now_val["other_setai_2015"]   = pre_vals[pref_city_age]["other_setai"]
+            now_val["single_setai_2015"]  = pre_vals[pref_city_age]["single_setai"]
+            now_val["unknown_setai_2015"] = pre_vals[pref_city_age]["unknown_setai"]
+            
+        return now_vals
+
+    
+    def get_trend_group_by_city(self):
+        kokusei2015_pop_013_service = Kokusei2015Population013Service()
+        pre_vals_tmp = kokusei2015_pop_013_service.get_group_by_city()
+
+        pre_vals = {}
+        for pre_val in pre_vals_tmp:
+            pref_city = "\t".join([pre_val["pref"],pre_val["city"]])
+
+            del pre_val["pref"]
+            del pre_val["city"]
+
+            pre_vals[pref_city] = pre_val
+
+        now_vals = self.get_group_by_city()
+            
+        for now_val in now_vals:
+            pref_city = "\t".join([now_val["pref"],now_val["city"]])
+            if not pref_city in pre_vals:
+                now_val["total_setai_2015"]   = 0
+                now_val["family_setai_2015"]  = 0
+                now_val["other_setai_2015"]   = 0
+                now_val["single_setai_2015"]  = 0
+                now_val["unknown_setai_2015"] = 0
+                continue
+
+            now_val["total_setai_2015"]   = pre_vals[pref_city]["total_setai"]
+            now_val["family_setai_2015"]  = pre_vals[pref_city]["family_setai"]
+            now_val["other_setai_2015"]   = pre_vals[pref_city]["other_setai"]
+            now_val["single_setai_2015"]  = pre_vals[pref_city]["single_setai"]
+            now_val["unknown_setai_2015"] = pre_vals[pref_city]["unknown_setai"]
+            
+        return now_vals
+
+    
+    def get_group_by_city(self):
+        sql = """
+select
+  pref, city,
+  sum( total_setai  ) as total_setai,
+  sum( family_setai ) as family_setai,
+  sum( other_setai  ) as other_setai,
+  sum( single_setai ) as single_setai,
+  sum( unknown_setai) as unknown_setai
+from kokusei_population_b12
+group by pref, city
+"""
+        
+        ret_data = []
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                    for ret_row in  db_cur.fetchall():
+                        ret_data.append( dict( ret_row ))
+                    
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+        return ret_data
+    
+    
+    def get_vals(self):
+        sql = "select * from kokusei_population_b12"
+        
+        ret_data = []
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                    for ret_row in  db_cur.fetchall():
+                        ret_data.append( dict( ret_row ))
+                    
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+        return ret_data

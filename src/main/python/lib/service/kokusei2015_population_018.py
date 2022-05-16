@@ -84,3 +84,21 @@ class Kokusei2015Population018Service(
 
         return ret_data
     
+    
+    def get_group_by_city(self):
+        sql = "select * from kokusei2015_population_018"
+        
+        ret_data = []
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                    for ret_row in  db_cur.fetchall():
+                        ret_data.append( dict( ret_row ))
+                    
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+        return ret_data

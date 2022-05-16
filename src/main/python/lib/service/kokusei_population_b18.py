@@ -9,6 +9,7 @@
 # 市区町村（2000年（平成12年）市区町村含む）
 
 from service.city import CityService
+from service.kokusei2015_population_018 import Kokusei2015Population018Service
 from util.db import Db
 
 import re
@@ -89,3 +90,53 @@ class KokuseiPopulationB18Service(
 
         return ret_data
 
+
+    def get_trend_group_by_city(self):
+        kokusei2015_pop_018_service = Kokusei2015Population018Service()
+        pre_vals_tmp = kokusei2015_pop_018_service.get_group_by_city()
+
+        pre_vals = {}
+        for pre_val in pre_vals_tmp:
+            pref_city = "\t".join([pre_val["pref"],pre_val["city"]])
+
+            del pre_val["pref"]
+            del pre_val["city"]
+
+            pre_vals[pref_city] = pre_val
+
+        now_vals = self.get_group_by_city()
+            
+        for now_val in now_vals:
+            pref_city = "\t".join([now_val["pref"],now_val["city"]])
+            if not pref_city in pre_vals:
+                now_val["owned_house_2015"]    = 0
+                now_val["public_rented_2015"]  = 0
+                now_val["private_rented_2015"] = 0
+                now_val["company_house_2015"]  = 0
+                continue
+        
+            now_val["owned_house_2015"]    = pre_vals[pref_city]["owned_house"]
+            now_val["public_rented_2015"]  = pre_vals[pref_city]["public_rented"]
+            now_val["private_rented_2015"] = pre_vals[pref_city]["private_rented"]
+            now_val["company_house_2015"]  = pre_vals[pref_city]["company_house"]
+
+        return now_vals
+    
+        
+    def get_group_by_city(self):
+        sql = "select * from kokusei_population_b18"
+        
+        ret_data = []
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                    for ret_row in  db_cur.fetchall():
+                        ret_data.append( dict( ret_row ))
+                    
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+        return ret_data

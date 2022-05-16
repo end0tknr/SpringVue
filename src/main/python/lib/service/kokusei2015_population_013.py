@@ -9,6 +9,8 @@
 # －特掲) － 都道府県※，都道府県市部・郡部，市区町村※，平成12年市町村
 
 from service.city import CityService
+from util.db import Db
+
 import csv
 import io
 import re
@@ -36,6 +38,16 @@ class Kokusei2015Population013Service(
     def get_insert_sql(self):
         return insert_sql
 
+    def del_tbl_rows(self):
+        logger.info("start")
+        util_db = Db()
+        util_db.del_tbl_rows("kokusei2015_population_013")
+
+    def save_tbl_rows(self, rows):
+        logger.info("start")
+        util_db = Db()
+        util_db.save_tbl_rows("kokusei2015_population_013",insert_cols,rows )
+
     def load_csv_content( self, csv_content ):
         
         city_service = CityService()
@@ -50,7 +62,6 @@ class Kokusei2015Population013Service(
         re_compile_2 = re.compile("^\d+.*歳")
 
         for cols in csv.reader( f ):
-            cols[8] = cols[8].strip() 
 
             if not city_def:
                 re_result = re_compile_1.search(cols[8])
@@ -58,12 +69,21 @@ class Kokusei2015Population013Service(
                     continue
 
                 city_code = re_result.group(1)
-                city_name = re_result.group(2)
+                city_name = re_result.group(2).replace(' ','')
                 city_def = city_service.find_def_by_code_city(city_code,city_name)
                 if not city_def or not city_def["city"]:
                     city_def = None
                 continue
+            
+            # 政令指定都市は、区のレベルで登録
+            if city_service.is_seirei_city(city_def["city"]):
+                city_def = None
+                continue
 
+            if cols[1] != "01": # 一般世帯数のみを取得
+                continue
+
+            cols[8] = cols[8].strip()
             if cols[8] == "総数（男女別）":
                 continue
             
@@ -71,11 +91,11 @@ class Kokusei2015Population013Service(
             if not re_result:
                 city_def = None
                 continue
-
+            
             for col_no in [9,10,26,27,28]:
                 if cols[col_no] =="-":
                     cols[col_no] = 0
-        
+
             new_info = {
                 "pref"          :city_def["pref"],
                 "city"          :city_def["city"],
@@ -86,6 +106,52 @@ class Kokusei2015Population013Service(
                 "single_setai"  :cols[28],
                 "unknown_setai" :cols[26],
             }
+
             ret_data.append(new_info)
 
+        return ret_data
+
+
+    def get_group_by_city(self):
+        sql = """
+select
+  pref, city,
+  sum( total_setai  ) as total_setai,
+  sum( family_setai ) as family_setai,
+  sum( other_setai  ) as other_setai,
+  sum( single_setai ) as single_setai,
+  sum( unknown_setai) as unknown_setai
+from kokusei2015_population_013
+group by pref, city
+"""
+        ret_data = []
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                    for ret_row in  db_cur.fetchall():
+                        ret_data.append( dict( ret_row ))
+                    
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+        return ret_data
+    
+    def get_vals(self):
+        sql = "select * from kokusei2015_population_013"
+        ret_data = []
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                    for ret_row in  db_cur.fetchall():
+                        ret_data.append( dict( ret_row ))
+                    
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
         return ret_data

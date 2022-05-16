@@ -14,8 +14,8 @@ def main():
     service_classes = [
         # Kokusei2015Population003Service(),
         # Kokusei2015Population007Service(),
-        # Kokusei2015Population013Service(),
-        Kokusei2015Population018Service(),
+        Kokusei2015Population013Service(),
+        # Kokusei2015Population018Service(),
     ]
 
     for service_class in service_classes:
