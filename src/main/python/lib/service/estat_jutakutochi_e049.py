@@ -11,6 +11,7 @@
 #   別借家に居住する主世帯数及び１か月当たり家賃－全国，都道府県，市区町村
 
 from service.city import CityService
+from util.db      import Db
 import re
 import service.estat_jutakutochi
 
@@ -24,7 +25,7 @@ insert_cols = ["pref","city",
                "rent_20000_39999",
                "rent_40000_59999",
                "rent_60000_79999",
-               "rent_90000_99999",
+               "rent_80000_99999",
                "rent_100000_149999",
                "rent_150000_199999",
                "rent_200000",
@@ -70,6 +71,11 @@ class EstatJutakuTochiE049Service(
                 row_no += 1
                 continue
             
+            # 政令指定都市は、区のレベルで登録
+            if city_service.is_seirei_city(city_def["city"]):
+                row_no += 1
+                continue
+
             if row_no % 100 == 0:
                 logger.info( "%d %s" % (row_no,city_code_name[1]))
 
@@ -94,7 +100,7 @@ class EstatJutakuTochiE049Service(
                 "rent_20000_39999"   :row_vals[12],
                 "rent_40000_59999"   :row_vals[13],
                 "rent_60000_79999"   :row_vals[14],
-                "rent_90000_99999"   :row_vals[15],
+                "rent_80000_99999"   :row_vals[15],
                 "rent_100000_149999" :row_vals[16],
                 "rent_150000_199999" :row_vals[17],
                 "rent_200000"        :row_vals[18],
@@ -105,3 +111,33 @@ class EstatJutakuTochiE049Service(
             row_no += 1
             
         return ret_data
+
+    def del_tbl_rows(self):
+        logger.info("start")
+        util_db = Db()
+        util_db.del_tbl_rows("estat_jutakutochi_e049")
+
+    def save_tbl_rows(self, rows):
+        logger.info("start")
+        util_db = Db()
+        util_db.save_tbl_rows("estat_jutakutochi_e049",insert_cols,rows )
+    
+
+    def get_vals(self):
+        sql = "select * from estat_jutakutochi_e049"
+        
+        ret_data = []
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                    for ret_row in  db_cur.fetchall():
+                        ret_data.append( dict( ret_row ))
+                    
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+        return ret_data
+        

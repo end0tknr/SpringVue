@@ -6,6 +6,7 @@ import sys
 sys.path.append( os.path.join(os.path.dirname(__file__), '../lib') )
 from service.adatascientist         import DataScientistService
 from service.estat_jutakutochi_e044 import EstatJutakuTochiE044Service
+from service.estat_jutakutochi_e049 import EstatJutakuTochiE049Service
 from service.mlit_fudousantorihiki  import MlitFudousanTorihikiService
 from service.kokusei_population_b01 import KokuseiPopulationB01Service
 from service.kokusei_population_b02 import KokuseiPopulationB02Service
@@ -22,7 +23,8 @@ def main():
     # calc_kokusei_pop_b12()
     # calc_kokusei_pop_b12_2()
     # calc_kokusei_pop_b18()
-    calc_jutakutochi_e044()
+    # calc_jutakutochi_e044()
+    calc_jutakutochi_e049()
     
 
 def calc_jutakutochi_e044():
@@ -38,6 +40,32 @@ def calc_jutakutochi_e044():
         disp_cols.append( ret_val["year_income"] )
         
         for atri_key in ["持ち家","借家"] :
+            if atri_key in ret_val:
+                disp_cols.append( str(ret_val[atri_key] ) )
+            else:
+                disp_cols.append( "0" )
+            
+        print( "\t".join( disp_cols ) )
+        
+
+def calc_jutakutochi_e049():
+    jutakutochi_service = EstatJutakuTochiE049Service()
+
+    
+    ret_vals = jutakutochi_service.get_vals()
+
+    atri_keys = ["rent_0","rent_1_9999","rent_10000_19999",
+                 "rent_20000_39999","rent_40000_59999","rent_60000_79999",
+                 "rent_80000_99999","rent_100000_149999","rent_150000_199999",
+                 "rent_200000","rent_unknown"]
+
+    for ret_val in ret_vals:
+        disp_cols = []
+        disp_cols.append( ret_val["pref"] )
+        disp_cols.append( ret_val["city"] )
+        disp_cols.append( ret_val["owner_age"] )
+        
+        for atri_key in atri_keys:
             if atri_key in ret_val:
                 disp_cols.append( str(ret_val[atri_key] ) )
             else:
