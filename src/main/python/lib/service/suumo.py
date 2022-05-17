@@ -98,7 +98,7 @@ class SuumoService(appbase.AppBase):
 INSERT INTO suumo_bukken
   (build_type,bukken_name,price,price_org,address,plan,build_area_m2,
    build_area_org,land_area_m2,land_area_org,build_year,
-   found_date)
+   found_date,check_date)
   VALUES %s
 ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
   DO UPDATE SET check_date='%s'
@@ -134,6 +134,7 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
                       org_row['land_area_m2'],
                       org_row['land_area_org']  or "",
                       org_row['build_year']     or 0,
+                      date_str,
                       date_str )
         tuple_key = "\t".join([ ret_tuple[0],
                                 ret_tuple[1],

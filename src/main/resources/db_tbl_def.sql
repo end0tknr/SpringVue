@@ -550,3 +550,43 @@ pref            varchar(4),
 city            varchar(16),
 address_other   varchar(64),
 primary key(site,client_ip) );
+
+
+CREATE TABLE IF NOT EXISTS soumu_zeisei_j51_20_b (
+pref                    varchar(4),
+city                    varchar(8),
+pop                     bigint,
+salary                  bigint,
+separate_long_capital   bigint,
+separate_short_capital  bigint,
+general_stock_capital   bigint,
+listed_stock_capital    bigint,
+listed_stock_dividend   bigint,
+future_trading_income   bigint,
+taxable_income          bigint,
+primary key(pref,city) );
+
+COMMENT ON TABLE soumu_zeisei_j51_20_b IS
+'https://www.soumu.go.jp/main_sosiki/jichi_zeisei/czaisei/czaisei_seido/xls/J51-20-b.xlsx
+市町村別内訳
+第11表　課税標準額段階別令和２年度分所得割額等に関する調（合計）
+（所得割納税義務者数・課税対象所得・課税標準額・所得割額）';
+
+COMMENT ON COLUMN soumu_zeisei_j51_20_b.pop
+     IS '所得割の納税義務者数';
+COMMENT ON COLUMN soumu_zeisei_j51_20_b.salary
+     IS '総所得金額等';
+COMMENT ON COLUMN soumu_zeisei_j51_20_b.separate_long_capital
+     IS '分離長期譲渡所得金額に係る所得金額';
+COMMENT ON COLUMN soumu_zeisei_j51_20_b.separate_short_capital
+     IS '分離短期譲渡所得金額に係る所得金額';
+COMMENT ON COLUMN soumu_zeisei_j51_20_b.general_stock_capital
+     IS '一般株式等に係る譲渡所得金額';
+COMMENT ON COLUMN soumu_zeisei_j51_20_b.listed_stock_capital
+     IS '上場株式等に係る譲渡所得金額';
+COMMENT ON COLUMN soumu_zeisei_j51_20_b.listed_stock_dividend
+     IS '上場株式等に係る配当所得金額';
+COMMENT ON COLUMN soumu_zeisei_j51_20_b.future_trading_income
+     IS '先物取引に係る雑所得金額';
+COMMENT ON COLUMN soumu_zeisei_j51_20_b.taxable_income
+     IS '課税対象所得';
