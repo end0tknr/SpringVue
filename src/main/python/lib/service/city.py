@@ -5,6 +5,7 @@ from psycopg2  import extras # for bulk insert
 import appbase
 import openpyxl
 import os
+import re
 import tempfile
 import urllib.request
 
@@ -17,6 +18,17 @@ seirei_cities = ["大阪市","名古屋市","京都市","横浜市","神戸市",
                  "札幌市","川崎市","福岡市","広島市","仙台市","千葉市",
                  "さいたま市","静岡市","堺市","新潟市","浜松市","岡山市",
                  "相模原市","熊本市"]
+
+re_exp_pref = "神奈川県|和歌山県|鹿児島県|.{2}[都道府県]"
+re_exp_city = "|".join([
+    "東村山市","武蔵村山市","羽村市","四日市市","廿日市市","大村市","野々市市",
+    "玉村町","大町町","大町市","田村市","十日町市","八丈町"] )
+    
+
+re_pref_cities = [re.compile("^(%s).*?(%s)(.*)"  % (re_exp_pref,re_exp_city) ),
+                  re.compile("^(%s)(.+?市.+?区)(.*)"    % (re_exp_pref) ),
+                  re.compile("^(%s)(.+?[市区町村])(.*)" % (re_exp_pref) ),
+                  re.compile("^(%s).+?郡(.+?[町村])(.*)"% (re_exp_pref) ) ]
 
 logger = None
 
@@ -60,7 +72,30 @@ class CityService(appbase.AppBase):
             
             return ret_data
         
+    def parse_pref_city(self, address_org):
 
+        # refer to https://ja.wikipedia.org/wiki/%E9%A0%88%E6%81%B5%E7%94%BA
+        address_org = address_org.replace("須惠町","須恵町")
+
+        re_compile_space = re.compile("[\s\n]*")
+        address_org = re_compile_space.sub("", address_org )
+        
+        for re_compile in re_pref_cities:
+            re_result = re_compile.search(address_org)
+            
+            if not re_result:
+                continue
+            
+            pref  = re_result.group(1)
+            city  = re_result.group(2)
+            other = re_result.group(3)
+
+            if self.find_def_by_pref_city(pref, city):
+                return [pref,city,other]
+        
+        logger.warning("fail parse "+address_org)
+        return ["?","?",address_org]
+        
     def  __load_wsheet(self, wsheet):
         ret_data = []
 

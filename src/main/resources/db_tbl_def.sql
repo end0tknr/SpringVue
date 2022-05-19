@@ -521,6 +521,8 @@ build_type      varchar(32)  NOT NULL DEFAULT '',
 bukken_name     varchar(64)  NOT NULL DEFAULT '',
 price           bigint,
 price_org       varchar(64),
+pref            varchar(4)   NOT NULL DEFAULT '',
+city            varchar(8)   NOT NULL DEFAULT '',
 address         varchar(128) NOT NULL DEFAULT '',
 plan            varchar(64)  NOT NULL DEFAULT '',
 build_area_m2   int,
@@ -530,7 +532,7 @@ land_area_org   varchar(64)  NOT NULL DEFAULT '',
 build_year      int          NOT NULL DEFAULT 0,
 found_date      date,
 check_date      date,
-primary key ( build_type,bukken_name,address,plan,
+primary key ( build_type,bukken_name,pref,city,address,plan,
               build_area_org,land_area_org,build_year)
 );
 

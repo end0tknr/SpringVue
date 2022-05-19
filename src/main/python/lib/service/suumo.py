@@ -6,6 +6,7 @@ from psycopg2  import extras # for bulk insert
 from selenium import webdriver # ex. pip install selenium==4.1.3
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from service.city  import CityService
 from util.db import Db
 
 import appbase
@@ -42,7 +43,7 @@ base_urls = [
     ["https://suumo.jp/ikkodate/",       "新築戸建"],
     ["https://suumo.jp/chukoikkodate/",  "中古戸建"],
     ["https://suumo.jp/ms/chuko/",       "中古マンション"],
-    #新築マンションは価格等が記載されていないことが多い為、無視
+    # 新築マンションは価格等が記載されていないことが多い為、無視
     #["https://suumo.jp/ms/shinchiku/",  "新築マンション"]
 ]
 disp_keys = [
@@ -63,7 +64,49 @@ class SuumoService(appbase.AppBase):
         global logger
         logger = self.get_logger()
 
-       
+
+    def modify_pref_city(self,address_org,pref,city,other):
+        sql = """
+UPDATE suumo_bukken
+SET pref=%s, city=%s, address=%s
+WHERE address=%s
+"""
+        sql_args = (pref,city,other,address_org)
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql,sql_args)
+                    db_conn.commit()
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return False
+
+        return True
+        
+    def load_all_bukkens(self):
+        ret_rows = []
+        sql = """
+SELECT * FROM suumo_bukken where pref =''
+"""
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+
+                ret_rows = db_cur.fetchall()
+                
+        for ret_row in ret_rows:
+            ret_row = dict( ret_row )
+            
+        return ret_rows
+        
     def load_search_result_list_urls(self):
         logger.info("start")
 
@@ -96,9 +139,9 @@ class SuumoService(appbase.AppBase):
 
         sql = """
 INSERT INTO suumo_bukken
-  (build_type,bukken_name,price,price_org,address,plan,build_area_m2,
-   build_area_org,land_area_m2,land_area_org,build_year,
-   found_date,check_date)
+  (build_type,bukken_name,price,price_org,pref,city,address,
+   plan,build_area_m2,build_area_org,land_area_m2,land_area_org,
+   build_year,found_date,check_date)
   VALUES %s
 ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
   DO UPDATE SET check_date='%s'
@@ -127,6 +170,8 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
                       org_row['bukken_name']    or "",
                       org_row['price'],
                       org_row['price_org'],
+                      org_row['pref']           or "",
+                      org_row['city']           or "",
                       org_row['address']        or "",
                       org_row['plan'],
                       org_row['build_area_m2'],
@@ -139,9 +184,11 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
         tuple_key = "\t".join([ ret_tuple[0],
                                 ret_tuple[1],
                                 ret_tuple[4],
-                                ret_tuple[7],
+                                ret_tuple[5],
+                                ret_tuple[6],
                                 ret_tuple[9],
-                                str( ret_tuple[10]) ] )
+                                ret_tuple[11],
+                                str( ret_tuple[12]) ] )
         return ret_tuple, tuple_key
 
         
@@ -354,6 +401,13 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
                 ret_info[new_key] = None
                 continue
             ret_info[new_key] = org_info[org_key] or None
+
+        address_org = ret_info["address"]
+        city_service  = CityService()
+        address_new = city_service.parse_pref_city(address_org)
+        ret_info["pref"]    = address_new[0]
+        ret_info["city"]    = address_new[1]
+        ret_info["address"] = address_new[2]
 
         for org_key in ["建物面積","専有面積"]:
             if org_key in org_info:
