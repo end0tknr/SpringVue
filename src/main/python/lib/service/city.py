@@ -14,17 +14,18 @@ master_src_url = "https://www.soumu.go.jp/main_content/000730858.xlsx"
 master_xlsx = "000730858.xlsx"
 bulk_insert_size = 20
 
-seirei_cities = ["大阪市","名古屋市","京都市","横浜市","神戸市","北九州市",
-                 "札幌市","川崎市","福岡市","広島市","仙台市","千葉市",
-                 "さいたま市","静岡市","堺市","新潟市","浜松市","岡山市",
-                 "相模原市","熊本市"]
+seirei_city_names = (
+    "大阪市","名古屋市","京都市","横浜市","神戸市","北九州市",
+    "札幌市","川崎市","福岡市","広島市","仙台市","千葉市",
+    "さいたま市","静岡市","堺市","新潟市","浜松市","岡山市",
+    "相模原市","熊本市")
 
 re_exp_pref = "神奈川県|和歌山県|鹿児島県|.{2}[都道府県]"
 re_exp_city = "|".join([
     "東村山市","武蔵村山市","羽村市","四日市市","廿日市市","大村市","野々市市",
     "玉村町","大町町","大町市","田村市","十日町市","八丈町"] )
     
-
+re_zipcode = re.compile("〒\d\d\d-\d\d\d\d")
 re_pref_cities = [re.compile("^(%s).*?(%s)(.*)"  % (re_exp_pref,re_exp_city) ),
                   re.compile("^(%s)(.+?市.+?区)(.*)"    % (re_exp_pref) ),
                   re.compile("^(%s)(.+?[市区町村])(.*)" % (re_exp_pref) ),
@@ -39,8 +40,24 @@ class CityService(appbase.AppBase):
         global logger
         logger = self.get_logger()
 
+    def get_seirei_cities(self):
+        ret_data = []
+        sql = "select * from city where city in %s"
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql  % str(seirei_city_names) )
+                    for ret_row in  db_cur.fetchall():
+                        ret_data.append( dict( ret_row ))
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+        return ret_data
+    
     def is_seirei_city(self, city_name):
-        return city_name in seirei_cities
+        return city_name in seirei_city_names
         
     def download_master(self):
         logger.info("start")
@@ -76,7 +93,8 @@ class CityService(appbase.AppBase):
 
         # refer to https://ja.wikipedia.org/wiki/%E9%A0%88%E6%81%B5%E7%94%BA
         address_org = address_org.replace("須惠町","須恵町")
-
+        address_org = re_zipcode.sub("",address_org)
+        
         re_compile_space = re.compile("[\s\n]*")
         address_org = re_compile_space.sub("", address_org )
         

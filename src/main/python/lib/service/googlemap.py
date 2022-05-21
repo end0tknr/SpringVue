@@ -1,6 +1,7 @@
 #!python
 # -*- coding: utf-8 -*-
 
+from service.city import CityService
 import appbase
 import json
 import re
@@ -134,43 +135,101 @@ VALUES (%s,%s,%s,%s)
     def conv_lng_lat_to_addrs(self,lng_lats):
         browser = self.get_browser()
         re_compile = re.compile(" (.+)、(.+)")
-        
+        city_service = CityService()
+
+        i = 0
         for lng_lat in lng_lats:
+            i += 1
             req_url = "https://www.google.co.jp/maps/search/%s,%s" \
                 % (lng_lat["lat"],lng_lat["lng"])
             browser.get(req_url)
-            browser.save_screenshot("/home/end0tknr/tmp/screenshot_hoge.png")
 
             div_elms  = browser.find_elements_by_css_selector("div.LCF4w")
-            lng_lat["address_other"] = div_elms[0].text
-            re_result = re_compile.search( div_elms[1].text )
-            if not re_result:
-                lng_lat["pref"] = "?"
-                lng_lat["city"] = "?"
-                logger.error("%s,%s -> %s %s %s" %
-                             (lng_lat["lat"],lng_lat["lng"],
-                              lng_lat["pref"],lng_lat["city"],lng_lat["address_other"]))
+            if len(div_elms) == 0 :
+                logger.error("fail parse otther_address " + req_url)
                 continue
+            
+            address_new = city_service.parse_pref_city(div_elms[0].text)
+            lng_lat["pref"]          = address_new[0]
+            lng_lat["city"]          = address_new[1]
+            lng_lat["address_other"] = address_new[2]
 
-            lng_lat["pref"] = re_result.group(2)
-            lng_lat["city"] = re_result.group(1)
-            
-            if not lng_lat["pref"][-1] in ["都","道","府","県"] or \
-               not lng_lat["city"][-1] in ["市","区","町","村"] :
-                
-                lng_lat["pref"] = "?"
-                lng_lat["city"] = "?"
-                
-                logger.warning("%s,%s -> %s %s %s" %
-                               (lng_lat["lat"],lng_lat["lng"],
-                                lng_lat["pref"],lng_lat["city"],lng_lat["address_other"]))
-                continue
-            
-            logger.info("%s,%s -> %s %s %s" %
-                        (lng_lat["lat"],lng_lat["lng"],
-                         lng_lat["pref"],lng_lat["city"],lng_lat["address_other"]))
-            
+            if i % 20 == 0:
+                logger.info("%d/%d %s %s %s" % ( i, len(lng_lats),
+                                                 lng_lat["pref"],
+                                                 lng_lat["city"],
+                                                 lng_lat["address_other"]))
+
+        browser.close()
         return lng_lats
+
+    # def conv_lng_lat_to_addrs(self,lng_lats):
+    #     browser = self.get_browser()
+    #     re_compile = re.compile(" (.+)、(.+)")
+    #     city_service = CityService()
+
+    #     i = 0
+    #     for lng_lat in lng_lats:
+    #         i += 1
+    #         req_url = "https://www.google.co.jp/maps/search/%s,%s" \
+    #             % (lng_lat["lat"],lng_lat["lng"])
+    #         browser.get(req_url)
+
+    #         div_elms  = browser.find_elements_by_css_selector("div.LCF4w")
+    #         if len(div_elms) < 2 :
+    #             logger.error("fail parse otther_address " + req_url)
+    #             continue
+            
+    #         lng_lat["address_other"] = div_elms[0].text
+    #         re_result = re_compile.search( div_elms[1].text )
+    #         if not re_result:
+    #             lng_lat["pref"] = "?"
+    #             lng_lat["city"] = "?"
+    #             logger.error("%s,%s -> %s %s %s" %
+    #                          (lng_lat["lat"],lng_lat["lng"],
+    #                           lng_lat["pref"],lng_lat["city"],
+    #                           lng_lat["address_other"]))
+    #             continue
+
+    #         lng_lat["pref"] = re_result.group(2)
+    #         lng_lat["city"] = re_result.group(1)
+            
+    #         if not lng_lat["pref"][-1] in ["都","道","府","県"] or \
+    #            not lng_lat["city"][-1] in ["市","区","町","村"] :
+                
+    #             lng_lat["pref"] = "?"
+    #             lng_lat["city"] = "?"
+                
+    #             logger.warning("%s,%s -> %s %s %s" %
+    #                            (lng_lat["lat"],lng_lat["lng"],
+    #                             lng_lat["pref"],lng_lat["city"],
+    #                             lng_lat["address_other"]))
+    #             continue
+
+    #         if i % 20 == 0:
+    #             logger.info("%d / %d %s %s" % (
+    #                 i, len(lng_lats), lng_lat["pref"], lng_lat["city"]))
+                
+    #         if not city_service.is_seirei_city(lng_lat["city"]):
+    #             continue
+
+    #         re_compile_2 = re.compile("%s%s(.+?区)"%(
+    #             lng_lat["pref"],lng_lat["city"]))
+            
+    #         re_result = re_compile_2.search( lng_lat["address_other"] )
+    #         if not re_result:
+    #             logger.warning("fail seirei city parse %s,%s -> %s %s %s" %
+    #                            (lng_lat["lat"],lng_lat["lng"],
+    #                             lng_lat["pref"],lng_lat["city"],
+    #                             lng_lat["address_other"]) )
+    #             continue
+    #         lng_lat["city"] = lng_lat["city"] + re_result.group(1)
+    #         logger.debug("%s,%s -> %s %s %s" %
+    #                      (lng_lat["lat"],lng_lat["lng"],
+    #                       lng_lat["pref"],lng_lat["city"],
+    #                       lng_lat["address_other"]))
+    #     browser.close()
+    #     return lng_lats
 
     
     def conv_lng_lat_to_addr(self,lng,lat):

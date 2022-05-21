@@ -182,10 +182,10 @@ VALUES %s
 
         return ret_data
         
-    def get_trend_group_by_city(self,trade_year):
+    def get_trend_group_by_city(self,shurui,trade_year):
 
-        pre_year = trade_year - 5 
-        pre_vals_tmp = self.get_group_by_city(pre_year  )
+        pre_year = trade_year - 5
+        pre_vals_tmp = self.get_group_by_city(shurui,pre_year  )
 
         pre_vals = {}
         for pre_val_tmp in pre_vals_tmp:
@@ -194,7 +194,7 @@ VALUES %s
             del pre_val_tmp["city"]
             pre_vals[pref_city] = pre_val_tmp
 
-        ret_vals =     self.get_group_by_city(trade_year)
+        ret_vals =     self.get_group_by_city(shurui,trade_year)
         for ret_val in ret_vals:
             pref_city = "\t".join([ret_val["pref"],ret_val["city"] ] )
             if not pref_city in pre_vals:
@@ -210,14 +210,13 @@ VALUES %s
             
         return ret_vals
         
-    def get_group_by_city(self,trade_year):
+    def get_group_by_city(self,shurui,trade_year):
         sql = """
 select
   pref, city, trade_year, count(*) as count,
   avg(price)::numeric::bigint as price
 from mlit_fudousantorihiki
-where shurui in ('宅地(土地と建物)','中古マンション等') and
-      trade_year=%s
+where shurui =%s AND trade_year=%s
 group by pref,city,trade_year
 """
         ret_data = []
@@ -225,7 +224,7 @@ group by pref,city,trade_year
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:
                 try:
-                    db_cur.execute(sql % (trade_year))
+                    db_cur.execute(sql, (shurui,trade_year))
                     for ret_row in  db_cur.fetchall():
                         ret_data.append( dict( ret_row ))
                     

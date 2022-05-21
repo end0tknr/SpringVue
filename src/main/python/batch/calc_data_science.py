@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import sys
 sys.path.append( os.path.join(os.path.dirname(__file__), '../lib') )
 from service.adatascientist         import DataScientistService
 from service.estat_jutakutochi_e044 import EstatJutakuTochiE044Service
 from service.estat_jutakutochi_e049 import EstatJutakuTochiE049Service
+from service.gis_youto_chiiki       import GisYoutoChiikiService
 from service.mlit_fudousantorihiki  import MlitFudousanTorihikiService
 from service.kokusei_population_b01 import KokuseiPopulationB01Service
 from service.kokusei_population_b02 import KokuseiPopulationB02Service
@@ -17,36 +19,47 @@ def main():
     # ds = DataScientistService()
     # ds.calc_correlation_1()
     
-    # calc_mlit_fudousantorihiki()
+    calc_mlit_fudousantorihiki()
     # calc_kokusei_pop_b01()
     # calc_kokusei_pop_b02()
     # calc_kokusei_pop_b12()
     # calc_kokusei_pop_b12_2()
     # calc_kokusei_pop_b18()
     # calc_jutakutochi_e044()
-    calc_jutakutochi_e049()
+    # calc_jutakutochi_e049()
+    # calc_youto_chiiki()
     
 
-def calc_jutakutochi_e044():
-    jutakutochi_service = EstatJutakuTochiE044Service()
+def calc_youto_chiiki():
+    youto_chiiki_service = GisYoutoChiikiService()
 
+    ret_vals = youto_chiiki_service.get_group_by_city()
     
-    ret_vals = jutakutochi_service.get_group_by_city_income()
-
+    re_compile = re.compile(".*(住居|工業|商業).*地域")
+    
     for ret_val in ret_vals:
-        disp_cols = []
-        disp_cols.append( ret_val["pref"] )
-        disp_cols.append( ret_val["city"] )
-        disp_cols.append( ret_val["year_income"] )
+        if not ret_val["city"]:
+            continue
         
-        for atri_key in ["持ち家","借家"] :
-            if atri_key in ret_val:
-                disp_cols.append( str(ret_val[atri_key] ) )
-            else:
-                disp_cols.append( "0" )
+        usage_area_m2 = {"住居":0, "工業":0, "商業":0}
+        
+        for atri_key in ret_val.keys():
+            re_result = re_compile.search(atri_key)
+            if not re_result:
+                continue
+            usage_type = re_result.group(1)
+            if ret_val[atri_key]:
+                usage_area_m2[usage_type] += ret_val[atri_key]
             
+        disp_cols = [
+            ret_val["pref"], ret_val["city"],
+            str(usage_area_m2["住居"]),
+            str(usage_area_m2["工業"]),
+            str(usage_area_m2["商業"]) ]
+
         print( "\t".join( disp_cols ) )
-        
+
+            
 
 def calc_jutakutochi_e049():
     jutakutochi_service = EstatJutakuTochiE049Service()
@@ -77,7 +90,10 @@ def calc_jutakutochi_e049():
 def calc_mlit_fudousantorihiki():
     fudousan_torihiki_service = MlitFudousanTorihikiService()
 
-    ret_vals = fudousan_torihiki_service.get_trend_group_by_city(2020)
+    ret_vals = fudousan_torihiki_service.get_trend_group_by_city(
+        # "宅地(土地と建物)",
+        "中古マンション等",
+        2020)
 
     atri_keys  = [
         "pref","city","count","count_pre","price","price_pre"]
