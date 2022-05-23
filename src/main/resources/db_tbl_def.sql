@@ -153,7 +153,7 @@ COMMENT ON TABLE estat_jutakutochi_e044 IS
 COMMENT ON COLUMN estat_jutakutochi_e044.year_income IS '年収';
 
 CREATE TABLE IF NOT EXISTS estat_jutakutochi_e048 (
-pref              varchar(4),
+pref            varchar(4),
 city            varchar(8),
 build_year      varchar(16),
 owner_age_24    bigint,

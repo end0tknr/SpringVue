@@ -8,7 +8,10 @@ sys.path.append( os.path.join(os.path.dirname(__file__), '../lib') )
 from service.adatascientist         import DataScientistService
 from service.estat_jutakutochi_d002 import EstatJutakuTochiD002Service
 from service.estat_jutakutochi_e044 import EstatJutakuTochiE044Service
+from service.estat_jutakutochi_e048 import EstatJutakuTochiE048Service
 from service.estat_jutakutochi_e049 import EstatJutakuTochiE049Service
+from service.estat_jutakutochi_e049 import EstatJutakuTochiE049Service
+from service.estat_jutakutochi_e101 import EstatJutakuTochiE101Service
 from service.gis_youto_chiiki       import GisYoutoChiikiService
 from service.mlit_fudousantorihiki  import MlitFudousanTorihikiService
 from service.kokusei_population_b01 import KokuseiPopulationB01Service
@@ -29,10 +32,12 @@ def main():
     # calc_kokusei_pop_b18()
     # calc_jutakutochi_d002()
     # calc_jutakutochi_e044()
+    # calc_jutakutochi_e048()
     # calc_jutakutochi_e049()
+    calc_jutakutochi_e101()
     # calc_youto_chiiki()
     # calc_suumo_stock_bukken()
-    calc_suumo_sold_bukken()
+    # calc_suumo_sold_bukken()
     
 
 def calc_suumo_stock_bukken():
@@ -112,6 +117,50 @@ def calc_jutakutochi_d002():
 
     atri_keys = ["detached_house","tenement_houses","apartment",
                  "owned_house","rented_house"]
+
+    for ret_val in ret_vals:
+        disp_cols = []
+        disp_cols.append( ret_val["pref"] )
+        disp_cols.append( ret_val["city"] )
+        
+        for atri_key in atri_keys:
+            if atri_key in ret_val:
+                disp_cols.append( str(ret_val[atri_key] ) )
+            else:
+                disp_cols.append( "0" )
+            
+        print( "\t".join( disp_cols ) )
+        
+def calc_jutakutochi_e048():
+    jutakutochi_service = EstatJutakuTochiE048Service()
+
+    ret_vals = jutakutochi_service.get_shinchiku_vals_group_by_city()
+
+    atri_keys = [
+        "owner_age_24","owner_age_25_34","owner_age_35_44",
+        "owner_age_45_54","owner_age_55_64","owner_age_65",
+        "owner_age_unknown"]
+
+    for ret_val in ret_vals:
+        disp_cols = []
+        disp_cols.append( ret_val["pref"] )
+        disp_cols.append( ret_val["city"] )
+        
+        for atri_key in atri_keys:
+            if atri_key in ret_val:
+                disp_cols.append( str(ret_val[atri_key] ) )
+            else:
+                disp_cols.append( "0" )
+            
+        print( "\t".join( disp_cols ) )
+        
+def calc_jutakutochi_e101():
+    jutakutochi_service = EstatJutakuTochiE101Service()
+
+    ret_vals = jutakutochi_service.get_shinchiku_vals_group_by_city()
+
+    atri_keys = [
+        "buy_new","buy_used","build_new","rebuild","inheritance","other"]
 
     for ret_val in ret_vals:
         disp_cols = []

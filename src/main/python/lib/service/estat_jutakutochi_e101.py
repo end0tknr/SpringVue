@@ -11,6 +11,7 @@
 #   －全国，都道府県，市区町村
 
 from service.city import CityService
+from util.db import Db
 import re
 import service.estat_jutakutochi
 
@@ -44,6 +45,16 @@ class EstatJutakuTochiE101Service(
     def get_insert_sql(self):
         return insert_sql
 
+    def del_tbl_rows(self):
+        logger.info("start")
+        util_db = Db()
+        util_db.del_tbl_rows("estat_jutakutochi_e101")
+
+    def save_tbl_rows(self, rows):
+        logger.info("start")
+        util_db = Db()
+        util_db.save_tbl_rows("estat_jutakutochi_e101",insert_cols,rows )
+
     def load_wsheet( self, wsheet ):
         
         city_service = CityService()
@@ -62,6 +73,11 @@ class EstatJutakuTochiE101Service(
             city_def = city_service.find_def_by_code_city(city_code_name[0],
                                                           city_code_name[1])
             if not city_def or not city_def["city"]:
+                row_no += 1
+                continue
+            
+            # 政令指定都市は、区のレベルで登録
+            if city_service.is_seirei_city(city_def["city"]):
                 row_no += 1
                 continue
             
@@ -95,3 +111,27 @@ class EstatJutakuTochiE101Service(
             row_no += 1
             
         return ret_data
+
+
+    def get_shinchiku_vals_group_by_city(self):
+        sql = """
+select *
+from  estat_jutakutochi_e101
+where build_year='2016～2018年9月'
+"""
+        ret_data = []
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+                
+                for ret_row in  db_cur.fetchall():
+                    ret_data.append( dict( ret_row ))
+                
+        return ret_data
+    
