@@ -26,7 +26,8 @@ target_path  = '/webland/zip/All_20111_20214.zip'
 #target_path  = '/webland/zip/All_20212_20213.zip'
 
 row_filters = {"種類" : ["宅地(土地と建物)","宅地(土地)","中古マンション等"],
-               "地域" : ["住宅地","宅地見込地"] }
+               "地域" : ["住宅地","宅地見込地",""] # 商業地や工業地を除く為
+               }
 col_filters = {"種類"            :"shurui",
                "地域"            :"chiiki",
                "都道府県名"      :"pref",
@@ -36,6 +37,11 @@ col_filters = {"種類"            :"shurui",
                "面積（㎡）"      :"area_m2",
                "建築年"          :"build_year",
                "取引時点"        :"trade_year" }
+calc_filter = {
+    "trade_year" : 2020,
+    "shurui"     : ("宅地(土地と建物)","宅地(土地)","中古マンション等")
+}
+
 bulk_insert_size = 20
 logger = None
 
@@ -97,7 +103,8 @@ VALUES %s
         return ret_rows
 
     def __filter_data(self,org_row):
-
+        
+        # print(org_row)
         for atri_key in row_filters:
             if not atri_key in org_row:
                 return None
@@ -128,7 +135,6 @@ VALUES %s
                 except Exception as e:
                     logger.error(e)
                     logger.error( ret_row["build_year"] )
-
         return ret_row
             
 
@@ -159,6 +165,9 @@ VALUES %s
                 logger.info(csv_path)
                 csv_name = str( os.path.split(csv_path)[1] )
 
+                # csv.DictReader() での総行数の算出方法が不明でしたので。
+                dict_row_size = len(open(csv_path,encoding='cp932').readlines() )
+
                 with open(csv_path, encoding='cp932', newline="") as f:
                     # key-value形式での読込み
                     dict_reader = csv.DictReader(f, delimiter=",", quotechar='"')
@@ -167,7 +176,7 @@ VALUES %s
                     for dict_row in dict_reader:
                         i += 1
                         if i % 10000 == 0:
-                            logger.info( csv_path +" "+str(i) )
+                            logger.info( "%d/%d %s" % (i,dict_row_size,csv_path))
                             
                         new_row = {}
                         # tuple -> hashmap
@@ -182,54 +191,75 @@ VALUES %s
 
         return ret_data
         
-    def get_trend_group_by_city(self,shurui,trade_year):
+    def get_vals_group_by_city(self):
 
-        pre_year = trade_year - 5
-        pre_vals_tmp = self.get_group_by_city(shurui,pre_year  )
+        pre_year   = calc_filter["trade_year"] - 5
+        pre_vals_tmp = self.get_tmp_vals_by_city( pre_year )
 
         pre_vals = {}
         for pre_val_tmp in pre_vals_tmp:
-            pref_city = "\t".join([pre_val_tmp["pref"],pre_val_tmp["city"] ] )
-            del pre_val_tmp["pref"]
-            del pre_val_tmp["city"]
-            pre_vals[pref_city] = pre_val_tmp
-
-        ret_vals =     self.get_group_by_city(shurui,trade_year)
-        for ret_val in ret_vals:
-            pref_city = "\t".join([ret_val["pref"],ret_val["city"] ] )
+            pref_city = "\t".join([pre_val_tmp["pref"], pre_val_tmp["city"] ] )
             if not pref_city in pre_vals:
-                logger.error("not found " + pref_city)
+                pre_vals[pref_city] = {}
+            
+            shurui = pre_val_tmp["shurui"]
+            pre_vals[pref_city][shurui + "_count"] = pre_val_tmp["count"]
+            pre_vals[pref_city][shurui + "_price"] = pre_val_tmp["price"]
+
+
+        now_vals_tmp = self.get_tmp_vals_by_city( calc_filter["trade_year"] )
+        now_vals = {}
+        for now_val_tmp in now_vals_tmp:
+            
+            pref_city = "\t".join([now_val_tmp["pref"], now_val_tmp["city"] ])
+            if not pref_city in now_vals:
+                now_vals[pref_city] = {"pref":now_val_tmp["pref"],
+                                       "city":now_val_tmp["city"]}
+            
+            shurui = now_val_tmp["shurui"]
+            for atri_key_tmp in ["count","price"]:
+                atri_key = "%s_%s" %(shurui,atri_key_tmp)
+                now_vals[pref_city][atri_key] = now_val_tmp[atri_key_tmp]
                 
-                ret_val["count_pre"] = 0
-                ret_val["price_pre"] = 0
+            
+            if not pref_city in pre_vals:
+                for atri_key_tmp in ["count","price"]:
+                    atri_key = "%s_%s" %(shurui,atri_key_tmp)
+                    now_vals[pref_city][atri_key+"_pre"] = 0
                 continue
 
-            ret_val["count_pre"] = pre_vals[pref_city]["count"]
-            ret_val["price_pre"] = pre_vals[pref_city]["price"]
-
+            for atri_key_tmp in ["count","price"]:
+                atri_key = "%s_%s" %(shurui,atri_key_tmp)
+                if not atri_key in pre_vals[pref_city]:
+                    now_vals[pref_city][atri_key+"_pre"] = 0
+                    continue
+                
+                now_vals[pref_city][atri_key+"_pre"] = \
+                    pre_vals[pref_city][atri_key]
             
-        return ret_vals
-        
-    def get_group_by_city(self,shurui,trade_year):
+        return now_vals.values()
+            
+            
+    def get_tmp_vals_by_city(self,trade_year):
         sql = """
 select
-  pref, city, trade_year, count(*) as count,
+  pref, city, trade_year, shurui,
+  count(*) as count,
   avg(price)::numeric::bigint as price
 from mlit_fudousantorihiki
-where shurui =%s AND trade_year=%s
-group by pref,city,trade_year
+where trade_year=%s AND shurui in %s
+group by trade_year,pref,city,shurui
 """
         ret_data = []
         
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:
                 try:
-                    db_cur.execute(sql, (shurui,trade_year))
-                    for ret_row in  db_cur.fetchall():
-                        ret_data.append( dict( ret_row ))
-                    
+                    db_cur.execute(sql, (trade_year,calc_filter["shurui"]))
                 except Exception as e:
                     logger.error(e)
                     logger.error(sql)
                     return []
+                for ret_row in  db_cur.fetchall():
+                    ret_data.append( dict( ret_row ))
         return ret_data

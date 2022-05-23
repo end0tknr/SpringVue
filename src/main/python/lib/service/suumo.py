@@ -128,8 +128,38 @@ SELECT * FROM suumo_bukken where pref =''
                         #ret_rows.append( dict(row) )
         return ret_rows
     
+    def save_bukken_infos_main(self):
+        logger.info("start")
+        
+        # 物件一覧のurl探索
+        result_list_urls = self.find_search_result_list_url()
+        # 物件一覧の旧url 削除
+        self.del_search_result_list_urls()
+
+        # 物件一覧の新url 登録
+        for build_type, result_list_urls in result_list_urls.items():
+            self.save_search_result_list_urls(build_type,result_list_urls)
+            
+        # 物件一覧の新url 再? load
+        result_list_urls = self.load_search_result_list_urls()
+            
+        # 各物件情報の取得と保存
+        i = 0
+        for result_list_tmp in result_list_urls:
+            i += 1
+            build_type      = result_list_tmp[0]
+            result_list_url = result_list_tmp[1]
+
+            if i % 20 == 0:
+                logger.info("%d/%d %s %s" % (i,len(result_list_urls),
+                                             build_type,
+                                             result_list_url ))
+            
+            bukken_infos = self.parse_bukken_infos(result_list_url)
+            self.save_bukken_infos(build_type,bukken_infos)
+
+        
     def save_bukken_infos(self, build_type, bukken_infos):
-        logger.info("start "+ build_type)
 
         date_str = datetime.datetime.now().strftime('%Y-%m-%d')
         row_groups = self.divide_rows_info(build_type,
@@ -204,7 +234,7 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
                                                               date_str)
 
             if tuple_key in tuple_keys:
-                logger.warning("duplicate bukken "+ tuple_key)
+                logger.debug("duplicate bukken "+ tuple_key)
                 continue
             
             tuple_keys[tuple_key] = 1
@@ -358,7 +388,6 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
     
 
     def parse_bukken_infos(self, result_list_url):
-        logger.info("start " + result_list_url)
 
         html_content = self.get_http_requests( result_list_url )
         if not html_content:
@@ -443,17 +472,16 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
 
         logger.error( org_val )
         
-        
     def conv_price(self, org_val ):
         if not org_val:
             return None
         if org_val in ["未定"]:
             return None
 
-        # 中央値(万円)を返す
-        re_compile_val_2 = \
-            re.compile("([\d\.]{1,10})(万|億).+?([\d\.]{1,10})(万|億)")
-        re_result = re_compile_val_2.search( org_val )
+        # 「???円～???円」表記の場合、中央値(万円)を返す
+        re_compile_val_1 = \
+            re.compile("([\d\.]{1,10})(万|億)[^\d]+?([\d\.]{1,10})(万|億)")
+        re_result = re_compile_val_1.search( org_val )
         if re_result:
             ret_val = (int(re_result.group(1)) + int(re_result.group(3))) /2
             if re_result.group(2) == "万":
@@ -461,19 +489,57 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
             elif re_result.group(2) == "億":
                 ret_val *= 100000000
             return ret_val
-        
+
+        re_compile_val_2 = re.compile("([\d\.]{1,5})億([\d\.]{1,5})万")
+        re_result = re_compile_val_2.search( org_val )
+        if re_result:
+            ret_val =  int( re_result.group(1) ) * 100000000 # 億
+            ret_val += int( re_result.group(2) ) * 10000     # 万
+            return ret_val
+
         re_compile_val_1 = re.compile("([\d\.]{1,10})(万|億)")
         re_result = re_compile_val_1.search( org_val )
         if re_result:
             ret_val = int( re_result.group(1) )
-        
+
             if re_result.group(2) == "万":
                 ret_val *= 10000
             elif re_result.group(2) == "億":
                 ret_val *= 100000000
             return ret_val
-
+        
         logger.error( org_val )
+        
+    # def conv_price(self, org_val ):
+    #     if not org_val:
+    #         return None
+    #     if org_val in ["未定"]:
+    #         return None
+
+    #     # 中央値(万円)を返す
+    #     re_compile_val_2 = \
+    #         re.compile("([\d\.]{1,10})(万|億).+?([\d\.]{1,10})(万|億)")
+    #     re_result = re_compile_val_2.search( org_val )
+    #     if re_result:
+    #         ret_val = (int(re_result.group(1)) + int(re_result.group(3))) /2
+    #         if re_result.group(2) == "万":
+    #             ret_val *= 10000
+    #         elif re_result.group(2) == "億":
+    #             ret_val *= 100000000
+    #         return ret_val
+        
+    #     re_compile_val_1 = re.compile("([\d\.]{1,10})(万|億)")
+    #     re_result = re_compile_val_1.search( org_val )
+    #     if re_result:
+    #         ret_val = int( re_result.group(1) )
+        
+    #         if re_result.group(2) == "万":
+    #             ret_val *= 10000
+    #         elif re_result.group(2) == "億":
+    #             ret_val *= 100000000
+    #         return ret_val
+
+    #     logger.error( org_val )
 
     def conv_build_year(self, org_val ):
         if not org_val:
@@ -488,4 +554,81 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
         logger.error( org_val )
 
         
+    def get_vals_group_by_city_sub(self, start_date_str, end_date_str):
+        sql = """
+select
+  pref, city, build_type,
+  count(*) as count,
+  round(avg(price))::bigint as price
+from suumo_bukken
+where
+  (check_date between %s AND %s)
+group by pref,city,build_type
+order by build_type, count(*) desc
+"""
+        ret_data_tmp = {}
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql, (start_date_str, end_date_str))
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+
+                for ret_row in  db_cur.fetchall():
+                    ret_row= dict( ret_row )
+                    pref_city = "%s\t%s" % (ret_row['pref'],ret_row['city'])
+                    
+                    if not pref_city in ret_data_tmp:
+                        ret_data_tmp[pref_city] = {}
+                        
+                    build_type = ret_row['build_type']
+                    ret_data_tmp[pref_city][build_type+"_count"]=ret_row['count']
+                    ret_data_tmp[pref_city][build_type+"_price"]=ret_row['price']
+                    
+        ret_data = []
+        for pref_city_str,key_vals in ret_data_tmp.items():
+            pref_city = pref_city_str.split("\t")
+            key_vals["pref"] = pref_city[0]
+            key_vals["city"] = pref_city[1]
+            ret_data.append(key_vals)
+
+                
+        return ret_data
+    
+    def get_last_check_date(self):
+        sql = """
+select
+  check_date
+from suumo_bukken
+order by check_date desc
+limit 1
+"""
+        ret_data_tmp = {}
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return None
+
+                ret_row = db_cur.fetchone()
+                return ret_row[0]
         
+    def get_stock_vals(self):
+        check_date = self.get_last_check_date()
+        check_date_str = check_date.strftime('%Y-%m-%d')
+
+        return self.get_vals_group_by_city_sub(check_date_str,check_date_str)
+
+    def get_sold_vals(self):
+        check_date = self.get_last_check_date()
+        end_date = check_date + datetime.timedelta(days= -1)
+        end_date_str = end_date.strftime('%Y-%m-%d')
+        start_date_str = end_date.strftime('%Y-%m-01')
+
+        return self.get_vals_group_by_city_sub(start_date_str,end_date_str)
+

@@ -6,6 +6,7 @@ import re
 import sys
 sys.path.append( os.path.join(os.path.dirname(__file__), '../lib') )
 from service.adatascientist         import DataScientistService
+from service.estat_jutakutochi_d002 import EstatJutakuTochiD002Service
 from service.estat_jutakutochi_e044 import EstatJutakuTochiE044Service
 from service.estat_jutakutochi_e049 import EstatJutakuTochiE049Service
 from service.gis_youto_chiiki       import GisYoutoChiikiService
@@ -14,22 +15,65 @@ from service.kokusei_population_b01 import KokuseiPopulationB01Service
 from service.kokusei_population_b02 import KokuseiPopulationB02Service
 from service.kokusei_population_b12 import KokuseiPopulationB12Service
 from service.kokusei_population_b18 import KokuseiPopulationB18Service
+from service.suumo                  import SuumoService
 
 def main():
     # ds = DataScientistService()
     # ds.calc_correlation_1()
     
-    calc_mlit_fudousantorihiki()
+    # calc_mlit_fudousantorihiki()
     # calc_kokusei_pop_b01()
     # calc_kokusei_pop_b02()
     # calc_kokusei_pop_b12()
     # calc_kokusei_pop_b12_2()
     # calc_kokusei_pop_b18()
+    # calc_jutakutochi_d002()
     # calc_jutakutochi_e044()
     # calc_jutakutochi_e049()
     # calc_youto_chiiki()
+    # calc_suumo_stock_bukken()
+    calc_suumo_sold_bukken()
     
 
+def calc_suumo_stock_bukken():
+    suumo_service = SuumoService()
+
+    ret_vals = suumo_service.get_stock_vals()
+    build_types = ["新築戸建","中古戸建","中古マンション"]
+    atri_keys   = ["count","price"]
+    for ret_val in ret_vals:
+        disp_cols = [ret_val["pref"],ret_val["city"]]
+        for build_type in build_types:
+            for atri_key in atri_keys:
+                key_tmp = "%s_%s" %(build_type,atri_key)
+                if key_tmp in ret_val:
+                    disp_cols.append( str(ret_val[key_tmp]) )
+                else:
+                    disp_cols.append("")
+        
+        print( "\t".join( disp_cols ) )
+
+
+def calc_suumo_sold_bukken():
+    suumo_service = SuumoService()
+
+    ret_vals = suumo_service.get_sold_vals()
+    build_types = ["新築戸建","中古戸建","中古マンション"]
+    atri_keys   = ["count","price"]
+    for ret_val in ret_vals:
+        disp_cols = [ret_val["pref"],ret_val["city"]]
+        for build_type in build_types:
+            for atri_key in atri_keys:
+                key_tmp = "%s_%s" %(build_type,atri_key)
+                if key_tmp in ret_val:
+                    disp_cols.append( str(ret_val[key_tmp]) )
+                else:
+                    disp_cols.append("")
+        
+        print( "\t".join( disp_cols ) )
+
+
+    
 def calc_youto_chiiki():
     youto_chiiki_service = GisYoutoChiikiService()
 
@@ -61,6 +105,27 @@ def calc_youto_chiiki():
 
             
 
+def calc_jutakutochi_d002():
+    jutakutochi_service = EstatJutakuTochiD002Service()
+
+    ret_vals = jutakutochi_service.get_vals()
+
+    atri_keys = ["detached_house","tenement_houses","apartment",
+                 "owned_house","rented_house"]
+
+    for ret_val in ret_vals:
+        disp_cols = []
+        disp_cols.append( ret_val["pref"] )
+        disp_cols.append( ret_val["city"] )
+        
+        for atri_key in atri_keys:
+            if atri_key in ret_val:
+                disp_cols.append( str(ret_val[atri_key] ) )
+            else:
+                disp_cols.append( "0" )
+            
+        print( "\t".join( disp_cols ) )
+        
 def calc_jutakutochi_e049():
     jutakutochi_service = EstatJutakuTochiE049Service()
 
@@ -90,20 +155,30 @@ def calc_jutakutochi_e049():
 def calc_mlit_fudousantorihiki():
     fudousan_torihiki_service = MlitFudousanTorihikiService()
 
-    ret_vals = fudousan_torihiki_service.get_trend_group_by_city(
-        # "宅地(土地と建物)",
-        "中古マンション等",
-        2020)
-
-    atri_keys  = [
-        "pref","city","count","count_pre","price","price_pre"]
-    
+    ret_vals = fudousan_torihiki_service.get_vals_group_by_city()
+    shuruis = ["宅地(土地と建物)","宅地(土地)","中古マンション等"]
+    atri_keys = ["count","price"]
+    tails = [None,"_pre"]
     for ret_val in ret_vals:
-        disp_cols = []
-        for atri_key in atri_keys:
-            disp_cols.append( str( ret_val[atri_key] ) )
-            
+        disp_cols = [ret_val["pref"],ret_val["city"]]
+        
+        for shurui in shuruis:
+            for atri_key in atri_keys:
+                atri_key_now = "%s_%s" % (shurui,atri_key)
+                if atri_key_now in ret_val:
+                    disp_cols.append( str(ret_val[atri_key_now]))
+                else:
+                    disp_cols.append( "0" )
+                    
+                atri_key_pre = "%s_%s_pre" % (shurui,atri_key)
+                if atri_key_pre in ret_val:
+                    disp_cols.append( str(ret_val[atri_key_pre]))
+                else:
+                    disp_cols.append( "0" )
+
         print( "\t".join( disp_cols ) )
+
+        
         
 
 def calc_kokusei_pop_b02():
