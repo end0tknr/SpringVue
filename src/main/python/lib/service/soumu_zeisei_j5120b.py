@@ -141,3 +141,33 @@ class SoumuZeiseiJ5120bService(appbase.AppBase):
             ret_data.append(new_info)
 
         return ret_data
+
+
+    def get_vals(self):
+        sql = """
+select
+  pref, city, pop,
+  salary * 1000 / pop as salary,
+ (separate_long_capital +
+  separate_short_capital +
+  general_stock_capital +
+  listed_stock_capital +
+  listed_stock_dividend +
+  future_trading_income ) * 1000 / pop as capital_income
+from soumu_zeisei_j51_20_b
+"""
+        ret_data = []
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql)
+                    for ret_row in  db_cur.fetchall():
+                        ret_data.append( dict( ret_row ))
+                    
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+        return ret_data
+    

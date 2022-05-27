@@ -19,6 +19,8 @@ from service.kokusei_population_b02 import KokuseiPopulationB02Service
 from service.kokusei_population_b12 import KokuseiPopulationB12Service
 from service.kokusei_population_b18 import KokuseiPopulationB18Service
 from service.suumo                  import SuumoService
+from service.soumu_zeisei_j5120b    import SoumuZeiseiJ5120bService
+
 
 def main():
     # ds = DataScientistService()
@@ -34,11 +36,24 @@ def main():
     # calc_jutakutochi_e044()
     # calc_jutakutochi_e048()
     # calc_jutakutochi_e049()
-    calc_jutakutochi_e101()
+    # calc_jutakutochi_e101()
     # calc_youto_chiiki()
     # calc_suumo_stock_bukken()
     # calc_suumo_sold_bukken()
-    
+    calc_soumu_zeisei()
+
+def calc_soumu_zeisei():
+    soumu_zeisei = SoumuZeiseiJ5120bService()
+
+    ret_vals = soumu_zeisei.get_vals()
+    for ret_val in ret_vals:
+        disp_cols = [ret_val["pref"],
+                     ret_val["city"],
+                     str( ret_val["pop"] ),
+                     str( ret_val["salary"] ),
+                     str( ret_val["capital_income"] )]
+        
+        print( "\t".join( disp_cols ) )
 
 def calc_suumo_stock_bukken():
     suumo_service = SuumoService()
