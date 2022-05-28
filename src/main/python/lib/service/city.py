@@ -40,6 +40,27 @@ class CityService(appbase.AppBase):
         global logger
         logger = self.get_logger()
 
+
+    def get_seirei_wards(self, city_name):
+        ret_data = []
+        sql = "select * from city where city like '%s'"
+        city_name = city_name + "%区"
+
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql % (city_name) )
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+            
+            for ret_row in  db_cur.fetchall():
+                ret_data.append( dict( ret_row ))
+
+        return ret_data
+
+        
     def get_seirei_cities(self):
         ret_data = []
         sql = "select * from city where city in %s"
@@ -92,7 +113,14 @@ class CityService(appbase.AppBase):
     def parse_pref_city(self, address_org):
 
         # refer to https://ja.wikipedia.org/wiki/%E9%A0%88%E6%81%B5%E7%94%BA
-        address_org = address_org.replace("須惠町","須恵町")
+        conv_names = [
+            ("須惠町","須恵町"),("茅ケ崎","茅ヶ崎"),("駒ケ根","駒ヶ根"),
+            ("鶴ケ島","鶴ヶ島"),("七ケ浜","七ヶ浜"),("七ケ宿","七ヶ宿"),
+            ("五ケ瀬","五ヶ瀬"),("檮原町","梼原町")
+        ]
+        for conv_name in conv_names:
+            address_org = address_org.replace(conv_name[0],conv_name[1])
+
         address_org = re_zipcode.sub("",address_org)
         
         re_compile_space = re.compile("[\s\n]*")
@@ -183,7 +211,8 @@ class CityService(appbase.AppBase):
                     return None
                 
                 return dict( ret_rows[0] )
-                
+
+            
     def find_def_by_pref_city(self,pref, city):
         sql = "SELECT * from city where pref = %s and city = %s"
         sql_args = (pref,city)

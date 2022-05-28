@@ -592,3 +592,9 @@ COMMENT ON COLUMN soumu_zeisei_j51_20_b.future_trading_income
      IS '先物取引に係る雑所得金額';
 COMMENT ON COLUMN soumu_zeisei_j51_20_b.taxable_income
      IS '課税対象所得';
+
+
+ALTER TABLE gis_chika_koji ADD COLUMN pref varchar(4);
+ALTER TABLE gis_chika_koji ADD COLUMN city varchar(8);
+ALTER TABLE gis_chika      ADD COLUMN pref varchar(4);
+ALTER TABLE gis_chika      ADD COLUMN city varchar(8);

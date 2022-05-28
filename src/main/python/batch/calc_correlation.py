@@ -16,12 +16,14 @@ comp_wsheet_keys = {
     "SUUMO売済":["新築戸建_数"   ],
     "SUUMO在庫":["新築戸建_数"   ],
     "人口世帯" :["人口","世帯"   ],
+    "平均年収" :["給与収入","資産収入"],
+    "地価"     :["住居系"],
+    "住宅入手法":["buy_new","buy_used","build_new"],
     "用途地域" :["住居_m2"],
-    "所有形態" :["持家","公共借家"],
     "同居形態" :["親族同居"],
     "年齢"     :["30～34",     "35～39",     "40～44",     "45～49",
                  "30～34_変動","35～39_変動","40～44_変動","45～49_変動"],
-    "所有形態✕構造":["戸建"]
+    "所有形態✕構造":["戸建","集合","持家","借家"]
 }
 
 
@@ -52,7 +54,7 @@ def main():
                                    comp_shname_key,
                                    corr_result) )
 
-    # disp_merged_big_sheet(pkeys,head_cols,base_wsheet)
+    disp_merged_big_sheet(pkeys,head_cols,base_wsheet)
 
 
 def disp_merged_big_sheet(pkeys,head_cols,base_wsheet):

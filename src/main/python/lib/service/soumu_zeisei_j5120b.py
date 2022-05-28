@@ -5,6 +5,7 @@ from service.city       import CityService
 from util.db import Db
 
 import appbase
+import copy
 import openpyxl # for xlsx
 import os
 import re
@@ -162,12 +163,24 @@ from soumu_zeisei_j51_20_b
             with self.db_cursor(db_conn) as db_cur:
                 try:
                     db_cur.execute(sql)
-                    for ret_row in  db_cur.fetchall():
-                        ret_data.append( dict( ret_row ))
                     
                 except Exception as e:
                     logger.error(e)
                     logger.error(sql)
                     return []
+
+                city_service = CityService()
+                for ret_row in  db_cur.fetchall():
+                    ret_row = dict( ret_row )
+                    if not city_service.is_seirei_city(ret_row["city"]):
+                        ret_data.append(ret_row)
+                        continue
+
+                    wards = city_service.get_seirei_wards(ret_row["city"])
+                    for ward in wards:
+                        ret_row_cp = ret_row.copy()
+                        ret_row_cp["city"] = ward["city"]
+                        ret_data.append(ret_row_cp)
+
         return ret_data
     

@@ -12,6 +12,7 @@ from service.estat_jutakutochi_e048 import EstatJutakuTochiE048Service
 from service.estat_jutakutochi_e049 import EstatJutakuTochiE049Service
 from service.estat_jutakutochi_e049 import EstatJutakuTochiE049Service
 from service.estat_jutakutochi_e101 import EstatJutakuTochiE101Service
+from service.gis_chika_koji         import GisChikaKojiService
 from service.gis_youto_chiiki       import GisYoutoChiikiService
 from service.mlit_fudousantorihiki  import MlitFudousanTorihikiService
 from service.kokusei_population_b01 import KokuseiPopulationB01Service
@@ -37,6 +38,7 @@ def main():
     # calc_jutakutochi_e048()
     # calc_jutakutochi_e049()
     # calc_jutakutochi_e101()
+    # calc_chika_koji()
     # calc_youto_chiiki()
     # calc_suumo_stock_bukken()
     # calc_suumo_sold_bukken()
@@ -92,8 +94,24 @@ def calc_suumo_sold_bukken():
         
         print( "\t".join( disp_cols ) )
 
-
     
+def calc_chika_koji():
+    chika_koji_service = GisChikaKojiService()
+
+    ret_vals = chika_koji_service.get_union_vals()
+    for ret_val in ret_vals:
+        disp_cols = [ ret_val["pref"], ret_val["city"] ]
+
+        for atri_key in ["住居系","商業系","工業系","?"]:
+            if atri_key in ret_val:
+                disp_cols.append( str(ret_val[atri_key] ))
+            else:
+                disp_cols.append( "" )
+                
+        print( "\t".join( disp_cols ) )
+
+
+        
 def calc_youto_chiiki():
     youto_chiiki_service = GisYoutoChiikiService()
 
