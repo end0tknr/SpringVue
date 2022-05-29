@@ -15,6 +15,7 @@ from service.estat_jutakutochi_e101 import EstatJutakuTochiE101Service
 from service.gis_chika_koji         import GisChikaKojiService
 from service.gis_youto_chiiki       import GisYoutoChiikiService
 from service.mlit_fudousantorihiki  import MlitFudousanTorihikiService
+from service.mlit_seisanryokuchi    import MlitSeisanRyokuchiService
 from service.kokusei_population_b01 import KokuseiPopulationB01Service
 from service.kokusei_population_b02 import KokuseiPopulationB02Service
 from service.kokusei_population_b12 import KokuseiPopulationB12Service
@@ -28,6 +29,7 @@ def main():
     # ds.calc_correlation_1()
     
     # calc_mlit_fudousantorihiki()
+    # calc_mlit_seisanryokuchi()
     # calc_kokusei_pop_b01()
     # calc_kokusei_pop_b02()
     # calc_kokusei_pop_b12()
@@ -39,11 +41,24 @@ def main():
     # calc_jutakutochi_e049()
     # calc_jutakutochi_e101()
     # calc_chika_koji()
-    # calc_youto_chiiki()
+    calc_youto_chiiki()
     # calc_suumo_stock_bukken()
     # calc_suumo_sold_bukken()
-    calc_soumu_zeisei()
+    # calc_soumu_zeisei()
 
+def calc_mlit_seisanryokuchi():
+    seisanryokuchi_service = MlitSeisanRyokuchiService()
+
+    ret_vals = seisanryokuchi_service.get_vals()
+
+    for ret_val in ret_vals:
+        disp_cols = [ret_val["pref"],
+                     ret_val["city"],
+                     str( ret_val["area_ha"] ),
+                     str( ret_val["area_count"] ) ]
+        
+        print( "\t".join( disp_cols ) )
+        
 def calc_soumu_zeisei():
     soumu_zeisei = SoumuZeiseiJ5120bService()
 
@@ -118,6 +133,12 @@ def calc_youto_chiiki():
     ret_vals = youto_chiiki_service.get_group_by_city()
     
     re_compile = re.compile(".*(住居|工業|商業).*地域")
+    usages = [
+        "第一種低層住居専用地域",   "第二種低層住居専用地域",
+        "第一種中高層住居専用地域", "第二種中高層住居専用地域",
+        "第一種住居地域",           "第二種住居地域",  "準住居地域",
+        "商業地域",                 "近隣商業地域",
+        "工業地域",                 "工業専用地域",    "準工業地域"]
     
     for ret_val in ret_vals:
         if not ret_val["city"]:
@@ -139,9 +160,14 @@ def calc_youto_chiiki():
             str(usage_area_m2["工業"]),
             str(usage_area_m2["商業"]) ]
 
+        for usage in usages:
+            if not usage in ret_val:
+                disp_cols.append("0")
+                continue
+            disp_cols.append( str(ret_val[usage]) )
+            
         print( "\t".join( disp_cols ) )
 
-            
 
 def calc_jutakutochi_d002():
     jutakutochi_service = EstatJutakuTochiD002Service()

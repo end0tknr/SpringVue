@@ -537,10 +537,11 @@ primary key ( build_type,bukken_name,pref,city,address,plan,
 );
 
 CREATE TABLE IF NOT EXISTS mlit_seisanryokuchi (
+pref            varchar(4),
 city            varchar(8),
 area_ha         int,
 area_count      int,
-primary key(city) );
+primary key(pref,city) );
 
 
 CREATE TABLE IF NOT EXISTS site_access (

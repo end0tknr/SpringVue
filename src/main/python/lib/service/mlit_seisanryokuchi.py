@@ -1,7 +1,7 @@
 #!python
 # -*- coding: utf-8 -*-
 
-from psycopg2  import extras # for bulk insert
+from util.db import Db
 
 import appbase
 from service.city import CityService
@@ -14,6 +14,8 @@ import urllib.request
 # refer urls are below.
 #   https://www.mlit.go.jp/toshi/city_plan/toshi_city_plan_fr_000022.html
 download_url = 'https://www.mlit.go.jp/common/000167918.xls'
+insert_cols = ["pref","city","area_ha","area_count"]
+
 logger = None
 
 class MlitSeisanRyokuchiService(appbase.AppBase):
@@ -22,11 +24,16 @@ class MlitSeisanRyokuchiService(appbase.AppBase):
         global logger
         logger = self.get_logger()
 
+    def del_tbl_rows(self):
+        logger.info("start")
+        util_db = Db()
+        util_db.del_tbl_rows("mlit_seisanryokuchi")
+
     def save_tbl_rows(self, rows):
-        pass
-    
-    def divide_rows(self, org_rows, chunk_size):
-        pass
+        logger.info("start")
+        util_db = Db()
+        util_db.save_tbl_rows("mlit_seisanryokuchi",insert_cols,rows )
+        
 
     def download_master(self):
         logger.info(download_url)
@@ -64,90 +71,78 @@ class MlitSeisanRyokuchiService(appbase.AppBase):
 
         city_service = CityService()
         ret_data = []
+        ret_data_tmp = {}
         row_no = 19
+        re_compile_pref = re.compile("^(.+[都道府県])$")
         pref = ""
 
         while row_no < wsheet.nrows :
-            cities = wsheet.cell_value(row_no,3)
 
             tmp_pref = wsheet.cell_value(row_no,2)
-            new_info = {
-                "city"      : wsheet.cell_value(row_no,3),
-                "area_ha"   : wsheet.cell_value(row_no,5),
-                "area_count": wsheet.cell_value(row_no,6)
-            }
+            tmp_city = wsheet.cell_value(row_no,3)
+            re_result = re_compile_pref.search(tmp_pref)
+            if re_result and tmp_city == "計":
+                pref = re_result.group(1)
+                row_no += 1
+                continue
 
-            if not new_info["city"] and \
-               not new_info["area_ha"] and \
-               not new_info["area_count"]:
-                row_no += 1
-                continue
-                
-            if new_info["city"] == "計":
-                pref = tmp_pref
+            city_def = city_service.find_def_by_pref_city(pref, tmp_city)
+            if not city_def or not city_def["city"]:
                 row_no += 1
                 continue
             
-            city_def = city_service.find_def_by_pref_city(pref, new_info["city"])
-            if not city_def:
-                row_no += 1
-                continue
-            
-            new_info["city"] = city_def["city"]
-            
-            ret_data.append(new_info)
+
+            pref_city = "%s\t%s" %(pref,tmp_city)
+            if not pref_city in ret_data_tmp:
+                ret_data_tmp[pref_city] = {"area_ha":0,"area_count":0}
+
+            ret_data_tmp[pref_city]["area_ha"]    += wsheet.cell_value(row_no,5)
+            ret_data_tmp[pref_city]["area_count"] += wsheet.cell_value(row_no,6)
+
             row_no += 1
-
+            
+        ret_data = []
+        for pref_city_str,vals_tmp in ret_data_tmp.items():
+            pref_city = pref_city_str.split("\t")
+            vals_tmp["pref"] = pref_city[0]
+            vals_tmp["city"] = pref_city[1]
+            
+            ret_data.append(vals_tmp)
+        print(ret_data)
         return ret_data
 
-    def save_tbl_rows(self, rows):
-        logger.info("start")
-        logger.info(rows[0])
 
-        bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
-        atri_keys = ["city","area_ha","area_count"]
-        row_groups = self.__divide_rows(rows, bulk_insert_size, atri_keys )
-        
+    def get_vals(self):
         sql = """
-INSERT INTO mlit_seisanryokuchi (%s) VALUES %s
-  ON CONFLICT DO NOTHING
+select *
+from mlit_seisanryokuchi
 """
-        sql = sql % (",".join(atri_keys), "%s")
-        print(sql)
-        print(row_groups)
+        ret_datas = []
         
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:
-
-                for row_group in row_groups:
-                    try:
-                        # bulk insert
-                        extras.execute_values(db_cur,sql,row_group)
-                    except Exception as e:
-                        logger.error(e)
-                        logger.error(sql)
-                        logger.error(row_group)
-                        return False
+                try:
+                    db_cur.execute(sql)
                     
-            db_conn.commit()
-        return True
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
 
-    def __divide_rows(self, org_rows, chunk_size, atri_keys):
-        i = 0
-        chunk = []
-        ret_rows = []
-        for org_row in org_rows:
-            new_tuple = ()
-            for atri_key in atri_keys:
-                new_tuple += (org_row[atri_key],)
-            chunk.append( new_tuple )
-            
-            if len(chunk) >= chunk_size:
-                ret_rows.append(chunk)
-                chunk = []
-            i += 1
+                city_service = CityService()
+                for ret_row in  db_cur.fetchall():
+                    ret_row = dict( ret_row )
 
-        if len(chunk) > 0:
-            ret_rows.append(chunk)
+                    wards = city_service.get_seirei_wards(ret_row["city"])
+                    if len(wards) == 0:
+                        ret_datas.append(ret_row)
+                        continue
+                    
+                    for ward in wards:
+                        ret_row_cp = ret_row.copy()
+                        ret_row_cp["city"] = ward["city"]
+                        ret_datas.append(ret_row_cp)
 
-        return ret_rows
+        return ret_datas
+    
+    
