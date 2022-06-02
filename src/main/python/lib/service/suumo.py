@@ -13,6 +13,7 @@ import appbase
 import datetime
 import json
 import re
+import sys
 import time
 import urllib.parse
 import urllib.request
@@ -32,7 +33,9 @@ pref_names = [
     "aomori","iwate","miyagi","akita","yamagata",
     "fukushima","ibaraki","tochigi",
     "gumma",            # suumo では、gunma でなく gumma
-    "saitama","chiba","tokyo","kanagawa",
+    "saitama","chiba",
+    "tokyo",
+    "kanagawa",
     "niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu",
     "shizuoka","aichi","mie","shiga","kyoto","osaka","hyogo","nara",
     "wakayama","tottori","shimane","okayama","hiroshima","yamaguchi",
@@ -171,7 +174,7 @@ SELECT * FROM suumo_bukken where pref =''
 INSERT INTO suumo_bukken
   (build_type,bukken_name,price,price_org,pref,city,address,
    plan,build_area_m2,build_area_org,land_area_m2,land_area_org,
-   build_year,found_date,check_date)
+   build_year,shop,found_date,check_date)
   VALUES %s
 ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
   DO UPDATE SET check_date='%s'
@@ -209,6 +212,7 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
                       org_row['land_area_m2'],
                       org_row['land_area_org']  or "",
                       org_row['build_year']     or 0,
+                      org_row['shop'],
                       date_str,
                       date_str )
         tuple_key = "\t".join([ ret_tuple[0],
@@ -386,7 +390,6 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
         logger.error("requests.get() " + result_url)
         return None
     
-
     def parse_bukken_infos(self, result_list_url):
 
         html_content = self.get_http_requests( result_list_url )
@@ -394,12 +397,12 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
             return []
 
         soup = BeautifulSoup(html_content, 'html.parser')
-
-        bukken_divs = soup.select("div.dottable.dottable--cassette")
         
         ret_bukken_infos = []
-
-        for bukken_div in bukken_divs:
+        bukken_parent_divs = soup.select("div.property_unit-content")
+        # bukken_divs = soup.select("div.dottable.dottable--cassette")
+        
+        for bukken_div in bukken_parent_divs:
             bukken_info = {}
             dls = bukken_div.select("dl")
             for dl in dls:
@@ -409,10 +412,88 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
                     continue
                 bukken_info[ dts[0].text.strip() ] = dds[0].text.strip()
 
+            divs = bukken_div.select("div.shopmore-title")
+            if len(divs):
+                bukken_info["shop"] = \
+                    self.parse_shop_name( divs[0].text.strip() )
+            else:
+                bukken_info["shop"] = None
+                
+            if not bukken_info["shop"]:
+                bukken_info["shop"] = self.find_shop_name( bukken_div )
+                
             ret_bukken_infos.append( self.conv_bukken_info(bukken_info) )
         return ret_bukken_infos
     
+    
+    def find_shop_name(self, bukken_div):
+        a_elms = bukken_div.select(".property_unit-title a")
+        if not len(a_elms):
+            return None
 
+        re_compile = re.compile("href=[\"\']?([^\s\"\']+)[\"\']?")
+        re_result = re_compile.search( str(a_elms[0]) )
+        if not re_result:
+            return None
+
+        bukken_detail_url = "https://suumo.jp"+re_result.group(1)
+        
+        html_content = self.get_http_requests(bukken_detail_url)
+        if not html_content:
+            return None
+
+        soup = BeautifulSoup(html_content, 'html.parser')
+        contact_tos = soup.select("td.bdGrayB")
+        contact_to_str = contact_tos[0].text.strip()
+        shop_name_org = contact_to_str.split("\n")[0]
+        shop_name = self.parse_shop_name( shop_name_org )
+        return shop_name
+        
+
+    def parse_shop_name(self, org_shop_name):
+        kabu_re_exp = "(?:株式会社|\(株\)|\（株\）|株)"
+        shp_re_exp  = "([^ 　\s\(\)（）]+)"
+        
+        if not org_shop_name:
+            return None
+        # 後株
+        re_compile = re.compile( "^"+ shp_re_exp + kabu_re_exp )
+        re_result = re_compile.search(org_shop_name)
+        if re_result:
+            return re_result.group(1)
+        # 前株
+        re_compile = re.compile( kabu_re_exp + shp_re_exp + "$" )
+        re_result = re_compile.search(org_shop_name)
+        if re_result:
+            return re_result.group(1)
+
+        return org_shop_name
+    
+    # def parse_bukken_infos(self, result_list_url):
+
+    #     html_content = self.get_http_requests( result_list_url )
+    #     if not html_content:
+    #         return []
+
+    #     soup = BeautifulSoup(html_content, 'html.parser')
+        
+    #     bukken_divs = soup.select("div.dottable.dottable--cassette")
+        
+    #     ret_bukken_infos = []
+
+    #     for bukken_div in bukken_divs:
+    #         bukken_info = {}
+    #         dls = bukken_div.select("dl")
+    #         for dl in dls:
+    #             dts = dl.select("dt")
+    #             dds = dl.select("dd")
+    #             if len(dts) == 0 or len(dds) == 0:
+    #                 continue
+    #             bukken_info[ dts[0].text.strip() ] = dds[0].text.strip()
+
+    #         ret_bukken_infos.append( self.conv_bukken_info(bukken_info) )
+    #     return ret_bukken_infos
+    
     def conv_bukken_info(self,org_info):
         
         org_new_keys = {
@@ -422,7 +503,8 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
             '間取り'  :'plan',
             '土地面積':'land_area_org',
             '土地面積':'land_area_org',
-            '築年月'  :'build_year'
+            '築年月'  :'build_year',
+            'shop'    :'shop'
         }
         ret_info = {}
         for org_key,new_key in org_new_keys.items():

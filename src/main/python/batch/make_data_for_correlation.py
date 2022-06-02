@@ -40,8 +40,8 @@ def main():
     # calc_jutakutochi_e048()
     # calc_jutakutochi_e049()
     # calc_jutakutochi_e101()
-    # calc_chika_koji()
-    calc_youto_chiiki()
+    calc_chika_koji()
+    # calc_youto_chiiki()
     # calc_suumo_stock_bukken()
     # calc_suumo_sold_bukken()
     # calc_soumu_zeisei()
@@ -113,11 +113,16 @@ def calc_suumo_sold_bukken():
 def calc_chika_koji():
     chika_koji_service = GisChikaKojiService()
 
+    atri_keys = [
+        "住居系","商業系","工業系","?",
+        '1低専','2低専','1中専','2中専','1住居','2住居','準住居',
+        '商業','近商', '工業','準工','工専' ]
+
     ret_vals = chika_koji_service.get_union_vals()
     for ret_val in ret_vals:
         disp_cols = [ ret_val["pref"], ret_val["city"] ]
 
-        for atri_key in ["住居系","商業系","工業系","?"]:
+        for atri_key in atri_keys:
             if atri_key in ret_val:
                 disp_cols.append( str(ret_val[atri_key] ))
             else:

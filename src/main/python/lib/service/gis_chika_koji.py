@@ -96,30 +96,36 @@ union
 """
         ret_data_tmp = {}
         
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-                try:
-                    db_cur.execute(sql)
-                except Exception as e:
-                    logger.error(e)
-                    logger.error(sql)
-                    return []
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+
+            for ret_row in  db_cur.fetchall():
+                ret_row = dict( ret_row )
+
+                pref_city = "\t".join([ret_row["pref"], ret_row["city"]])
+                if not pref_city in ret_data_tmp:
+                    ret_data_tmp[pref_city] = {}
+
+                youto = ret_row["youto"]
+                youto_group = self.get_youto_group(youto)
                 
-                for ret_row in  db_cur.fetchall():
-                    ret_row = dict( ret_row )
+                if not youto in ret_data_tmp[pref_city]:
+                    ret_data_tmp[pref_city][youto] = {"price":0,"count":0}
+                    
+                ret_data_tmp[pref_city][youto]["price"] += ret_row["price"]
+                ret_data_tmp[pref_city][youto]["count"] += 1
 
-                    pref_city = "\t".join([ret_row["pref"], ret_row["city"]])
-                    if not pref_city in ret_data_tmp:
-                        ret_data_tmp[pref_city] = {}
+                if not youto_group in ret_data_tmp[pref_city]:
+                    ret_data_tmp[pref_city][youto_group] = {"price":0,"count":0}
 
-                    youto_group = self.get_youto_group(ret_row["youto"])
-                    if not youto_group in ret_data_tmp[pref_city]:
-                        ret_data_tmp[pref_city][youto_group] = {"price":0,
-                                                                "count":0}
-                        
-                    ret_data_tmp[pref_city][youto_group]["price"] \
-                        += ret_row["price"]
-                    ret_data_tmp[pref_city][youto_group]["count"] += 1
+                ret_data_tmp[pref_city][youto_group]["price"] += ret_row["price"]
+                ret_data_tmp[pref_city][youto_group]["count"] += 1
 
         ret_datas = []
         for pref_city_str,youto_groups in ret_data_tmp.items():
