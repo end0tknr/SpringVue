@@ -29,8 +29,7 @@ browser_conf = {
     "implicitly_wait": 10 }
 
 pref_names = [
-    "hokkaido",
-    "aomori","iwate","miyagi","akita","yamagata",
+    "hokkaido","aomori","iwate","miyagi","akita","yamagata",
     "fukushima","ibaraki","tochigi",
     "gumma",            # suumo では、gunma でなく gumma
     "saitama","chiba",
@@ -42,12 +41,14 @@ pref_names = [
     "tokushima","kagawa","ehime","kochi","fukuoka","saga","nagasaki",
     "kumamoto","oita","miyazaki", "kagoshima"
 ]
+
+base_host = "https://suumo.jp"
 base_urls = [
-    ["https://suumo.jp/ikkodate/",       "新築戸建"],
-    ["https://suumo.jp/chukoikkodate/",  "中古戸建"],
-    ["https://suumo.jp/ms/chuko/",       "中古マンション"],
+    [base_host+"/ikkodate/",       "新築戸建"],
+    # [base_host+"/chukoikkodate/",  "中古戸建"],
+    # [base_host+"/ms/chuko/",       "中古マンション"],
     # 新築マンションは価格等が記載されていないことが多い為、無視
-    #["https://suumo.jp/ms/shinchiku/",  "新築マンション"]
+    #[base_host+"/ms/shinchiku/",  "新築マンション"]
 ]
 disp_keys = [
     'base_url','物件名', '販売価格', '所在地','沿線・駅',
@@ -174,7 +175,7 @@ SELECT * FROM suumo_bukken where pref =''
 INSERT INTO suumo_bukken
   (build_type,bukken_name,price,price_org,pref,city,address,
    plan,build_area_m2,build_area_org,land_area_m2,land_area_org,
-   build_year,shop,found_date,check_date)
+   build_year,shop_org,url,found_date,check_date)
   VALUES %s
 ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
   DO UPDATE SET check_date='%s'
@@ -212,7 +213,8 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
                       org_row['land_area_m2'],
                       org_row['land_area_org']  or "",
                       org_row['build_year']     or 0,
-                      org_row['shop'],
+                      org_row['shop_org'],
+                      org_row['url'],
                       date_str,
                       date_str )
         tuple_key = "\t".join([ ret_tuple[0],
@@ -404,6 +406,8 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
         
         for bukken_div in bukken_parent_divs:
             bukken_info = {}
+            bukken_info["url"] = self.parse_bukken_url(bukken_div)
+            
             dls = bukken_div.select("dl")
             for dl in dls:
                 dts = dl.select("dt")
@@ -412,21 +416,13 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
                     continue
                 bukken_info[ dts[0].text.strip() ] = dds[0].text.strip()
 
-            divs = bukken_div.select("div.shopmore-title")
-            if len(divs):
-                bukken_info["shop"] = \
-                    self.parse_shop_name( divs[0].text.strip() )
-            else:
-                bukken_info["shop"] = None
-                
-            if not bukken_info["shop"]:
-                bukken_info["shop"] = self.find_shop_name( bukken_div )
-                
+            bukken_info["shop_org"] = self.find_shop_name( bukken_div,
+                                                           bukken_info["url"] )
             ret_bukken_infos.append( self.conv_bukken_info(bukken_info) )
         return ret_bukken_infos
     
     
-    def find_shop_name(self, bukken_div):
+    def parse_bukken_url(self, bukken_div):
         a_elms = bukken_div.select(".property_unit-title a")
         if not len(a_elms):
             return None
@@ -436,22 +432,54 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
         if not re_result:
             return None
 
-        bukken_detail_url = "https://suumo.jp"+re_result.group(1)
-        
-        html_content = self.get_http_requests(bukken_detail_url)
-        if not html_content:
-            return None
+        bukken_detail_url = base_host+re_result.group(1)
+        return bukken_detail_url
 
-        soup = BeautifulSoup(html_content, 'html.parser')
-        contact_tos = soup.select("td.bdGrayB")
-        contact_to_str = contact_tos[0].text.strip()
-        shop_name_org = contact_to_str.split("\n")[0]
-        shop_name = self.parse_shop_name( shop_name_org )
-        return shop_name
+        
+    def find_shop_name(self, bukken_div, bukken_url ):
+
+        divs = bukken_div.select("div.shopmore-title")
+        if not len(divs):
+            return None
+        
+        shop_org = self.parse_shop_name( divs[0].text.strip() )
+        if shop_org:
+            return shop_org
+
+        return None
+
+        # html_content = self.get_http_requests(bukken_url)
+        # if not html_content:
+        #     return None
+
+        # soup = BeautifulSoup(html_content, 'html.parser')
+        # contact_tos = soup.select("td.bdGrayB")
+        # contact_to_str = contact_tos[0].text.strip()
+        # shop_name_org = contact_to_str.split("\n")[0]
+        # shop_name = self.parse_shop_name( shop_name_org )
+        # return shop_name
+        
+    # def find_shop_name(self, bukken_div, bukken_url ):
+
+    #     divs = bukken_div.select("div.shopmore-title")
+    #     shop_org = self.parse_shop_name( divs[0].text.strip() )
+    #     if shop_org:
+    #         return shop_org
+
+    #     html_content = self.get_http_requests(bukken_url)
+    #     if not html_content:
+    #         return None
+
+    #     soup = BeautifulSoup(html_content, 'html.parser')
+    #     contact_tos = soup.select("td.bdGrayB")
+    #     contact_to_str = contact_tos[0].text.strip()
+    #     shop_name_org = contact_to_str.split("\n")[0]
+    #     shop_name = self.parse_shop_name( shop_name_org )
+    #     return shop_name
         
 
     def parse_shop_name(self, org_shop_name):
-        kabu_re_exp = "(?:株式会社|\(株\)|\（株\）|株)"
+        kabu_re_exp = "(?:株式会社|有限会社|\(株\)|\（株\）|\(有\)|\（有\）)"
         shp_re_exp  = "([^ 　\s\(\)（）]+)"
         
         if not org_shop_name:
@@ -469,31 +497,6 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
 
         return org_shop_name
     
-    # def parse_bukken_infos(self, result_list_url):
-
-    #     html_content = self.get_http_requests( result_list_url )
-    #     if not html_content:
-    #         return []
-
-    #     soup = BeautifulSoup(html_content, 'html.parser')
-        
-    #     bukken_divs = soup.select("div.dottable.dottable--cassette")
-        
-    #     ret_bukken_infos = []
-
-    #     for bukken_div in bukken_divs:
-    #         bukken_info = {}
-    #         dls = bukken_div.select("dl")
-    #         for dl in dls:
-    #             dts = dl.select("dt")
-    #             dds = dl.select("dd")
-    #             if len(dts) == 0 or len(dds) == 0:
-    #                 continue
-    #             bukken_info[ dts[0].text.strip() ] = dds[0].text.strip()
-
-    #         ret_bukken_infos.append( self.conv_bukken_info(bukken_info) )
-    #     return ret_bukken_infos
-    
     def conv_bukken_info(self,org_info):
         
         org_new_keys = {
@@ -504,7 +507,8 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
             '土地面積':'land_area_org',
             '土地面積':'land_area_org',
             '築年月'  :'build_year',
-            'shop'    :'shop'
+            'url'     :'url',
+            'shop_org':'shop_org',
         }
         ret_info = {}
         for org_key,new_key in org_new_keys.items():
@@ -592,37 +596,6 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
         
         logger.error( org_val )
         
-    # def conv_price(self, org_val ):
-    #     if not org_val:
-    #         return None
-    #     if org_val in ["未定"]:
-    #         return None
-
-    #     # 中央値(万円)を返す
-    #     re_compile_val_2 = \
-    #         re.compile("([\d\.]{1,10})(万|億).+?([\d\.]{1,10})(万|億)")
-    #     re_result = re_compile_val_2.search( org_val )
-    #     if re_result:
-    #         ret_val = (int(re_result.group(1)) + int(re_result.group(3))) /2
-    #         if re_result.group(2) == "万":
-    #             ret_val *= 10000
-    #         elif re_result.group(2) == "億":
-    #             ret_val *= 100000000
-    #         return ret_val
-        
-    #     re_compile_val_1 = re.compile("([\d\.]{1,10})(万|億)")
-    #     re_result = re_compile_val_1.search( org_val )
-    #     if re_result:
-    #         ret_val = int( re_result.group(1) )
-        
-    #         if re_result.group(2) == "万":
-    #             ret_val *= 10000
-    #         elif re_result.group(2) == "億":
-    #             ret_val *= 100000000
-    #         return ret_val
-
-    #     logger.error( org_val )
-
     def conv_build_year(self, org_val ):
         if not org_val:
             return None
