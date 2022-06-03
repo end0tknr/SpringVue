@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <defs>
+    <style>
+      polyline { stroke         : #fff;
+                 stroke-width   : 13;
+                 stroke-linecap : square;
+                 fill           : none; }
+      rect {     fill           : #e71b24 }
+    </style>
+  </defs>
+  
+  <rect x="0" y="0" width="200" height="200"/>
+  <!-- 1 -->
+  <polyline points="40,30 60,30 60,80" />
+  <polyline points="30,80 80,80" />
+  <!-- 5 -->
+  <polyline points="160,30 130,30 125,55 165,55 170,80 120,80" />
+  <!-- D -->
+  <polyline points="30,120 75,120 80,125 80,165 75,170 30,170 30,120" />
+  <!-- B -->
+  <polyline points="120,145 165,145 170,140 170,125 165,120 120,120" />
+  <polyline points="120,120 120,170 165,170 170,165 170,150 165,145" />
+</svg>

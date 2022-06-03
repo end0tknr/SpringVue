@@ -1,29 +1,46 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="site_logo.svg" type="image/svg+xml">
+  <title>15DB</title>
+  <style>
+    #page_middle {text-align:center; padding: 30px; }
+    a                    { text-decoration: none;   }
+    #login_container     { margin: 20px;            }
+    #login_container img { width:50px; height:50px; margin:5px 5px;}
+  </style>
 </head>
-
 <body>
-  <div id="app">
-    <h1>{{ message }}</h1>
-
-    refer from https://reffect.co.jp/vue/vue-axios-learn
-  </div>
   
-  <script src="https://unpkg.com/vue@next"></script>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <script>
-    const app = Vue.createApp({
-        data(){
-            return { message: 'Demo Vue.js 3 + Axios', }
-        },
-        mounted(){
-        }
-    })
+  <div id="page_middle" >
+    <a href="/"><img src="site_logo.svg" /></a>
 
-    app.mount('#app')
-  </script>
+    <div id="login_container">
+      <div>Login via SNS</div>
+      
+    <a href="">
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"/>
+    </a>
+    <a href="">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg"/>
+    </a>
+    <a href="">
+      <img
+        src="https://upload.wikimedia.org/wikipedia/en/0/04/Facebook_f_logo_%282021%29.svg"/>
+    </a>
+    <a href="">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Twitter-logo.svg"/>
+    </a>
+    
+    </div>
+
+    or <a href="">Sign up</a>
+    
+  </div><!--.page_middle-->
+
 </body>
 </html>
-
