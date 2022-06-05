@@ -8,21 +8,30 @@
   <title>15DB</title>
   <link rel="stylesheet" href="/pri/css/common.css">
   <style>
-    label.data_name {cursor: pointer;
-                     border-left-width: 10px;
-                     border-left-style: solid;
-                     border-left-color: #FFF;
-                    }
-    label:hover { text-decoration: underline; }
-    table { border-collapse:collapse; }
-    tr    { border-bottom: 1px #000 solid ; }
-    td    { padding:8px 4px; vertical-align:middle; }
-    td div.col_description {overflow-y: scroll;
-                            display: flex;
-                            align-items: center;
-                            height: 30px;}
-    td div.col_description.full  {height: auto;}
-
+    /* refer to https://csshtml.work/table-scroll/ */
+    .scroll_tbl{
+      overflow: auto;
+      width: 100%;
+      height: 200px;
+    }
+    .scroll_tbl td{
+    }
+    .scroll_tbl th{
+        background: #FFF;
+        position: sticky;
+        top:  0;
+        left: 0;
+    }
+  
+    .scroll_tbl tr:first-child th:first-child{
+        z-index: 1;
+    }
+    
+    .graph_bar {
+        background-image:url("/pri/img/graph_bar_blue.svg");
+        background-position: 0% 90%;
+        background-repeat: no-repeat;
+    }
   </style>
 </head>
 <body>
@@ -46,26 +55,101 @@
 
       <div id="vueapp">
 
+        <div class="scroll_tbl">
+          
         <table>
-          <thead>
             <tr>
               <th>市区町村</th>
-              <th>販売済 数</th>
-              <th>〃 前回比</th>
-              <th>販売中 数</th>
-              <th>〃 前回比</th>
+              <th>販売済 数</th><th>前回比</th><th>価格</th>
+              <th>販売中数</th><th>前回比</th><th>価格</th>
+              <th>地価</th>
             </tr>
-          </thead>
-          <tbody>
-            <tr>
-	      <td>練馬区</td>
-	      <td></td>
-	      <td></td>
-	      <td></td>
-	      <td></td>
-            </tr>
-          </tbody>
+	    <tr>
+	      <th>千代田区</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr><th>八王子市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>立川市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>武蔵野市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>三鷹市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>府中市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>調布市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>小金井市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>小平市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>日野市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>東村山市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>国分寺市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>国立市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>東大和市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>東久留米市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>武蔵村山市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
+	    <tr>
+	      <th>西東京市</th>
+	      <td>999,999</td><td>+999</td><td>999,999</td>
+	      <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+	    </tr>
         </table>
+        </div>
 
       </div><!--#vueapp-->
       
@@ -74,41 +158,259 @@
   
   <div class="container_title">
     <h1>国分寺市</h1>
-    <div class="container_title_sub">
-      <div>隣接:
-	<a href="">立川市</a>
-	<a href="">国立市</a>
-	<a href="">府中市</a>
-	<a href="">小金井市</a>
-	<a href="">小平市</a>
-      </div>
-      <div class="container_title_sub_right">
-      </div>
+    <div class="container_title_sub"></div>
+    <div class="container_title_sub_right"></div>
   </div><!--.container_title-->
 
   <div class="page_middle">
     <div class="page_middle_container">
-      <table>
-        <thead>
+
+      <h2>地区別</h2>
+
+      <div class="scroll_tbl">
+        
+	<table>
+          <tr>
+            <th>地区</th>
+            <th>販売済 数</th><th>前回比</th><th>価格</th>
+            <th>販売中数</th><th>前回比</th><th>価格</th>
+            <th>地価</th>
+          </tr>
+          <tr>
+            <th>戸倉</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>光町</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>高木町</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>新町</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>西元町</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>西町</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>西恋ケ窪</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>泉町</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>東元町</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>東恋ケ窪</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>内藤</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>日吉町</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>富士本</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>並木町</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>北町</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>本多</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>本町</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+          </tr>
+	</table>
+      </div><!--.scroll_tbl-->
+
+      <h2>会社別</h2>
+
+      <div class="scroll_tbl">
+        
+	<table>
+          <tr>
+            <th>会社</th>
+            <th>販売済 数</th><th>前回比</th><th>価格</th>
+            <th>販売中数</th><th>前回比</th><th>価格</th>
+          </tr>
+          <tr>
+            <th>積水ハウス</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>旭化成</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>セキスイハイム</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>住友林業</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>ダイワハウス</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>飯田ホールディングス</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>兼六ホームズ</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td>
+          </tr>
+	</table>
+	
+      </div><!--.scroll_tbl-->
+        
+      <h2>隣接市区町村</h2>
+
+      <div class="scroll_tbl">
+        
+	<table>
           <tr>
             <th>市区町村</th>
-            <th>販売済 数</th>
-            <th>〃 前回比</th>
-            <th>販売中 数</th>
-            <th>〃 前回比</th>
+            <th>販売済 数</th><th>前回比</th><th>価格</th>
+            <th>販売中数</th><th>前回比</th><th>価格</th><th>地価</th>
           </tr>
-        </thead>
-        <tbody>
           <tr>
-	    <td>練馬区</td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
+            <th>国分寺市</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td>
           </tr>
-        </tbody>
-      </table>
+          <tr>
+            <th>立川氏</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>小平市</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>小金井市</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td>
+          </tr>
+          <tr>
+            <th>府中市</th>
+	    <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
+	    <td>+999</td><td>999,999</td>
+	    <td>999,999</td><td>-999</td><td>999,999</td>
+          </tr>
+	</table>
 	
+      </div><!--.scroll_tbl-->
+
+
+      <h2>その他</h2>
+
+      <table>
+	<tr>
+	  <th>人口</th><td></td>
+	  <th>人口変動</th><td></td>
+	  <th></th><td></td>
+	</tr>
+	<tr>
+	  <th>世帯</th><td></td>
+	  <th>世帯変動</th><td></td>
+	  <th></th><td></td>
+	</tr>
+	<tr>
+	  <th>面積</th><td></td>
+	  <th>住居面積</th><td></td>
+	  <th>生産緑地</th><td></td>
+	</tr>
+	<tr>
+	  <th>年収</th><td></td>
+	  <th></th><td></td>
+	  <th></th><td></td>
+	</tr>
+	<tr>
+	  <th>持家:賃貸</th><td></td>
+	  <th>戸建:集合</th><td></td>
+	  <th></th><td></td>
+      </table>
+
     </div><!--.page_middle_container-->
   </div><!--.page_middle-->
 
