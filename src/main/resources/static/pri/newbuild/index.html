@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/site_logo.svg" type="image/svg+xml">
+  <title>15DB</title>
+  <link rel="stylesheet" href="/pri/css/common.css">
+  <style>
+    label.data_name {cursor: pointer;
+                     border-left-width: 10px;
+                     border-left-style: solid;
+                     border-left-color: #FFF;
+                    }
+    label:hover { text-decoration: underline; }
+    table { border-collapse:collapse; }
+    tr    { border-bottom: 1px #000 solid ; }
+    td    { padding:8px 4px; vertical-align:middle; }
+    td div.col_description {overflow-y: scroll;
+                            display: flex;
+                            align-items: center;
+                            height: 30px;}
+    td div.col_description.full  {height: auto;}
+
+  </style>
+</head>
+<body>
+
+  <div class="header_container">
+  </div><!--.header_container-->
+  
+  <div class="page_top">
+  </div><!--.page_top-->
+
+  <div class="container_title">
+    <h1>東京都</h1>
+    <div class="container_title_sub">
+      <div>YYYY/MM/DD ～ YYYY/MM/DD</div>
+      <div class="container_title_sub_right"><a href="">都道府県変更</a></div>
+    </div>
+  </div><!--.container_title-->
+
+  <div class="page_middle">
+    <div class="page_middle_container">
+
+      <div id="vueapp">
+
+        <table>
+          <thead>
+            <tr>
+              <th>市区町村</th>
+              <th>販売済 数</th>
+              <th>〃 前回比</th>
+              <th>販売中 数</th>
+              <th>〃 前回比</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+	      <td>練馬区</td>
+	      <td></td>
+	      <td></td>
+	      <td></td>
+	      <td></td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div><!--#vueapp-->
+      
+    </div><!--.page_middle_container-->
+  </div><!--.page_middle-->
+  
+  <div class="container_title">
+    <h1>国分寺市</h1>
+    <div class="container_title_sub">
+      <div>隣接:
+	<a href="">立川市</a>
+	<a href="">国立市</a>
+	<a href="">府中市</a>
+	<a href="">小金井市</a>
+	<a href="">小平市</a>
+      </div>
+      <div class="container_title_sub_right">
+      </div>
+  </div><!--.container_title-->
+
+  <div class="page_middle">
+    <div class="page_middle_container">
+      <table>
+        <thead>
+          <tr>
+            <th>市区町村</th>
+            <th>販売済 数</th>
+            <th>〃 前回比</th>
+            <th>販売中 数</th>
+            <th>〃 前回比</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+	    <td>練馬区</td>
+	    <td></td>
+	    <td></td>
+	    <td></td>
+	    <td></td>
+          </tr>
+        </tbody>
+      </table>
+	
+    </div><!--.page_middle_container-->
+  </div><!--.page_middle-->
+
+  <div class="page_bottom">
+  </div><!--.page_bottom-->
+
+  <footer>
+    &copy; <span class="copyright_year"></span>
+    end0tknr
+  </footer>
+  <script src="/pri/js/common.js"></script>
+  <script src="/pri/js/AppBase.js"></script>
+  <script src="/pri/js/NewBuild.js"></script>
+</body>
+</html>
