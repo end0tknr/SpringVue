@@ -625,3 +625,42 @@ ALTER TABLE gis_chika_koji ADD COLUMN pref varchar(4);
 ALTER TABLE gis_chika_koji ADD COLUMN city varchar(8);
 ALTER TABLE gis_chika      ADD COLUMN pref varchar(4);
 ALTER TABLE gis_chika      ADD COLUMN city varchar(8);
+
+
+CREATE TABLE IF NOT EXISTS real_estate_shop (
+government              varchar(16),
+licence                 varchar(16),
+shop                    varchar(64),
+primary key(government,licence)
+);
+
+CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_section (
+pref                    varchar(4),
+city                    varchar(8),
+section                 varchar(8),
+calc_date_from          date,
+calc_date_to            date,
+sold_count              int,
+sold_price              bigint,
+on_sale_count           int,
+on_sale_price           bigint,
+primary key(pref,city,section,calc_date_from) );
+
+CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_shop (
+pref                    varchar(4),
+shop                    varchar(64),
+calc_date_from          date,
+calc_date_to            date,
+sold_count              int,
+sold_price              bigint,
+on_sale_count           int,
+on_sale_price           bigint,
+primary key(pref,city,shop,calc_date_from) );
+
+CREATE TABLE IF NOT EXISTS newbuild_sales_months_by_shop (
+pref                    varchar(4),
+shop                    varchar(64),
+calc_date_from          date,
+months                  int,
+count                   int,
+primary key(pref,city,shop,calc_date_from,months) );

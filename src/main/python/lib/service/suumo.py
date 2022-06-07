@@ -29,17 +29,17 @@ browser_conf = {
     "implicitly_wait": 10 }
 
 pref_names = [
-    "hokkaido","aomori","iwate","miyagi","akita","yamagata",
-    "fukushima","ibaraki","tochigi",
-    "gumma",            # suumo では、gunma でなく gumma
-    "saitama","chiba",
+    # "hokkaido","aomori","iwate","miyagi","akita","yamagata",
+    # "fukushima","ibaraki","tochigi",
+    # "gumma",            # suumo では、gunma でなく gumma
+    # "saitama","chiba",
     "tokyo",
-    "kanagawa",
-    "niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu",
-    "shizuoka","aichi","mie","shiga","kyoto","osaka","hyogo","nara",
-    "wakayama","tottori","shimane","okayama","hiroshima","yamaguchi",
-    "tokushima","kagawa","ehime","kochi","fukuoka","saga","nagasaki",
-    "kumamoto","oita","miyazaki", "kagoshima"
+    # "kanagawa",
+    # "niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu",
+    # "shizuoka","aichi","mie","shiga","kyoto","osaka","hyogo","nara",
+    # "wakayama","tottori","shimane","okayama","hiroshima","yamaguchi",
+    # "tokushima","kagawa","ehime","kochi","fukuoka","saga","nagasaki",
+    # "kumamoto","oita","miyazaki", "kagoshima"
 ]
 
 base_host = "https://suumo.jp"
@@ -406,7 +406,11 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
         
         for bukken_div in bukken_parent_divs:
             bukken_info = {}
-            bukken_info["url"] = self.parse_bukken_url(bukken_div)
+            
+            result_parse = self.parse_bukken_url(bukken_div)
+            if len(result_parse):
+                bukken_info["url"]    = result_parse[0]
+                bukken_info["物件名"] = result_parse[1]
             
             dls = bukken_div.select("dl")
             for dl in dls:
@@ -414,7 +418,13 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
                 dds = dl.select("dd")
                 if len(dts) == 0 or len(dds) == 0:
                     continue
-                bukken_info[ dts[0].text.strip() ] = dds[0].text.strip()
+
+                atri_name = dts[0].text.strip()
+                
+                if atri_name != "物件名" or \
+                   (atri_name == "物件名" and not bukken_info["物件名"]):
+                    
+                    bukken_info[ atri_name ] = dds[0].text.strip()
 
             bukken_info["shop_org"] = self.find_shop_name( bukken_div,
                                                            bukken_info["url"] )
@@ -425,15 +435,16 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
     def parse_bukken_url(self, bukken_div):
         a_elms = bukken_div.select(".property_unit-title a")
         if not len(a_elms):
-            return None
+            return []
 
         re_compile = re.compile("href=[\"\']?([^\s\"\']+)[\"\']?")
         re_result = re_compile.search( str(a_elms[0]) )
         if not re_result:
-            return None
+            return []
 
         bukken_detail_url = base_host+re_result.group(1)
-        return bukken_detail_url
+        bukken_name = a_elms[0].text.strip()
+        return [bukken_detail_url,bukken_name]
 
         
     def find_shop_name(self, bukken_div, bukken_url ):
@@ -480,17 +491,17 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
 
     def parse_shop_name(self, org_shop_name):
         kabu_re_exp = "(?:株式会社|有限会社|\(株\)|\（株\）|\(有\)|\（有\）)"
-        shp_re_exp  = "([^ 　\s\(\)（）]+)"
+        shop_re_exp  = "([^\(\)（）]+)"
         
         if not org_shop_name:
             return None
         # 後株
-        re_compile = re.compile( "^"+ shp_re_exp + kabu_re_exp )
+        re_compile = re.compile( "^"+ shop_re_exp + kabu_re_exp )
         re_result = re_compile.search(org_shop_name)
         if re_result:
             return re_result.group(1)
         # 前株
-        re_compile = re.compile( kabu_re_exp + shp_re_exp + "$" )
+        re_compile = re.compile( kabu_re_exp + shop_re_exp + "$" )
         re_result = re_compile.search(org_shop_name)
         if re_result:
             return re_result.group(1)
