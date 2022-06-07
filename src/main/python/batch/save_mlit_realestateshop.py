@@ -10,11 +10,7 @@ def main():
     real_estate_shop_service = MlitRealEstateShopService()
 
     real_estate_shop_service.del_tbl_rows()
-    
-    infos = real_estate_shop_service.download_master()
-    # print( infos )
-    
-    seisan_yrokuchi_service.save_tbl_rows( infos )
+    real_estate_shop_service.download_and_save_master()
     
 
 if __name__ == '__main__':
