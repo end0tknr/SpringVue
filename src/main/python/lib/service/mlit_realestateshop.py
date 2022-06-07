@@ -7,10 +7,11 @@ from util.db import Db
 
 import appbase
 import os
+import jaconv        # pip install jaconv
 import re
+import time
+import unicodedata   # 標準module
 import urllib.request
-import jaconv           # pip install jaconv
-import unicodedata      # 標準module
 
 url_base    = "https://etsuran.mlit.go.jp/TAKKEN/takkenKensaku.do"
 insert_cols = ["government","licence","shop"]
@@ -32,7 +33,7 @@ class MlitRealEstateShopService(appbase.AppBase):
         util_db = Db()
         util_db.save_tbl_rows("real_estate_shop",insert_cols,rows )
         
-
+    # selenium の headless modeでは動作しないみたい...
     def download_and_save_master(self):
         logger.info("start")
 
@@ -51,7 +52,7 @@ class MlitRealEstateShopService(appbase.AppBase):
             
             # parseした不動産会社情報のdb保存
             shops = self.parse_found_shops_pages(browser)
-            self.save_rows(shops)
+            self.save_tbl_rows(shops)
 
             browser.close()
             pref_no += 1
@@ -132,7 +133,7 @@ class MlitRealEstateShopService(appbase.AppBase):
             else:
                 continue
 
-            shop = conv_shop_name(shop)
+            shop = self.conv_shop_name(shop)
 
             shop_key = government +"\t"+ licence
             shops_tmp[shop_key] = shop
