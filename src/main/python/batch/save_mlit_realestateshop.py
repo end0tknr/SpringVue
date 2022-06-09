@@ -9,7 +9,7 @@ from service.mlit_realestateshop import MlitRealEstateShopService
 def main():
     real_estate_shop_service = MlitRealEstateShopService()
 
-    real_estate_shop_service.del_tbl_rows()
+    # real_estate_shop_service.del_tbl_rows()
     real_estate_shop_service.download_and_save_master()
     
 

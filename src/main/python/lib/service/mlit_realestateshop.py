@@ -37,7 +37,7 @@ class MlitRealEstateShopService(appbase.AppBase):
     def download_and_save_master(self):
         logger.info("start")
 
-        pref_no     = 1
+        pref_no     = 13
         max_pref_no = 47 # 47都道府県
 
         while pref_no <= max_pref_no:
@@ -52,6 +52,11 @@ class MlitRealEstateShopService(appbase.AppBase):
             
             # parseした不動産会社情報のdb保存
             shops = self.parse_found_shops_pages(browser)
+            # if not shops:
+            #     logger.warning("retry "+ req_url)
+            #     browser.close()
+            #     continue
+                
             self.save_tbl_rows(shops)
 
             browser.close()
@@ -61,14 +66,33 @@ class MlitRealEstateShopService(appbase.AppBase):
         shops_hash = {}
         i = 0
         while(i < 1000 ):  # 1000は 最終pageを判定できない場合に備えたもの
+            body = browser.find_element(by=By.CSS_SELECTOR,value="body")
+            body_text = body.text.replace("\n"," ")
+            # 「接続拒否」の場合は、一旦、BACK
+            if "The requested URL was rejected" in body_text:
+                tmp_msg = "The requested URL was rejected... and bak"
+                logger.warning(tmp_msg)
+                a_elms = browser.find_elements(by=By.CSS_SELECTOR, value="a")
+                a_elms[0].click() # 「Go Back」link
+            
             shops_hash_tmp = self.parse_shops( browser )
             shops_hash.update( shops_hash_tmp )
 
-            select_elms = browser.find_elements(by=By.CSS_SELECTOR, value="#pageListNo1")
-            page_no = Select(select_elms[0]).first_selected_option.text.split("/")
-
+            select_elms = browser.find_elements(by=By.CSS_SELECTOR,
+                                                value="#pageListNo1")
+            page_no = 0
+            try:
+                page_no = \
+                    Select(select_elms[0]).first_selected_option.text.split("/")
+            except Exception as e:
+                logger.error(e)
+                logger.error("fail find page no... retry")
+                browser.back()
+                continue
+                
             if i % 10 == 0:
-                logger.info("%s/%s %s" % (page_no[0],page_no[1],browser.current_url) )
+                logger.info("%s/%s %s" %
+                            (page_no[0],page_no[1],browser.current_url) )
             
             if page_no[0] == page_no[1]:  #最終pageに達したら、終了
                 break
@@ -81,9 +105,9 @@ class MlitRealEstateShopService(appbase.AppBase):
         ret_datas = []
         for pref_licence_str,shop in shops_hash.items():
             pref_licence = pref_licence_str.split("\t")
-            ret_datas.append({"pref"    : pref_licence[0],
-                              "licence" : pref_licence[1],
-                              "shop"    : shop} )
+            ret_datas.append({"government": pref_licence[0],
+                              "licence"   : pref_licence[1],
+                              "shop"      : shop} )
         return ret_datas
 
 
@@ -103,11 +127,12 @@ class MlitRealEstateShopService(appbase.AppBase):
         return shop
 
     def parse_shops( self, browser ):
-        tr_elms = browser.find_elements(by=By.CSS_SELECTOR,value="table.re_disp tr")
+        tr_elms = browser.find_elements(by=By.CSS_SELECTOR,
+                                        value="table.re_disp tr")
         
         if len(tr_elms) == 0:
             logger.error("fail parse table.re_disp tr %s" % (browser.current_url))
-            return []
+            return {}
         
         tr_elms.pop(0) # 先頭行はヘッダの為、削除
 
@@ -124,6 +149,8 @@ class MlitRealEstateShopService(appbase.AppBase):
 
             if len(cols) == 7:
                 government = re_compile.sub('',cols[1])
+                government = government.replace("各地方整備局等","国土交通大臣")
+                
                 licence    = re_compile.sub('',cols[2])
                 shop = cols[3]
             elif len(cols) == 6:    #信託銀行の場合
@@ -132,6 +159,8 @@ class MlitRealEstateShopService(appbase.AppBase):
                 shop       = cols[2]
             else:
                 continue
+
+            
 
             shop = self.conv_shop_name(shop)
 
