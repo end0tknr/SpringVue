@@ -6,7 +6,8 @@ from psycopg2  import extras # for bulk insert
 from selenium import webdriver # ex. pip install selenium==4.1.3
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from service.city  import CityService
+from service.city                import CityService
+from service.mlit_realestateshop import MlitRealEstateShopService
 from util.db import Db
 
 import appbase
@@ -15,6 +16,7 @@ import json
 import re
 import sys
 import time
+import unicodedata   # 標準module
 import urllib.parse
 import urllib.request
 
@@ -50,14 +52,14 @@ base_urls = [
     # 新築マンションは価格等が記載されていないことが多い為、無視
     #[base_host+"/ms/shinchiku/",  "新築マンション"]
 ]
-disp_keys = [
-    'base_url','物件名', '販売価格', '所在地','沿線・駅',
-    '間取り','建物面積','専有面積','土地面積'
-]
-http_conf = {
-    "retry_limit" : 10,
-    "retry_sleep" : 10,
-}
+
+http_conf = {"retry_limit":5, "retry_sleep":5 }
+re_compile_licenses = [
+    re.compile("((国土交通大臣).{0,6}第(\d\d+)号)"),
+    # refer to https://techacademy.jp/magazine/20932
+    re.compile("((神奈川県|和歌山県|鹿児島県|[一-龥]{2}[都道府県])"+
+               ".{0,10}知事.{0,6}第(\d\d+)号)") ]
+
 
 bulk_insert_size = 20
 logger = None
@@ -76,6 +78,7 @@ SET pref=%s, city=%s, address=%s
 WHERE address=%s
 """
         sql_args = (pref,city,other,address_org)
+        #print(sql_args)
         
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:
@@ -380,14 +383,17 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
     def get_http_requests(self, result_url):
         i = 0
         while i < http_conf["retry_limit"]:
-            i += 1
-            result = None
             try:
                 html_content = urllib.request.urlopen(result_url).read()
                 return html_content
-            except:
-                logger.warning("retry requests.get() " + result_url)
+            except Exception as e:
+                if "404: Not Found" in str(e):
+                    return None
+                
+                logger.warning(e)
+                logger.warning("retry " + result_url)
                 time.sleep(http_conf["retry_sleep"])
+            i += 1
 
         logger.error("requests.get() " + result_url)
         return None
@@ -698,3 +704,163 @@ limit 1
 
         return self.get_vals_group_by_city_sub(start_date_str,end_date_str)
 
+
+    def save_bukken_details(self):
+        org_bukkens = self.get_bukkens_for_detail()
+
+        i = 0
+        for org_bukken in org_bukkens:
+            i += 1
+            if i % 100 == 0:
+                logger.info("%d/%d" % (i,len(org_bukkens)))
+
+            if not org_bukken["url"]:
+                continue
+            
+            bukken_detail = self.parse_bukken_detail( org_bukken )
+            if not bukken_detail:
+                continue
+            
+            self.save_bukken_detail(org_bukken["url"], bukken_detail)
+
+    def save_bukken_detail(self, url,bukken_detail):
+        
+        sql = """
+UPDATE suumo_bukken
+SET shop=%s, total_house=%s, house_for_sale=%s, show_date=%s
+WHERE url=%s
+"""
+        sql_args = (bukken_detail["shop"],
+                    bukken_detail["total_house"],
+                    bukken_detail["house_for_sale"],
+                    bukken_detail["show_date"],
+                    url)
+        #print(sql_args)
+
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                result = db_cur.execute(sql,sql_args)
+                db_conn.commit()
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                logger.error(url)
+                return False
+        return True
+        
+        
+    def parse_bukken_detail(self, org_bukken):
+
+        req_url = org_bukken["url"] + "bukkengaiyo/"
+
+        html_content = self.get_http_requests( req_url )
+        if not html_content:
+            logger.warning("fail "+ req_url)
+            return None
+
+        ret_data = {"url": org_bukken["url"] }
+        soup = BeautifulSoup(html_content, 'html.parser')
+        
+        shop_def = self.parse_bukken_shop(soup)
+        if shop_def:
+            ret_data["shop"] = shop_def["shop"]
+        else:
+            logger.warning("no shop_def %s" %(req_url,))
+            ret_data["shop"] = None
+
+        house_count = self.parse_bukken_house_count(soup)
+        ret_data.update(house_count)
+
+        ret_data["show_date"] = self.parse_bukken_show_date(soup)
+
+        return ret_data
+    
+
+    def parse_bukken_house_count(self, soup):
+        all_text = soup.text.strip().replace("\n"," ")
+        
+        re_compile_1 = re.compile("販売.*?数.*?(\d+)\s*(戸|室|棟|区画)")
+        re_compile_2 = re.compile("総.*?数.*?(\d+)\s*(戸|室|棟|区画)")
+
+        ret_data = {}
+        re_result = re_compile_1.search(all_text)
+        if re_result:
+            # なぜか全角文字が紛れ込むようですので NFKC
+            ret_data["house_for_sale"] = \
+                unicodedata.normalize("NFKC",re_result.group(1))
+        else:
+            ret_data["house_for_sale"] = None
+            
+        re_result = re_compile_2.search(all_text)
+        if re_result:
+            # なぜか全角文字が紛れ込むようですので NFKC
+            ret_data["total_house"] = \
+                unicodedata.normalize("NFKC",re_result.group(1))
+
+        else:
+            ret_data["total_house"] = None
+            
+        return ret_data
+    
+    def parse_bukken_show_date(self, soup):
+        all_text = soup.text.strip().replace("\n"," ")
+        re_compile = re.compile("情報提供日.{0,10}(20\d+)年(\d+)月(\d+)日")
+        re_result = re_compile.search(all_text)
+        if not re_result:
+            return None
+
+        show_date = "%s-%s-%s" % (re_result.group(1),
+                                  re_result.group(2),
+                                  re_result.group(3))
+        ret_date = unicodedata.normalize("NFKC",show_date) #全角→半角
+            
+        return ret_date
+    
+        
+    def parse_bukken_shop(self, soup):
+        all_text = soup.text.strip()
+
+        shop_service = MlitRealEstateShopService()
+
+        for re_compile in re_compile_licenses:
+            re_result = re_compile.search( all_text )
+            if not re_result:
+                continue
+                
+            # print(re_result.group(1))
+            government = re_result.group(2)
+            licence    = unicodedata.normalize("NFKC",re_result.group(3))
+            licence    = "第%06d号" % (int(licence))
+
+            return shop_service.get_def_by_licence(government,licence)
+        return {}
+    
+    
+    def get_bukkens_for_detail(self):
+        ret_rows = []
+        sql = """
+SELECT * FROM suumo_bukken
+WHERE show_date is not null and shop is null and check_date >= %s
+"""
+        limit_date = datetime.date.today() + datetime.timedelta(days=-10)
+        limit_date_str = limit_date.strftime('%Y-%m-%d')
+        logger.info("limit_date:"+ limit_date_str)
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql,(limit_date_str,))
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+
+                ret_rows = db_cur.fetchall()
+                
+        ret_datas = []
+        for ret_row in ret_rows:
+            ret_row = dict( ret_row )
+            ret_datas.append( ret_row )
+        return ret_rows
+        

@@ -536,6 +536,7 @@ shop            varchar(64),
 total_house     int,
 house_for_sale  int,
 found_date      date,
+show_date       date,
 check_date      date,
 primary key ( build_type,bukken_name,pref,city,address,plan,
               build_area_org,land_area_org,build_year)

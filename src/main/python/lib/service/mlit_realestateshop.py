@@ -185,3 +185,24 @@ class MlitRealEstateShopService(appbase.AppBase):
                 return img_elm
         return None
             
+    def get_def_by_licence(self,government,licence):
+
+        sql = """
+select * from real_estate_shop
+where government=%s and  licence=%s
+"""
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql,(government,licence))
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return {}
+
+            ret_rows = db_cur.fetchall()
+            if len(ret_rows):
+                return dict(ret_rows[0])
+
+            logger.warning("Not found %s %s" % (government,licence))
+            return None
