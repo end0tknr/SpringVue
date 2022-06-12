@@ -8,7 +8,7 @@ from service.suumo import SuumoService
 
 def main():
     suumo_service = SuumoService()
-    suumo_service.save_bukken_details()
+    suumo_service.save_bukken_details( '新築戸建' )
 
 if __name__ == '__main__':
     main()

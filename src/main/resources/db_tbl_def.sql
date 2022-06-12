@@ -542,6 +542,9 @@ primary key ( build_type,bukken_name,pref,city,address,plan,
               build_area_org,land_area_org,build_year)
 );
 
+CREATE INDEX suumo_bukken_url ON suumo_bukken (url);
+
+
 -- CREATE TABLE IF NOT EXISTS lifell_bukken (
 -- build_type      varchar(32)  NOT NULL DEFAULT '',
 -- bukken_name     varchar(64)  NOT NULL DEFAULT '',

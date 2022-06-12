@@ -31,24 +31,24 @@ browser_conf = {
     "implicitly_wait": 10 }
 
 pref_names = [
-    # "hokkaido","aomori","iwate","miyagi","akita","yamagata",
-    # "fukushima","ibaraki","tochigi",
-    # "gumma",            # suumo では、gunma でなく gumma
-    # "saitama","chiba",
+    "hokkaido","aomori","iwate","miyagi","akita","yamagata",
+    "fukushima","ibaraki","tochigi",
+    "gumma",            # suumo では、gunma でなく gumma
+    "saitama","chiba",
     "tokyo",
-    # "kanagawa",
-    # "niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu",
-    # "shizuoka","aichi","mie","shiga","kyoto","osaka","hyogo","nara",
-    # "wakayama","tottori","shimane","okayama","hiroshima","yamaguchi",
-    # "tokushima","kagawa","ehime","kochi","fukuoka","saga","nagasaki",
-    # "kumamoto","oita","miyazaki", "kagoshima"
+    "kanagawa",
+    "niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu",
+    "shizuoka","aichi","mie","shiga","kyoto","osaka","hyogo","nara",
+    "wakayama","tottori","shimane","okayama","hiroshima","yamaguchi",
+    "tokushima","kagawa","ehime","kochi","fukuoka","saga","nagasaki",
+    "kumamoto","oita","miyazaki", "kagoshima"
 ]
 
 base_host = "https://suumo.jp"
 base_urls = [
     [base_host+"/ikkodate/",       "新築戸建"],
-    # [base_host+"/chukoikkodate/",  "中古戸建"],
-    # [base_host+"/ms/chuko/",       "中古マンション"],
+    [base_host+"/chukoikkodate/",  "中古戸建"],
+    [base_host+"/ms/chuko/",       "中古マンション"],
     # 新築マンションは価格等が記載されていないことが多い為、無視
     #[base_host+"/ms/shinchiku/",  "新築マンション"]
 ]
@@ -60,8 +60,12 @@ re_compile_licenses = [
     re.compile("((神奈川県|和歌山県|鹿児島県|[一-龥]{2}[都道府県])"+
                ".{0,10}知事.{0,6}第(\d\d+)号)") ]
 
+re_compile_house_count_1 = re.compile("販売.*?数.*?(\d+)\s*(戸|室|棟|区画)")
+re_compile_house_count_2 = re.compile("総.*?数.*?(\d+)\s*(戸|室|棟|区画)")
+re_compile_show_date = re.compile("情報提供日.{0,10}(20\d+)年(\d+)月(\d+)日")
 
-bulk_insert_size = 20
+
+check_date_diff = -3
 logger = None
 
 class SuumoService(appbase.AppBase):
@@ -168,6 +172,7 @@ SELECT * FROM suumo_bukken where pref =''
         
     def save_bukken_infos(self, build_type, bukken_infos):
 
+        bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
         date_str = datetime.datetime.now().strftime('%Y-%m-%d')
         row_groups = self.divide_rows_info(build_type,
                                            bukken_infos,
@@ -705,14 +710,14 @@ limit 1
         return self.get_vals_group_by_city_sub(start_date_str,end_date_str)
 
 
-    def save_bukken_details(self):
-        org_bukkens = self.get_bukkens_for_detail()
+    def save_bukken_details(self,build_type):
+        org_bukkens = self.get_bukkens_for_detail(build_type)
 
         i = 0
         for org_bukken in org_bukkens:
             i += 1
             if i % 100 == 0:
-                logger.info("%d/%d" % (i,len(org_bukkens)))
+                logger.info("%s %d/%d" % (build_type,i,len(org_bukkens)))
 
             if not org_bukken["url"]:
                 continue
@@ -780,11 +785,8 @@ WHERE url=%s
     def parse_bukken_house_count(self, soup):
         all_text = soup.text.strip().replace("\n"," ")
         
-        re_compile_1 = re.compile("販売.*?数.*?(\d+)\s*(戸|室|棟|区画)")
-        re_compile_2 = re.compile("総.*?数.*?(\d+)\s*(戸|室|棟|区画)")
-
         ret_data = {}
-        re_result = re_compile_1.search(all_text)
+        re_result = re_compile_house_count_1.search(all_text)
         if re_result:
             # なぜか全角文字が紛れ込むようですので NFKC
             ret_data["house_for_sale"] = \
@@ -792,7 +794,7 @@ WHERE url=%s
         else:
             ret_data["house_for_sale"] = None
             
-        re_result = re_compile_2.search(all_text)
+        re_result = re_compile_house_count_2.search(all_text)
         if re_result:
             # なぜか全角文字が紛れ込むようですので NFKC
             ret_data["total_house"] = \
@@ -805,8 +807,7 @@ WHERE url=%s
     
     def parse_bukken_show_date(self, soup):
         all_text = soup.text.strip().replace("\n"," ")
-        re_compile = re.compile("情報提供日.{0,10}(20\d+)年(\d+)月(\d+)日")
-        re_result = re_compile.search(all_text)
+        re_result = re_compile_show_date.search(all_text)
         if not re_result:
             return None
 
@@ -837,20 +838,45 @@ WHERE url=%s
         return {}
     
     
-    def get_bukkens_for_detail(self):
+    def get_last_check_date(self):
+        sql = """
+SELECT check_date FROM suumo_bukken
+ORDER BY check_date DESC
+LIMIT 1
+"""
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return None
+
+            ret_rows = db_cur.fetchall()
+            ret_row = dict( ret_rows[0] )
+            return str( ret_row["check_date"] )
+        return None
+
+        
+    def get_bukkens_for_detail(self, build_type):
         ret_rows = []
         sql = """
 SELECT * FROM suumo_bukken
-WHERE show_date is not null and shop is null and check_date >= %s
+WHERE build_type=%s and check_date >= %s
 """
-        limit_date = datetime.date.today() + datetime.timedelta(days=-10)
+        chk_date_str = self.get_last_check_date()
+        chk_date = datetime.datetime.strptime(chk_date_str, '%Y-%m-%d')
+        
+        limit_date = chk_date + datetime.timedelta(days= check_date_diff )
         limit_date_str = limit_date.strftime('%Y-%m-%d')
+        
         logger.info("limit_date:"+ limit_date_str)
         
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:
                 try:
-                    db_cur.execute(sql,(limit_date_str,))
+                    db_cur.execute(sql,(build_type,limit_date_str))
                 except Exception as e:
                     logger.error(e)
                     logger.error(sql)
