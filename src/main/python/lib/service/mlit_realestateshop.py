@@ -37,7 +37,7 @@ class MlitRealEstateShopService(appbase.AppBase):
     def download_and_save_master(self):
         logger.info("start")
 
-        pref_no     = 13
+        pref_no     = 1
         max_pref_no = 47 # 47都道府県
 
         while pref_no <= max_pref_no:
@@ -45,8 +45,9 @@ class MlitRealEstateShopService(appbase.AppBase):
             logger.info(req_url)
 
             browser = self.get_browser()
+            time.sleep(2)
             browser.get(req_url)
-
+            time.sleep(2)
             search_btn = self.find_search_btn( browser )
             search_btn.click()
             
@@ -99,7 +100,7 @@ class MlitRealEstateShopService(appbase.AppBase):
 
             next_btn = self.find_next_btn( browser )
             next_btn.click()
-            time.sleep(2)
+            time.sleep(3)
             i += 1
 
         ret_datas = []
