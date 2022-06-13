@@ -65,7 +65,7 @@ re_compile_house_count_1 = re.compile("販売.*?数.*?(\d+)\s*(戸|室|棟|区�
 re_compile_house_count_2 = re.compile("総.*?数.*?(\d+)\s*(戸|室|棟|区画)")
 re_compile_show_date = re.compile("情報提供日.{0,10}(20\d+)年(\d+)月(\d+)日")
 
-parallel_size = 5       # 並列処理用
+parallel_size = 4  # 並列処理用
 
 check_date_diff = -3
 logger = None
@@ -802,6 +802,10 @@ WHERE url=%s
         
         
     def parse_bukken_detail(self, org_bukken):
+        if not "url" in org_bukken or not org_bukken["url"]:
+            logger.error( "no url" )
+            logger.error( org_bukken )
+            return None
 
         req_url = org_bukken["url"] + "bukkengaiyo/"
 
