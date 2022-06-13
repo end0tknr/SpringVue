@@ -11,6 +11,7 @@ from service.mlit_realestateshop import MlitRealEstateShopService
 from util.db import Db
 
 import appbase
+import concurrent.futures
 import datetime
 import json
 import re
@@ -64,6 +65,7 @@ re_compile_house_count_1 = re.compile("販売.*?数.*?(\d+)\s*(戸|室|棟|区�
 re_compile_house_count_2 = re.compile("総.*?数.*?(\d+)\s*(戸|室|棟|区画)")
 re_compile_show_date = re.compile("情報提供日.{0,10}(20\d+)年(\d+)月(\d+)日")
 
+parallel_size = 5       # 並列処理用
 
 check_date_diff = -3
 logger = None
@@ -712,21 +714,65 @@ limit 1
 
     def save_bukken_details(self,build_type):
         org_bukkens = self.get_bukkens_for_detail(build_type)
+        org_size = len(org_bukkens)
 
-        i = 0
-        for org_bukken in org_bukkens:
-            i += 1
-            if i % 100 == 0:
-                logger.info("%s %d/%d" % (build_type,i,len(org_bukkens)))
+        while len(org_bukkens) >= parallel_size:
+            parallels = []
+            i = 0
+            while i < parallel_size:
 
-            if not org_bukken["url"]:
-                continue
+                calced = org_size - len(org_bukkens) 
+                if calced % 100 == 0:
+                    logger.info("%s %d/%d" % (build_type,calced,org_size))
+
+                # refer to https://pystyle.info/python-concurrent-futures/
+                
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                # with concurrent.futures.ProcessPoolExecutor() as executor:
+                    future = executor.submit(self.parse_bukken_detail,
+                                             org_bukkens.pop() )
+                    parallels.append(future)
+                    i += 1
             
-            bukken_detail = self.parse_bukken_detail( org_bukken )
+            for parallel in parallels:
+                bukken_detail = parallel.result()
+                if not bukken_detail:
+                    continue
+                self.save_bukken_detail(bukken_detail["url"], bukken_detail)
+                
+        parallels = []
+        if len(org_bukkens):
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(self.parse_bukken_detail,
+                                         org_bukkens.pop() )
+                parallels.append(future)
+            i += 1
+
+        for parallel in parallels:
+            bukken_detail = parallel.result()
             if not bukken_detail:
                 continue
+            print(bukken_detail)
+            self.save_bukken_detail(bukken_detail["url"], bukken_detail)
             
-            self.save_bukken_detail(org_bukken["url"], bukken_detail)
+    
+    # def save_bukken_details(self,build_type):
+    #     org_bukkens = self.get_bukkens_for_detail(build_type)
+
+    #     i = 0
+    #     for org_bukken in org_bukkens:
+    #         i += 1
+    #         if i % 100 == 0:
+    #             logger.info("%s %d/%d" % (build_type,i,len(org_bukkens)))
+
+    #         if not org_bukken["url"]:
+    #             continue
+
+    #         bukken_detail = self.parse_bukken_detail( org_bukken )
+    #         if not bukken_detail:
+    #             continue
+            
+    #         self.save_bukken_detail(org_bukken["url"], bukken_detail)
 
     def save_bukken_detail(self, url,bukken_detail):
         
@@ -863,7 +909,7 @@ LIMIT 1
         ret_rows = []
         sql = """
 SELECT * FROM suumo_bukken
-WHERE build_type=%s and check_date >= %s
+WHERE build_type=%s and check_date >= %s and shop is null
 """
         chk_date_str = self.get_last_check_date()
         chk_date = datetime.datetime.strptime(chk_date_str, '%Y-%m-%d')

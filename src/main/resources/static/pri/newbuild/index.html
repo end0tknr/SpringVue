@@ -7,6 +7,7 @@
   <link rel="icon" href="/site_logo.svg" type="image/svg+xml">
   <title>15DB</title>
   <link rel="stylesheet" href="/pri/css/common.css">
+  <link rel="stylesheet" href="japan_map.css">
   <style>
     /* refer to https://csshtml.work/table-scroll/ */
     table th {
@@ -57,6 +58,34 @@
         background-position: 0% 90%;
         background-repeat: no-repeat;
     }
+
+    #open_jpn_map_modal { cursor: pointer;}
+    #close_jpn_map_modal { cursor: pointer;
+                           width: 150px;
+                           border: 1px solid #ccc;
+                           border-radius: 4px;
+                           text-align: center;
+                           margin: 16px auto 0; }
+    #mask { background: rgba(0, 0, 0, 0.4);
+            position: fixed;
+            top:0; bottom:0; right:0; left:0;
+            z-index: 1; }
+    #mask.hidden { display: none; }
+    
+    #jpn_map_modal {background: #fff;
+            width: 800px;
+            padding: 10px;
+            border-radius: 4px;
+            position: absolute;
+            top: 40px;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            z-index: 2; }
+    @media screen and (max-width: 600px) {
+	#jpn_map_modal {width: 100%;}
+    }
+
   </style>
 </head>
 <body>
@@ -71,7 +100,9 @@
     <h1>東京都</h1>
     <div class="container_title_sub">
       <div>YYYY/MM/DD ～ YYYY/MM/DD</div>
-      <div class="container_title_sub_right"><a href="">都道府県変更</a></div>
+      <div class="container_title_sub_right">
+        <a id="open_jpn_map_modal">都道府県選択</a>
+      </div>
     </div>
   </div><!--.container_title-->
 
@@ -339,7 +370,7 @@
         </table>
         </div>
 
-	
+        
       <h2>地区別</h2>
 
       <div class="scroll_tbl2">
@@ -562,8 +593,192 @@
     &copy; <span class="copyright_year"></span>
     end0tknr
   </footer>
+
+  <div id="mask" class="hidden"></div>
+  
+  <section id="jpn_map_modal" class="hidden">
+<div id="japan-map" class="clearfix">
+
+  <div id="hokkaido-touhoku" class="clearfix">
+    
+  <p class="area-title">北海道・東北</p>
+  <div class="area">
+    <a href="#">
+      <div id="hokkaido"><p>北海道</p></div></a>
+    <a href="#">
+      <div id="aomori"><p>青森</p></div></a>
+    <a href="#">
+      <div id="akita"><p>秋田</p></div></a>
+    <a href="#">
+      <div id="iwate"><p>岩手</p></div></a>
+    <a href="#">
+      <div id="yamagata"><p>山形</p></div></a>
+    <a href="#">
+      <div id="miyagi"><p>宮城</p></div></a>
+    <a href="#">
+      <div id="fukushima"><p>福島</p></div></a>
+  </div>
+</div>
+
+<div id="kantou">
+  <p class="area-title">関東</p>
+  
+  <div class="area">
+    <a href="#">
+      <div id="gunma"><p>群馬</p></div></a>
+    <a href="#">
+      <div id="tochigi"><p>栃木</p></div></a>
+    <a href="#">
+      <div id="ibaraki"><p>茨城</p></div></a>
+    <a href="#">
+      <div id="saitama"><p>埼玉</p></div></a>
+    <a href="#">
+      <div id="chiba"><p>千葉</p></div></a>
+    <a href="#">
+      <div id="tokyo"><p>東京</p></div></a>
+    <a href="#">
+      <div id="kanagawa"><p>神奈川</p></div>
+    </a>
+  </div>
+</div>
+
+<div id="tyubu" class="clearfix">
+  <p class="area-title">中部</p>
+  
+  <div class="area">
+    <a href="#">
+      <div id="nigata"><p>新潟</p></div></a>
+    <a href="#">
+      <div id="toyama"><p>富山</p></div></a>
+    <a href="#">
+      <div id="ishikawa"><p>石川</p></div></a>
+    <a href="#">
+      <div id="fukui"><p>福井</p></div></a>
+    <a href="#">
+      <div id="nagano"><p>長野</p></div>
+    </a>
+    <a href="#">
+      <div id="gifu"><p>岐阜</p></div></a>
+    <a href="#">
+      <div id="yamanashi"><p>山梨</p></div></a>
+    <a href="#">
+      <div id="aichi"><p>愛知</p></div></a>
+    <a href="#">
+      <div id="shizuoka"><p>静岡</p></div>
+    </a>
+  </div>
+</div>
+
+<div id="kinki" class="clearfix">
+  <p class="area-title">近畿</p>
+  
+  <div class="area">
+    <a href="#">
+      <div id="kyoto"><p>京都</p></div></a>
+    <a href="#">
+      <div id="shiga"><p>滋賀</p></div></a>
+    <a href="#">
+      <div id="osaka"><p>大阪</p></div></a>
+    <a href="#">
+      <div id="nara"><p>奈良</p></div></a>
+    <a href="#">
+      <div id="mie"><p>三重</p></div></a>
+    <a href="#">
+      <div id="wakayama"><p>和歌山</p></div></a>
+    <a href="#">
+      <div id="hyougo"><p>兵庫</p></div></a>
+  </div>
+</div>
+
+<div id="tyugoku" class="clearfix">
+  <p class="area-title">中国</p>
+  
+  <div class="area">
+    <a href="#">
+      <div id="tottori"><p>鳥取</p></div></a>
+    <a href="#">
+      <div id="okayama"><p>岡山</p></div></a>
+    <a href="#">
+      <div id="shimane"><p>島根</p></div></a>
+    <a href="#">
+      <div id="hiroshima"><p>広島</p></div></a>
+    <a href="#">
+      <div id="yamaguchi"><p>山口</p></div>
+    </a>
+  </div>
+</div>
+
+<div id="shikoku" class="clearfix">
+  <p class="area-title">四国</p>
+  
+  <div class="area">
+    <a href="#">
+      <div id="kagawa"><p>香川</p></div></a>
+    <a href="#">
+      <div id="ehime"><p>愛媛</p></div></a>
+    <a href="#">
+      <div id="tokushima"><p>徳島</p></div>
+    </a>
+    <a href="#">
+      <div id="kouchi"><p>高知</p></div></a>
+  </div>
+</div>
+
+<div id="kyusyu" class="clearfix">
+  <p class="area-title">九州</p>
+  
+  <div class="area">
+    <a href="#">
+      <div id="fukuoka"><p>福岡</p></div></a>
+    <a href="#">
+      <div id="saga"><p>佐賀</p></div></a>
+    <a href="#">
+      <div id="nagasaki"><p>長崎</p></div></a>
+    <a href="#">
+      <div id="oita"><p>大分</p></div></a>
+    <a href="#">
+      <div id="kumamoto"><p>熊本</p></div>
+    </a>
+    <a href="#">
+      <div id="miyazaki"><p>宮崎</p></div></a>
+    <a href="#">
+      <div id="kagoshima"><p>鹿児島</p></div></a>
+  </div>
+</div>
+
+</div> <!-- japan-map -->
+
+    <div id="close_jpn_map_modal">
+      close
+    </div>
+  </section>
+
+  
   <script src="/pri/js/common.js"></script>
   <script src="/pri/js/AppBase.js"></script>
   <script src="/pri/js/NewBuild.js"></script>
+  <script>
+    'use strict';
+    {
+        const close = document.getElementById('close_jpn_map_modal' );
+        const modal = document.getElementById('jpn_map_modal');
+        const mask  = document.getElementById('mask');
+        
+        document.getElementById('open_jpn_map_modal').addEventListener(
+            'click', () => {
+                modal.classList.remove('hidden');
+                mask.classList.remove('hidden');
+            });
+        
+        close.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            mask.classList.add('hidden');
+        });
+        
+        mask.addEventListener('click', () => {
+            close.click();
+        });
+    }
+  </script>
 </body>
 </html>
