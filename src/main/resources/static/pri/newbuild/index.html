@@ -7,86 +7,7 @@
   <link rel="icon" href="/site_logo.svg" type="image/svg+xml">
   <title>15DB</title>
   <link rel="stylesheet" href="/pri/css/common.css">
-  <link rel="stylesheet" href="japan_map.css">
-  <style>
-    /* refer to https://csshtml.work/table-scroll/ */
-    table th {
-        font-weight: normal;
-    }
-    
-    .scroll_tbl,
-    .scroll_tbl2 {
-      overflow: auto;
-      width: 100%;
-      height: 200px;
-    }
-    .scroll_tbl  th,
-    .scroll_tbl2 th {
-        background: #FFF;
-        position: sticky;
-        top:  0;
-        left: 0;
-    }
-    .scroll_tbl  td,
-    .scroll_tbl2 td {
-        padding: 0 10px;
-    }
-  
-    .scroll_tbl tr:nth-child(1) th {
-        font-weight: bold;
-    }
-    .scroll_tbl2 tr:nth-child(1) th,
-    .scroll_tbl2 tr:nth-child(2) th {
-        font-weight: bold;
-    }
-    
-    .scroll_tbl  th div,
-    .scroll_tbl2 th div {
-        width: 100px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-  
-    .scroll_tbl  tr:first-child th:first-child,
-    .scroll_tbl2 tr:first-child th:first-child {
-        z-index: 1;
-    }
-    
-    .graph_bar {
-        background-image:url("/pri/img/graph_bar_blue.svg");
-        background-position: 0% 90%;
-        background-repeat: no-repeat;
-    }
-
-    #open_jpn_map_modal { cursor: pointer;}
-    #close_jpn_map_modal { cursor: pointer;
-                           width: 150px;
-                           border: 1px solid #ccc;
-                           border-radius: 4px;
-                           text-align: center;
-                           margin: 16px auto 0; }
-    #mask { background: rgba(0, 0, 0, 0.4);
-            position: fixed;
-            top:0; bottom:0; right:0; left:0;
-            z-index: 1; }
-    #mask.hidden { display: none; }
-    
-    #jpn_map_modal {background: #fff;
-            width: 800px;
-            padding: 10px;
-            border-radius: 4px;
-            position: absolute;
-            top: 40px;
-            left: 0;
-            right: 0;
-            margin: 0 auto;
-            z-index: 2; }
-    @media screen and (max-width: 600px) {
-	#jpn_map_modal {width: 100%;}
-    }
-
-  </style>
+  <link rel="stylesheet" href="/pri/css/newbuild.css">
 </head>
 <body>
 
@@ -96,15 +17,20 @@
   <div class="page_top">
   </div><!--.page_top-->
 
-  <div class="container_title">
-    <h1>東京都</h1>
-    <div class="container_title_sub">
-      <div>YYYY/MM/DD ～ YYYY/MM/DD</div>
-      <div class="container_title_sub_right">
-        <a id="open_jpn_map_modal">都道府県選択</a>
+  <div id="vueapp">
+    
+    <div class="container_title">
+      <h1 id="pref_name">{{pref_name}}</h1>
+      <div class="container_title_sub">
+        <div>
+          <input type="date" name="disp_date_from">
+        </div>
+        <div class="container_title_sub_right">
+          <a  v-on:click="show_jpn_map_modal">都道府県選択</a>
+        </div>
       </div>
-    </div>
-  </div><!--.container_title-->
+    </div><!--.container_title-->
+    
 
   <div class="page_middle">
     <div class="page_middle_container">
@@ -124,47 +50,27 @@
             <th>数</th><th>前回比</th><th>価格</th>
             <th>数</th><th>前回比</th><th>価格</th>
           </tr>
-          <tr>
-            <th><div>積水ハウス</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>旭化成</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>セキスイハイム</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>住友林業</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>ダイワハウス</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>飯田ホールディングス</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>兼六ホームズ</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td>
+
+          <tr v-for="shop_data in shop_datas">
+            <th><div>{{ shop_data.shop }}</div></th>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:shop_data.sold_count_graph+'px 4px'}">
+              {{ shop_data.sold_count }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:shop_data.sold_count_diff_graph+'px 4px'}">
+              {{ shop_data.sold_count_diff }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:shop_data.sold_price_graph+'px 4px'}">
+              {{ shop_data.sold_price }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:shop_data.on_sale_count_graph+'px 4px'}">
+              {{ shop_data.on_sale_count }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:shop_data.on_sale_count_diff_graph+'px 4px'}">
+            {{ shop_data.on_sale_count_diff }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:shop_data.on_sale_price_graph+'px 4px'}">
+            {{ shop_data.on_sale_price }}</td>
           </tr>
         </table>
         
@@ -264,7 +170,7 @@
   </div><!--.page_middle-->
   
   <div class="container_title">
-    <h1>国分寺市</h1>
+    <h1>市区町村</h1>
     <div class="container_title_sub"></div>
     <div class="container_title_sub_right"></div>
   </div><!--.container_title-->
@@ -597,188 +503,116 @@
   <div id="mask" class="hidden"></div>
   
   <section id="jpn_map_modal" class="hidden">
-<div id="japan-map" class="clearfix">
+    <div id="japan-map" class="clearfix">
 
-  <div id="hokkaido-touhoku" class="clearfix">
+      <div id="hokkaido-touhoku" class="clearfix">
     
-  <p class="area-title">北海道・東北</p>
-  <div class="area">
-    <a href="#">
-      <div id="hokkaido"><p>北海道</p></div></a>
-    <a href="#">
-      <div id="aomori"><p>青森</p></div></a>
-    <a href="#">
-      <div id="akita"><p>秋田</p></div></a>
-    <a href="#">
-      <div id="iwate"><p>岩手</p></div></a>
-    <a href="#">
-      <div id="yamagata"><p>山形</p></div></a>
-    <a href="#">
-      <div id="miyagi"><p>宮城</p></div></a>
-    <a href="#">
-      <div id="fukushima"><p>福島</p></div></a>
-  </div>
-</div>
+        <p class="area-title">北海道・東北</p>
+        <div class="area">
+          <div id="hokkaido">北海道</div>
+          <div id="aomori">青森</div>
+          <div id="akita">秋田</div>
+          <div id="iwate">岩手</div>
+          <div id="yamagata">山形</div>
+          <div id="miyagi">宮城</div>
+          <div id="fukushima">福島</div>
+        </div>
+      </div><!--#hokkaido-touhoku-->
 
-<div id="kantou">
-  <p class="area-title">関東</p>
+      <div id="kantou">
+        <p class="area-title">関東</p>
   
-  <div class="area">
-    <a href="#">
-      <div id="gunma"><p>群馬</p></div></a>
-    <a href="#">
-      <div id="tochigi"><p>栃木</p></div></a>
-    <a href="#">
-      <div id="ibaraki"><p>茨城</p></div></a>
-    <a href="#">
-      <div id="saitama"><p>埼玉</p></div></a>
-    <a href="#">
-      <div id="chiba"><p>千葉</p></div></a>
-    <a href="#">
-      <div id="tokyo"><p>東京</p></div></a>
-    <a href="#">
-      <div id="kanagawa"><p>神奈川</p></div>
-    </a>
-  </div>
-</div>
+        <div class="area">
+          <div id="gunma"><p>群馬</p></div>
+          <div id="tochigi"><p>栃木</p></div>
+          <div id="ibaraki"><p>茨城</p></div>
+          <div id="saitama"><p>埼玉</p></div>
+          <div id="chiba"><p>千葉</p></div>
+          <div id="tokyo"><p>東京</p></div>
+          <div id="kanagawa"><p>神奈川</p></div>
+        </div>
+      </div><!--#kantou-->
 
-<div id="tyubu" class="clearfix">
-  <p class="area-title">中部</p>
+      <div id="tyubu" class="clearfix">
+        <p class="area-title">中部</p>
   
-  <div class="area">
-    <a href="#">
-      <div id="nigata"><p>新潟</p></div></a>
-    <a href="#">
-      <div id="toyama"><p>富山</p></div></a>
-    <a href="#">
-      <div id="ishikawa"><p>石川</p></div></a>
-    <a href="#">
-      <div id="fukui"><p>福井</p></div></a>
-    <a href="#">
-      <div id="nagano"><p>長野</p></div>
-    </a>
-    <a href="#">
-      <div id="gifu"><p>岐阜</p></div></a>
-    <a href="#">
-      <div id="yamanashi"><p>山梨</p></div></a>
-    <a href="#">
-      <div id="aichi"><p>愛知</p></div></a>
-    <a href="#">
-      <div id="shizuoka"><p>静岡</p></div>
-    </a>
-  </div>
-</div>
+        <div class="area">
+          <div id="nigata"><p>新潟</p></div>
+          <div id="toyama"><p>富山</p></div>
+          <div id="ishikawa"><p>石川</p></div>
+          <div id="fukui"><p>福井</p></div>
+          <div id="nagano"><p>長野</p></div>
+          <div id="gifu"><p>岐阜</p></div>
+          <div id="yamanashi"><p>山梨</p></div>
+          <div id="aichi"><p>愛知</p></div>
+          <div id="shizuoka"><p>静岡</p></div>
+        </div>
+      </div><!--#tyubu-->
 
-<div id="kinki" class="clearfix">
-  <p class="area-title">近畿</p>
+      <div id="kinki" class="clearfix">
+        <p class="area-title">近畿</p>
   
-  <div class="area">
-    <a href="#">
-      <div id="kyoto"><p>京都</p></div></a>
-    <a href="#">
-      <div id="shiga"><p>滋賀</p></div></a>
-    <a href="#">
-      <div id="osaka"><p>大阪</p></div></a>
-    <a href="#">
-      <div id="nara"><p>奈良</p></div></a>
-    <a href="#">
-      <div id="mie"><p>三重</p></div></a>
-    <a href="#">
-      <div id="wakayama"><p>和歌山</p></div></a>
-    <a href="#">
-      <div id="hyougo"><p>兵庫</p></div></a>
-  </div>
-</div>
+        <div class="area">
+          <div id="kyoto"><p>京都</p></div>
+          <div id="shiga"><p>滋賀</p></div>
+          <div id="osaka"><p>大阪</p></div>
+          <div id="nara"><p>奈良</p></div>
+          <div id="mie"><p>三重</p></div>
+          <div id="wakayama"><p>和歌山</p></div>
+          <div id="hyougo"><p>兵庫</p></div>
+        </div>
+      </div><!--#kinki-->
 
-<div id="tyugoku" class="clearfix">
-  <p class="area-title">中国</p>
+      <div id="tyugoku" class="clearfix">
+        <p class="area-title">中国</p>
   
-  <div class="area">
-    <a href="#">
-      <div id="tottori"><p>鳥取</p></div></a>
-    <a href="#">
-      <div id="okayama"><p>岡山</p></div></a>
-    <a href="#">
-      <div id="shimane"><p>島根</p></div></a>
-    <a href="#">
-      <div id="hiroshima"><p>広島</p></div></a>
-    <a href="#">
-      <div id="yamaguchi"><p>山口</p></div>
-    </a>
-  </div>
-</div>
+        <div class="area">
+          <div id="tottori"><p>鳥取</p></div>
+          <div id="okayama"><p>岡山</p></div>
+          <div id="shimane"><p>島根</p></div>
+          <div id="hiroshima"><p>広島</p></div>
+          <div id="yamaguchi"><p>山口</p></div>
+        </div>
+      </div><!--#tyugoku-->
 
-<div id="shikoku" class="clearfix">
-  <p class="area-title">四国</p>
+      <div id="shikoku" class="clearfix">
+        <p class="area-title">四国</p>
   
-  <div class="area">
-    <a href="#">
-      <div id="kagawa"><p>香川</p></div></a>
-    <a href="#">
-      <div id="ehime"><p>愛媛</p></div></a>
-    <a href="#">
-      <div id="tokushima"><p>徳島</p></div>
-    </a>
-    <a href="#">
-      <div id="kouchi"><p>高知</p></div></a>
-  </div>
-</div>
+        <div class="area">
+          <div id="kagawa"><p>香川</p></div>
+          <div id="ehime"><p>愛媛</p></div>
+          <div id="tokushima"><p>徳島</p></div>
+          <div id="kouchi"><p>高知</p></div>
+        </div>
+      </div><!--#shikoku-->
 
-<div id="kyusyu" class="clearfix">
-  <p class="area-title">九州</p>
+      <div id="kyusyu" class="clearfix">
+        <p class="area-title">九州</p>
   
-  <div class="area">
-    <a href="#">
-      <div id="fukuoka"><p>福岡</p></div></a>
-    <a href="#">
-      <div id="saga"><p>佐賀</p></div></a>
-    <a href="#">
-      <div id="nagasaki"><p>長崎</p></div></a>
-    <a href="#">
-      <div id="oita"><p>大分</p></div></a>
-    <a href="#">
-      <div id="kumamoto"><p>熊本</p></div>
-    </a>
-    <a href="#">
-      <div id="miyazaki"><p>宮崎</p></div></a>
-    <a href="#">
-      <div id="kagoshima"><p>鹿児島</p></div></a>
-  </div>
-</div>
+        <div class="area">
+          <div id="fukuoka"><p>福岡</p></div>
+          <div id="saga"><p>佐賀</p></div>
+          <div id="nagasaki"><p>長崎</p></div>
+          <div id="oita"><p>大分</p></div>
+          <div id="kumamoto"><p>熊本</p></div>
+          <div id="miyazaki"><p>宮崎</p></div>
+          <div id="kagoshima"><p>鹿児島</p></div>
+        </div>
+      </div><!--#kyusyu-->
+      
+    </div> <!-- japan-map -->
 
-</div> <!-- japan-map -->
+    <div id="close_jpn_map_modal">close</div>
 
-    <div id="close_jpn_map_modal">
-      close
-    </div>
+  </div><!--#vueapp-->
+  
+    
   </section>
 
-  
-  <script src="/pri/js/common.js"></script>
+  <script src="/pri/js/Common.js"></script>
   <script src="/pri/js/AppBase.js"></script>
-  <script src="/pri/js/NewBuild.js"></script>
-  <script>
-    'use strict';
-    {
-        const close = document.getElementById('close_jpn_map_modal' );
-        const modal = document.getElementById('jpn_map_modal');
-        const mask  = document.getElementById('mask');
-        
-        document.getElementById('open_jpn_map_modal').addEventListener(
-            'click', () => {
-                modal.classList.remove('hidden');
-                mask.classList.remove('hidden');
-            });
-        
-        close.addEventListener('click', () => {
-            modal.classList.add('hidden');
-            mask.classList.add('hidden');
-        });
-        
-        mask.addEventListener('click', () => {
-            close.click();
-        });
-    }
-  </script>
+  <script src="https://unpkg.com/vue@next"></script>
+  <script src="/pri/js/app_conf.js"></script>
+  <script src="/pri/js/VueNewBuild.js"></script>
 </body>
 </html>

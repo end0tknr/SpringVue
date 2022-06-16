@@ -48,8 +48,8 @@ pref_names = [
 base_host = "https://suumo.jp"
 base_urls = [
     [base_host+"/ikkodate/",       "新築戸建"],
-    [base_host+"/chukoikkodate/",  "中古戸建"],
-    [base_host+"/ms/chuko/",       "中古マンション"],
+    #[base_host+"/chukoikkodate/",  "中古戸建"],
+    #[base_host+"/ms/chuko/",       "中古マンション"],
     # 新築マンションは価格等が記載されていないことが多い為、無視
     #[base_host+"/ms/shinchiku/",  "新築マンション"]
 ]
@@ -67,7 +67,7 @@ re_compile_show_date = re.compile("情報提供日.{0,10}(20\d+)年(\d+)月(\d+)
 
 parallel_size = 4  # 並列処理用
 
-check_date_diff = -3
+check_date_diff = -1
 logger = None
 
 class SuumoService(appbase.AppBase):
