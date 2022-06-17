@@ -47,8 +47,8 @@
           </tr>
           <tr>
             <th>会社</th>
-            <th>数</th><th>前回比</th><th>価格</th>
-            <th>数</th><th>前回比</th><th>価格</th>
+            <th>数</th><th>価格</th><th>販売日数</th>
+            <th>数</th><th>価格</th><th>販売日数</th>
           </tr>
 
           <tr v-for="shop_data in shop_datas">
@@ -57,115 +57,25 @@
                 v-bind:style="{backgroundSize:shop_data.sold_count_graph+'px 4px'}">
               {{ shop_data.sold_count }}</td>
             <td class="graph_bar"
-                v-bind:style="{backgroundSize:shop_data.sold_count_diff_graph+'px 4px'}">
-              {{ shop_data.sold_count_diff }}</td>
-            <td class="graph_bar"
                 v-bind:style="{backgroundSize:shop_data.sold_price_graph+'px 4px'}">
               {{ shop_data.sold_price }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:shop_data.sold_count_diff_graph+'px 4px'}">
+              {{ shop_data.sold_count_diff }}</td>
             <td class="graph_bar"
                 v-bind:style="{backgroundSize:shop_data.on_sale_count_graph+'px 4px'}">
               {{ shop_data.on_sale_count }}</td>
             <td class="graph_bar"
-                v-bind:style="{backgroundSize:shop_data.on_sale_count_diff_graph+'px 4px'}">
-            {{ shop_data.on_sale_count_diff }}</td>
-            <td class="graph_bar"
                 v-bind:style="{backgroundSize:shop_data.on_sale_price_graph+'px 4px'}">
             {{ shop_data.on_sale_price }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:shop_data.on_sale_count_diff_graph+'px 4px'}">
+            {{ shop_data.on_sale_count_diff }}</td>
           </tr>
         </table>
         
       </div><!--.scroll_tbl2-->
   
-
-      <h2>販売月数</h2>
-
-      <div class="scroll_tbl">
-        
-        <table>
-          <tr>
-            <th>会社</th>
-            <th>～3</th>
-            <th>～6</th>
-            <th>～9</th>
-            <th>～12</th>
-            <th>～15</th>
-            <th>～18</th>
-            <th>18～</th>
-          </tr>
-          <tr>
-            <th><div>積水ハウス</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-          </tr>
-          <tr>
-            <th><div>旭化成</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-          </tr>
-          <tr>
-            <th><div>セキスイハイム</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-          </tr>
-          <tr>
-            <th><div>住友林業</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-          </tr>
-          <tr>
-            <th><div>ダイワハウス</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-          </tr>
-          <tr>
-            <th><div>飯田ホールディングス</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-          </tr>
-          <tr>
-            <th><div>兼六ホームズ</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-          </tr>
-        </table>
-        
-      </div><!--.scroll_tbl2-->
-      
     </div><!--.page_middle_container-->
   </div><!--.page_middle-->
   

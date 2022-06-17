@@ -638,18 +638,6 @@ shop                    varchar(64),
 primary key(government,licence)
 );
 
-CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_section (
-pref                    varchar(4),
-city                    varchar(8),
-section                 varchar(8),
-calc_date_from          date,
-calc_date_to            date,
-sold_count              int,
-sold_price              bigint,
-on_sale_count           int,
-on_sale_price           bigint,
-primary key(pref,city,section,calc_date_from) );
-
 CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_shop (
 pref                    varchar(4),
 shop                    varchar(64),
@@ -663,10 +651,30 @@ on_sale_price           bigint,
 on_sale_days            int,
 primary key(pref,shop,calc_date,calc_days) );
 
-CREATE TABLE IF NOT EXISTS newbuild_sales_months_by_shop (
+CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_city (
 pref                    varchar(4),
-shop                    varchar(64),
-calc_date_from          date,
-months                  int,
-count                   int,
-primary key(pref,city,shop,calc_date_from,months) );
+city                    varchar(16),
+calc_date               date,
+calc_days               int,
+sold_count              int,
+sold_price              bigint,
+sold_days               int,
+on_sale_count           int,
+on_sale_price           bigint,
+on_sale_days            int,
+primary key(pref,city,calc_date,calc_days) );
+
+CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_town (
+pref                    varchar(4),
+city                    varchar(16),
+town                    varchar(64),
+calc_date               date,
+calc_days               int,
+sold_count              int,
+sold_price              bigint,
+sold_days               int,
+on_sale_count           int,
+on_sale_price           bigint,
+on_sale_days            int,
+primary key(pref,city,town,calc_date,calc_days) );
+
