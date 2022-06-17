@@ -909,11 +909,37 @@ LIMIT 1
         return None
 
         
+    def get_bukkens_by_check_date(self, build_type, date_from, date_to):
+        ret_rows = []
+        
+        sql = """
+SELECT * FROM suumo_bukken
+WHERE build_type=%s and (check_date BETWEEN %s AND %s)
+"""
+        sql_args = (build_type, date_from, date_to )
+        
+        with self.db_connect() as db_conn:
+            with self.db_cursor(db_conn) as db_cur:
+                try:
+                    db_cur.execute(sql,sql_args)
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return []
+
+                ret_rows = db_cur.fetchall()
+                
+        ret_datas = []
+        for ret_row in ret_rows:
+            ret_row = dict( ret_row )
+            ret_datas.append( ret_row )
+        return ret_rows
+        
     def get_bukkens_for_detail(self, build_type):
         ret_rows = []
         sql = """
 SELECT * FROM suumo_bukken
-WHERE build_type=%s and check_date >= %s and shop is null
+WHERE build_type=%s and check_date >= %s
 """
         chk_date_str = self.get_last_check_date()
         chk_date = datetime.datetime.strptime(chk_date_str, '%Y-%m-%d')
@@ -940,3 +966,4 @@ WHERE build_type=%s and check_date >= %s and shop is null
             ret_datas.append( ret_row )
         return ret_rows
         
+    

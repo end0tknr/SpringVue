@@ -653,13 +653,15 @@ primary key(pref,city,section,calc_date_from) );
 CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_shop (
 pref                    varchar(4),
 shop                    varchar(64),
-calc_date_from          date,
-calc_date_to            date,
+calc_date               date,
+calc_days               int,
 sold_count              int,
 sold_price              bigint,
+sold_days               int,
 on_sale_count           int,
 on_sale_price           bigint,
-primary key(pref,city,shop,calc_date_from) );
+on_sale_days            int,
+primary key(pref,shop,calc_date,calc_days) );
 
 CREATE TABLE IF NOT EXISTS newbuild_sales_months_by_shop (
 pref                    varchar(4),
