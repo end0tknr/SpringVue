@@ -1,7 +1,7 @@
 (function () {
     "use strict";
-    const server_api_base_url = "http://localhost:8080/api/";
-    //const server_api_base_url = "http://192.168.56.108:8080/pri/js/dummyapi/";
+    //const server_api_base_url = "http://localhost:8080/api/";
+    const server_api_base_url = "http://192.168.56.108:8080/pri/js/dummyapi/";
     
     let vueapp = Vue.createApp({
         data(){
@@ -11,7 +11,12 @@
                 shop_sales : [],
                 city_sales : [],
                 town_sales : [],
-                near_city_sales : []
+                near_city_sales : [],
+                sort_tbl_dirs : {
+                    "shop_sales"      : {},
+                    "city_sales"      : {},
+                    "town_sales"      : {},
+                    "near_city_sales" : {} }
             }
         },
         mounted(){
@@ -37,7 +42,18 @@
             load_near_city_data(pref,city){
                 vue_newbuild.load_near_city_data(pref,city,this);
             },
+            sort_tbl(tbl_name,sort_key){
+                if(! this.sort_tbl_dirs[tbl_name][sort_key] ){
+                    this.sort_tbl_dirs[tbl_name][sort_key] = -1
+                }
 
+                this.sort_tbl_dirs[tbl_name][sort_key] *= -1;
+                let sort_dir = this.sort_tbl_dirs[tbl_name][sort_key];
+                
+                this[tbl_name] = vue_newbuild.sort_tbl(this[tbl_name],
+                                                       sort_key,
+                                                       sort_dir);
+            },
             show_jpn_map_modal(){
                 alert("HOGE")
                 // modal.classList.remove('hidden');
@@ -50,6 +66,30 @@
         init_page=()=> {
             this.vueapp   = vueapp;
             this.vueapp.mount('#vueapp');
+        }
+
+        sort_tbl(tbl_rows,sort_key,dir){
+            tbl_rows = tbl_rows.sort(function(a, b) {
+                let val_a = a[sort_key].replace(/,/g,'');
+                let val_b = b[sort_key].replace(/,/g,'');
+                val_a = Number( val_a );
+                val_b = Number( val_b );
+
+                if( isNaN(val_a) ){
+                    val_a = a[sort_key];
+                }
+                if( isNaN(val_b) ){
+                    val_b = b[sort_key];
+                }
+                
+                if( val_a < val_b ){
+                    return 1 * dir;
+                } else if ( val_a > val_b ){
+                    return -1 * dir;
+                }
+                return 0
+            });
+            return tbl_rows;
         }
 
         async load_shop_data(pref,vue_obj){
@@ -80,8 +120,8 @@
                 encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
             
             let res = await fetch(req_url);
-	    let town_sales = await res.json();
-	    town_sales = this.conv_counts_for_disp( town_sales );
+            let town_sales = await res.json();
+            town_sales = this.conv_counts_for_disp( town_sales );
             vue_obj.town_sales = town_sales;
         }
         
@@ -91,8 +131,8 @@
                 encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
             
             let res = await fetch(req_url);
-	    let city_sales = await res.json();
-	    city_sales = this.conv_counts_for_disp( city_sales );
+            let city_sales = await res.json();
+            city_sales = this.conv_counts_for_disp( city_sales );
             vue_obj.near_city_sales = city_sales;
         }
         

@@ -103,6 +103,7 @@ GROUP BY t1.n03_001, t1.n03_003, t1.n03_004
         ret_data = []
         city_service = CityService()
         db_conn = self.db_connect()
+        is_found = {}
         
         with self.db_cursor(db_conn) as db_cur:
             try:
@@ -119,6 +120,11 @@ GROUP BY t1.n03_001, t1.n03_003, t1.n03_004
                     found_city = ret_row["city_1"]+ret_row["city_2"]
                 else:
                     found_city = ret_row["city_2"]
+                    
+                found_pref_city = ret_row["pref"] + "\t" + found_city
+                if found_pref_city in is_found:
+                    continue
+                is_found[found_pref_city] = 1
                     
                 ret_data.append( {"pref":ret_row["pref"], "city":found_city} )
                 

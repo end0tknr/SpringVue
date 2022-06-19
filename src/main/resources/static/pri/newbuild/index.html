@@ -46,9 +46,13 @@
             <th></th>
           </tr>
           <tr>
-            <th>会社</th>
-            <th>数</th><th>百万円</th><th>販売日数</th>
-            <th>数</th><th>百万円</th><th>販売日数</th>
+            <th v-on:click="sort_tbl('shop_sales','shop')">会社</th>
+            <th v-on:click="sort_tbl('shop_sales','sold_count')">数</th>
+            <th v-on:click="sort_tbl('shop_sales','sold_price')">百万円</th>
+            <th v-on:click="sort_tbl('shop_sales','sold_days')">販売日数</th>
+            <th v-on:click="sort_tbl('shop_sales','on_sale_count')">数</th>
+            <th v-on:click="sort_tbl('shop_sales','on_sale_price')">百万円</th>
+            <th v-on:click="sort_tbl('shop_sales','on_sale_days')">販売日数</th>
           </tr>
 
           <tr v-for="shop_data in shop_sales">
@@ -87,9 +91,13 @@
             <th></th>
           </tr>
           <tr>
-            <th>市区町村</th>
-            <th>数</th><th>百万円</th><th>販売日数</th>
-            <th>数</th><th>百万円</th><th>販売日数</th>
+            <th v-on:click="sort_tbl('city_sales','city')">市区町村</th>
+            <th v-on:click="sort_tbl('city_sales','sold_count')">数</th>
+            <th v-on:click="sort_tbl('city_sales','sold_price')">百万円</th>
+            <th v-on:click="sort_tbl('city_sales','sold_days')">販売日数</th>
+            <th v-on:click="sort_tbl('city_sales','on_sale_count')">数</th>
+            <th v-on:click="sort_tbl('city_sales','on_sale_price')">百万円</th>
+            <th v-on:click="sort_tbl('city_sales','on_sale_days')">販売日数</th>
           </tr>
 
           <tr v-for="city_data in city_sales">
@@ -116,7 +124,7 @@
         </table>
         
       </div><!--.scroll_tbl2-->
-	
+        
     </div><!--.page_middle_container-->
   </div><!--.page_middle-->
   
@@ -141,9 +149,13 @@
             <th></th>
           </tr>
           <tr>
-            <th>市区町村</th>
-            <th>数</th><th>百万円</th><th>販売日数</th>
-            <th>数</th><th>百万円</th><th>販売日数</th>
+            <th v-on:click="sort_tbl('town_sales','town')">地区</th>
+            <th v-on:click="sort_tbl('town_sales','sold_count')">数</th>
+            <th v-on:click="sort_tbl('town_sales','sold_price')">百万円</th>
+            <th v-on:click="sort_tbl('town_sales','sold_days')">販売日数</th>
+            <th v-on:click="sort_tbl('town_sales','on_sale_count')">数</th>
+            <th v-on:click="sort_tbl('town_sales','on_sale_price')">百万円</th>
+            <th v-on:click="sort_tbl('town_sales','on_sale_days')">販売日数</th>
           </tr>
 
           <tr v-for="town_data in town_sales">
@@ -171,10 +183,10 @@
       </div><!--.scroll_tbl2-->
 
         
-      <h2>隣接 市区町村</h2>
+      <h2>近隣 市区町村</h2>
 
       <div class="scroll_tbl2">
-        
+
         <table>
           <tr>
             <th></th>
@@ -183,40 +195,35 @@
             <th></th>
           </tr>
           <tr>
-            <th>市区町村</th>
-            <th>数</th><th>前回比</th><th>価格</th>
-            <th>数</th><th>前回比</th><th>価格</th>
-            <th>地価</th>
+            <th v-on:click="sort_tbl('near_city_sales','city')">市区町村</th>
+            <th v-on:click="sort_tbl('near_city_sales','sold_count')">数</th>
+            <th v-on:click="sort_tbl('near_city_sales','sold_price')">百万円</th>
+            <th v-on:click="sort_tbl('near_city_sales','sold_days')">販売日数</th>
+            <th v-on:click="sort_tbl('near_city_sales','on_sale_count')">数</th>
+            <th v-on:click="sort_tbl('near_city_sales','on_sale_price')">百万円</th>
+            <th v-on:click="sort_tbl('near_city_sales','on_sale_days')">販売日数</th>
           </tr>
-          <tr>
-            <th><div>国分寺市</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>立川市</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>小平市</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>小金井市</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>府中市</div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td>
+
+          <tr v-for="city_data in near_city_sales">
+            <th><div><a href="">{{ city_data.city }}</a></div></th>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:city_data.sold_count_px+'px 4px'}">
+              {{ city_data.sold_count }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:city_data.sold_price_px+'px 4px'}">
+              {{ city_data.sold_price }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:city_data.sold_days+'px 4px'}">
+              {{ city_data.sold_days }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:city_data.on_sale_count_px+'px 4px'}">
+              {{ city_data.on_sale_count }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:city_data.on_sale_price_px+'px 4px'}">
+            {{ city_data.on_sale_price }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:city_data.on_sale_days+'px 4px'}">
+            {{ city_data.on_sale_days }}</td>
           </tr>
         </table>
         
