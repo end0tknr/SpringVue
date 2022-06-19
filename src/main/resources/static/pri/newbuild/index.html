@@ -35,7 +35,7 @@
   <div class="page_middle">
     <div class="page_middle_container">
 
-      <h2>販売数</h2>
+      <h2>会社別</h2>
 
       <div class="scroll_tbl2">
         <table>
@@ -47,49 +47,38 @@
           </tr>
           <tr>
             <th>会社</th>
-            <th>数</th><th>価格</th><th>販売日数</th>
-            <th>数</th><th>価格</th><th>販売日数</th>
+            <th>数</th><th>百万円</th><th>販売日数</th>
+            <th>数</th><th>百万円</th><th>販売日数</th>
           </tr>
 
-          <tr v-for="shop_data in shop_datas">
+          <tr v-for="shop_data in shop_sales">
             <th><div>{{ shop_data.shop }}</div></th>
             <td class="graph_bar"
-                v-bind:style="{backgroundSize:shop_data.sold_count_graph+'px 4px'}">
+                v-bind:style="{backgroundSize:shop_data.sold_count_px+'px 4px'}">
               {{ shop_data.sold_count }}</td>
             <td class="graph_bar"
-                v-bind:style="{backgroundSize:shop_data.sold_price_graph+'px 4px'}">
+                v-bind:style="{backgroundSize:shop_data.sold_price_px+'px 4px'}">
               {{ shop_data.sold_price }}</td>
             <td class="graph_bar"
-                v-bind:style="{backgroundSize:shop_data.sold_count_diff_graph+'px 4px'}">
-              {{ shop_data.sold_count_diff }}</td>
+                v-bind:style="{backgroundSize:shop_data.sold_days+'px 4px'}">
+              {{ shop_data.sold_days }}</td>
             <td class="graph_bar"
-                v-bind:style="{backgroundSize:shop_data.on_sale_count_graph+'px 4px'}">
+                v-bind:style="{backgroundSize:shop_data.on_sale_count_px+'px 4px'}">
               {{ shop_data.on_sale_count }}</td>
             <td class="graph_bar"
-                v-bind:style="{backgroundSize:shop_data.on_sale_price_graph+'px 4px'}">
+                v-bind:style="{backgroundSize:shop_data.on_sale_price_px+'px 4px'}">
             {{ shop_data.on_sale_price }}</td>
             <td class="graph_bar"
-                v-bind:style="{backgroundSize:shop_data.on_sale_count_diff_graph+'px 4px'}">
-            {{ shop_data.on_sale_count_diff }}</td>
+                v-bind:style="{backgroundSize:shop_data.on_sale_days+'px 4px'}">
+            {{ shop_data.on_sale_days }}</td>
           </tr>
         </table>
         
       </div><!--.scroll_tbl2-->
+      
+      <h2>市区町村別</h2>
   
-    </div><!--.page_middle_container-->
-  </div><!--.page_middle-->
-  
-  <div class="container_title">
-    <h1>市区町村</h1>
-    <div class="container_title_sub"></div>
-    <div class="container_title_sub_right"></div>
-  </div><!--.container_title-->
-
-  <div class="page_middle">
-    <div class="page_middle_container">
-
-        <div class="scroll_tbl2">
-          
+      <div class="scroll_tbl2">
         <table>
           <tr>
             <th></th>
@@ -99,98 +88,51 @@
           </tr>
           <tr>
             <th>市区町村</th>
-            <th>数</th><th>前回比</th><th>価格</th>
-            <th>数</th><th>前回比</th><th>価格</th>
-            <th>地価</th>
+            <th>数</th><th>百万円</th><th>販売日数</th>
+            <th>数</th><th>百万円</th><th>販売日数</th>
           </tr>
-            <tr>
-              <th><div>八王子市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>立川市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>武蔵野市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>三鷹市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>府中市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>調布市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>小金井市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>小平市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>日野市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>東村山市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>国分寺市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>国立市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>東大和市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>東久留米市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>武蔵村山市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-            <tr>
-              <th><div>西東京市</div></th>
-              <td>999,999</td><td>+999</td><td>999,999</td>
-              <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-            </tr>
-        </table>
-        </div>
 
+          <tr v-for="city_data in city_sales">
+            <th><div><a href="">{{ city_data.city }}</a></div></th>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:city_data.sold_count_px+'px 4px'}">
+              {{ city_data.sold_count }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:city_data.sold_price_px+'px 4px'}">
+              {{ city_data.sold_price }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:city_data.sold_days+'px 4px'}">
+              {{ city_data.sold_days }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:city_data.on_sale_count_px+'px 4px'}">
+              {{ city_data.on_sale_count }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:city_data.on_sale_price_px+'px 4px'}">
+            {{ city_data.on_sale_price }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:city_data.on_sale_days+'px 4px'}">
+            {{ city_data.on_sale_days }}</td>
+          </tr>
+        </table>
+        
+      </div><!--.scroll_tbl2-->
+	
+    </div><!--.page_middle_container-->
+  </div><!--.page_middle-->
+  
+  <div class="container_title">
+    <h1 id="pref_name">{{city_name}}</h1>
+    <div class="container_title_sub">
+      <div class="container_title_sub_right"></div>
+    </div>
+  </div><!--.container_title-->
+    
+  <div class="page_middle">
+    <div class="page_middle_container">
         
       <h2>地区別</h2>
 
       <div class="scroll_tbl2">
-        
         <table>
           <tr>
             <th></th>
@@ -199,112 +141,31 @@
             <th></th>
           </tr>
           <tr>
-            <th>地区</th>
-            <th>数</th><th>前回比</th><th>価格</th>
-            <th>数</th><th>前回比</th><th>価格</th>
-            <th>地価</th>
+            <th>市区町村</th>
+            <th>数</th><th>百万円</th><th>販売日数</th>
+            <th>数</th><th>百万円</th><th>販売日数</th>
           </tr>
-          <tr>
-            <th><div>戸倉<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>光町<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>高木町<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>新町<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>西元町<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>西町<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>西恋ケ窪<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>泉町<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>東元町<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>東恋ケ窪<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>内藤<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>日吉町<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>富士本<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>並木町<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>北町<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>本多<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
-          </tr>
-          <tr>
-            <th><div>本町<div></th>
-            <td class="graph_bar" style="background-size: 20px 4px;">999,999</td>
-            <td>+999</td><td>999,999</td>
-            <td>999,999</td><td>-999</td><td>999,999</td><td>999,999</td>
+
+          <tr v-for="town_data in town_sales">
+            <th><div><a href="">{{ town_data.town }}</a></div></th>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:town_data.sold_count_px+'px 4px'}">
+              {{ town_data.sold_count }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:town_data.sold_price_px+'px 4px'}">
+              {{ town_data.sold_price }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:town_data.sold_days+'px 4px'}">
+              {{ town_data.sold_days }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:town_data.on_sale_count_px+'px 4px'}">
+              {{ town_data.on_sale_count }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:town_data.on_sale_price_px+'px 4px'}">
+            {{ town_data.on_sale_price }}</td>
+            <td class="graph_bar"
+                v-bind:style="{backgroundSize:town_data.on_sale_days+'px 4px'}">
+            {{ town_data.on_sale_days }}</td>
           </tr>
         </table>
       </div><!--.scroll_tbl2-->

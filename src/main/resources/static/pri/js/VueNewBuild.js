@@ -1,104 +1,150 @@
 (function () {
     "use strict";
+    const server_api_base_url = "http://localhost:8080/api/";
+    //const server_api_base_url = "http://192.168.56.108:8080/pri/js/dummyapi/";
     
     let vueapp = Vue.createApp({
         data(){
             return {
-		pref_name : "東京都",
-                shop_datas : []
+                pref_name : "東京都",
+                city_name : "国分寺市",
+                shop_sales : [],
+                city_sales : [],
+                town_sales : [],
+                near_city_sales : []
             }
         },
         mounted(){
-	    this.shop_datas = this.get_pref_data(this.pref_name)
+            this.load_shop_data(this.pref_name);
+            this.load_city_data(this.pref_name);
+            this.load_town_data(this.pref_name,this.city_name);
+            this.load_near_city_data(this.pref_name,this.city_name);
         },
         methods : {
             conv_to_graph_siz(org_val){
-		return org_val / 50;
+                return org_val / 50;
             },
 
-	    get_pref_data(pref){
-		return vue_newbuild.get_pref_data(pref)
-	    },
+            load_shop_data(pref){
+                vue_newbuild.load_shop_data(pref,this);
+            },
+            load_city_data(pref){
+                vue_newbuild.load_city_data(pref,this);
+            },
+            load_town_data(pref,city){
+                vue_newbuild.load_town_data(pref,city,this);
+            },
+            load_near_city_data(pref,city){
+                vue_newbuild.load_near_city_data(pref,city,this);
+            },
 
             show_jpn_map_modal(){
-		alert("HOGE")
+                alert("HOGE")
                 // modal.classList.remove('hidden');
                 // mask.classList.remove('hidden');
-	    }
+            }
         }
     })
     
     class VueNewBuild extends AppBase {
-        // constructor() {
-        // }
-        
         init_page=()=> {
             this.vueapp   = vueapp;
             this.vueapp.mount('#vueapp');
         }
 
-	get_pref_data=(pref)=> {
-            let shop_datas = [
-                {"shop":"積水ﾊｳｽ",
-                 "sold_count":100,     "sold_count_graph":100,
-                 "sold_count_diff":10, "sold_count_diff_graph":10,
-                 "on_sale_count":100,  "on_sale_count_graph":100,
-                 "on_sale_count_diff":10,"on_sale_count_diff_graph":10,
-                 "sold_price"   : 50000000,"sold_price_graph" : 50,
-                 "on_sale_price": 50000000,"on_sale_price_graph" : 50,
-                },
-                {"shop":"ｾｷｽｲﾊｲﾑ",
-                 "sold_count":100,     "sold_count_graph":100,
-                 "sold_count_diff":10, "sold_count_diff_graph":10,
-                 "on_sale_count":100,  "on_sale_count_graph":100,
-                 "on_sale_count_diff":10,"on_sale_count_diff_graph":10,
-                 "sold_price"   : 50000000,"sold_price_graph" : 50,
-                 "on_sale_price": 50000000,"on_sale_price_graph" : 50,
-                },
-                {"shop":"大和ﾊｳｽ",
-                 "sold_count":100,     "sold_count_graph":100,
-                 "sold_count_diff":10, "sold_count_diff_graph":10,
-                 "on_sale_count":100,  "on_sale_count_graph":100,
-                 "on_sale_count_diff":10,"on_sale_count_diff_graph":10,
-                 "sold_price"   : 50000000,"sold_price_graph" : 50,
-                 "on_sale_price": 50000000,"on_sale_price_graph" : 50,
-                }
-            ];
-	    return shop_datas;
+        async load_shop_data(pref,vue_obj){
+            let req_url = server_api_base_url +
+                "newbuild/SalesCountByShop/"+
+                encodeURIComponent(pref);
+            
+            let res = await fetch(req_url);
+            let shop_sales = await res.json();
+            shop_sales = this.conv_counts_for_disp( shop_sales );
+            vue_obj.shop_sales = shop_sales;
         }
-	
-	// https://qiita.com/ryoyakawai/items/2045e61d417a4b2e819f
-	
-	get_server_api=(req_path,req_params_hash={})=>{
-	    var request = new XMLHttpRequest();
+        
+        async load_city_data(pref,vue_obj){
+            let req_url = server_api_base_url +
+                "newbuild/SalesCountByCity/"+
+                encodeURIComponent(pref);
+            
+            let res = await fetch(req_url);
+            let city_sales = await res.json();
+            city_sales = this.conv_counts_for_disp( city_sales );
+            vue_obj.city_sales = city_sales;
+        }
+        
+        async load_town_data(pref,city,vue_obj){
+            let req_url = server_api_base_url +
+                "newbuild/SalesCountByTown/"+
+                encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+            
+            let res = await fetch(req_url);
+	    let town_sales = await res.json();
+	    town_sales = this.conv_counts_for_disp( town_sales );
+            vue_obj.town_sales = town_sales;
+        }
+        
+        async load_near_city_data(pref,city,vue_obj){
+            let req_url = server_api_base_url +
+                "newbuild/SalesCountByNearCity/"+
+                encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+            
+            let res = await fetch(req_url);
+	    let city_sales = await res.json();
+	    city_sales = this.conv_counts_for_disp( city_sales );
+            vue_obj.near_city_sales = city_sales;
+        }
+        
+        conv_counts_for_disp( sales_counts ){
+            let atri_sets = {}
+            const atri_keys = ["sold_count",   "sold_price",   "sold_days",
+                               "on_sale_count","on_sale_price","on_sale_days"]
+            for( let atri_key of atri_keys ) {
+                atri_sets[atri_key] = new Set();
+            }
 
-	    req_path_param = req_path;
-	    req_params = [];
-	    for (let param_key in req_params_hash) {
-		req_params.push(encodeURIComponent(param_key)+"="+
-				encodeURIComponent(req_params_hash[param_key]))
-	    }
-	    if ( req_params.length ){
-		req_path_param += ( "?"+req_params.join("&") );
-	    }
+            // sort
+            sales_counts = sales_counts.sort(function(a, b) {
+                for( let atri_key of atri_keys ) {
+                    atri_sets[atri_key].add(a[atri_key]);
+                    atri_sets[atri_key].add(b[atri_key]);
+                }
+                
+                return b["sold_count"] - a["sold_count"];
+            });
+            
+            let atri_min_max = {}
+            for( let atri_key of atri_keys ) {
+                let atri_list = Array.from( atri_sets[atri_key] );
+                atri_min_max[atri_key] = [Math.min(...atri_list), Math.max(...atri_list)]
+            }
 
-	    request.open("get",req_path_param, true);
-	    
-	    request.onload = function (event) {
-		if (request.readyState === 4) {
-		    if (request.status === 200) {
-			console.log(request.statusText); // => "OK"
-		    } else {
-			console.log(request.statusText); // => Error Message
-		    }
-		}
-	    };
-	    request.onerror = function (event) {
-		console.log(event.type); // => "error"
-	    };
-	    request.send(null);
-	}
-	
+            
+            for( let sales_count of sales_counts ) {
+                for( let atri_key of atri_keys ) {
+
+                    let graph_bar_key = atri_key + "_px";
+                    sales_count[graph_bar_key] =
+                        this.calc_graph_bar_px(sales_count[atri_key],
+                                               atri_min_max[atri_key][0],
+                                               atri_min_max[atri_key][1],
+                                               50 );
+
+                    //数値の3桁区切り化
+                    sales_count[atri_key] = Number(sales_count[atri_key]).toLocaleString();
+                }
+            }
+            return sales_counts;
+        }
+
+        calc_graph_bar_px(val, val_min, val_max, bar_max ){
+            if(! val ){
+                return 0;
+            }
+            return Math.ceil(val / val_max * bar_max);
+        }
+
     }
 
     window.vue_newbuild = new VueNewBuild();

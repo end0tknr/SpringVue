@@ -35,6 +35,14 @@ lat             double precision,
 primary key(code));
 COMMENT ON COLUMN city.code IS '市町村code';
 
+CREATE TABLE IF NOT EXISTS near_city (
+pref            varchar(4),
+city            varchar(8),
+near_pref       varchar(4),
+near_city       varchar(8),
+primary key(pref,city,near_pref,near_city));
+
+
 -- 2015年の古いデータの為、対象外
 -- CREATE TABLE IF NOT EXISTS estat_jutakutochi (
 -- city              varchar(8),
