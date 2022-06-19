@@ -31,5 +31,10 @@ public class NewBuildService {
     	return newBuildRepository.getSalesCountByTown(prefName,cityName);
     }
 
+    public  List<NewBuildSalesCountByCity>
+    getSalesCountByNearCity(String prefName,String cityName) {
+    	return newBuildRepository.getSalesCountByNearCity(prefName,cityName);
+    }
+
 
 }

@@ -22,4 +22,10 @@ public interface NewBuildRepository {
     		"WHERE pref='${prefName}' AND city='${cityName}' LIMIT 30")
     List<NewBuildSalesCountByTown> getSalesCountByTown(String prefName,String cityName);
 
+   @Select(" SELECT tbl1.* FROM newbuild_sales_count_by_city tbl1 "+
+		   " JOIN near_city tbl2 "+
+		   "  ON ( tbl1.pref=tbl2.near_pref AND tbl1.city=tbl2.near_city ) "+
+		   " WHERE tbl2.pref='${prefName}' AND tbl2.city='${cityName}' LIMIT 30 ")
+    List<NewBuildSalesCountByCity> getSalesCountByNearCity(String prefName,String cityName);
+
 }

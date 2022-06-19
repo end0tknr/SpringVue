@@ -46,6 +46,21 @@ public class NewBuildRestController {
     	return newBuildService.getSalesCountByCity(prefName);
     }
 
+    @RequestMapping("/api/newbuild/SalesCountByNearCity/{prefCityName}")
+    public List<NewBuildSalesCountByCity> salesCountByNearCity(
+    		@PathVariable("prefCityName") String prefCityName ){
+
+    	try {
+    		prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	String[] names = prefCityName.split("_");
+    	System.out.println( names[0] );
+    	System.out.println( names[1] );
+    	return newBuildService.getSalesCountByNearCity(names[0],names[1]);
+    }
+
     @RequestMapping("/api/newbuild/SalesCountByTown/{prefCityName}")
     public List<NewBuildSalesCountByTown> salesCountByTown(
     		@PathVariable("prefCityName") String prefCityName ){
