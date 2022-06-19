@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByCity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByShop;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByTown;
 import jp.end0tknr.springvue.service.NewBuildService;
 
 @RestController
@@ -43,5 +44,19 @@ public class NewBuildRestController {
 			e.printStackTrace();
 		}
     	return newBuildService.getSalesCountByCity(prefName);
+    }
+
+    @RequestMapping("/api/newbuild/SalesCountByTown/{prefCityName}")
+    public List<NewBuildSalesCountByTown> salesCountByTown(
+    		@PathVariable("prefCityName") String prefCityName ){
+
+    	try {
+    		prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
+    	String[] names = prefCityName.split("_");
+    	return newBuildService.getSalesCountByTown(names[0],names[1]);
     }
 }
