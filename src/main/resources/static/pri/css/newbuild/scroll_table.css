@@ -50,4 +50,5 @@ table th {
     background-image:url("/pri/img/graph_bar_blue.svg");
     background-position: 0% 90%;
     background-repeat: no-repeat;
+    text-align: right;
 }

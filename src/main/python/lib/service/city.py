@@ -30,7 +30,6 @@ re_pref_cities = [re.compile("^(%s).*?(%s)(.*)"  % (re_exp_pref,re_exp_city) ),
                   re.compile("^(%s)(.+?市.+?区)(.*)"    % (re_exp_pref) ),
                   re.compile("^(%s)(.+?[市区町村])(.*)" % (re_exp_pref) ),
                   re.compile("^(%s).+?郡(.+?[町村])(.*)"% (re_exp_pref) ) ]
-
 logger = None
 
 
@@ -40,6 +39,45 @@ class CityService(appbase.AppBase):
         global logger
         logger = self.get_logger()
 
+
+    def save_near_cities(self, pref,city, near_cities):
+        sql = """
+INSERT INTO near_city (pref,city,near_pref,near_city) VALUES (%s,%s,%s,%s)
+"""
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            for near_city in near_cities:
+                sql_args = (pref,city, near_city["pref"], near_city["city"])
+                print(sql_args)
+                try:
+                    db_cur.execute(sql,sql_args)
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    return False
+            db_conn.commit()
+        return True
+            
+        
+    def get_all_pref_city(self):
+        ret_data = []
+        sql = """
+SELECT pref,city FROM city GROUP BY pref,city
+"""
+
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+            
+            for ret_row in  db_cur.fetchall():
+                ret_data.append( dict( ret_row ))
+
+        return ret_data
 
     def get_seirei_wards(self, city_name):
         ret_data = []
@@ -78,7 +116,13 @@ class CityService(appbase.AppBase):
         return ret_data
     
     def is_seirei_city(self, city_name):
-        return city_name in seirei_city_names
+        if not city_name:
+            return False
+        
+        for seirei_city_name in seirei_city_names:
+            if seirei_city_name in city_name:
+                return True
+        return False
         
     def download_master(self):
         logger.info("start")
@@ -109,7 +153,7 @@ class CityService(appbase.AppBase):
                 return []
             
             return ret_data
-        
+    
     def parse_pref_city(self, address_org):
 
         # refer to https://ja.wikipedia.org/wiki/%E9%A0%88%E6%81%B5%E7%94%BA
