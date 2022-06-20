@@ -13,6 +13,8 @@
     .scroll_tbl2 .sort_keys th:hover {  text-decoration: underline;}
     .scroll_tbl2 .col_key            {  cursor: pointer;           }
     .scroll_tbl2 .col_key:hover      {  text-decoration: underline;}
+
+    .open_jpn_map_modal              {  cursor: pointer;           }
   </style>
 </head>
 <body>
@@ -32,7 +34,7 @@
           <input type="date" name="disp_date_from">
         </div>
         <div class="container_title_sub_right">
-          <a  v-on:click="show_jpn_map_modal">都道府県選択</a>
+          <a class="open_jpn_map_modal" v-on:click="show_jpn_map_modal">都道府県選択</a>
         </div>
       </div>
     </div><!--.container_title-->
@@ -303,22 +305,23 @@
     end0tknr
   </footer>
 
-  <div id="mask" class="hidden"></div>
+  <div v-show="show_jpn_map" id="mask"></div>
   
-  <section id="jpn_map_modal" class="hidden">
+  <section v-show="show_jpn_map" id="jpn_map_modal"
+	   v-on:click="set_pref_name($event)">
     <div id="japan-map" class="clearfix">
 
       <div id="hokkaido-touhoku" class="clearfix">
     
         <p class="area-title">北海道・東北</p>
         <div class="area">
-          <div id="hokkaido">北海道</div>
-          <div id="aomori">青森</div>
-          <div id="akita">秋田</div>
-          <div id="iwate">岩手</div>
-          <div id="yamagata">山形</div>
-          <div id="miyagi">宮城</div>
-          <div id="fukushima">福島</div>
+          <div class="pref" id="hokkaido">北海道</div>
+          <div class="pref" id="aomori">青森</div>
+          <div class="pref" id="akita">秋田</div>
+          <div class="pref" id="iwate">岩手</div>
+          <div class="pref" id="yamagata">山形</div>
+          <div class="pref" id="miyagi">宮城</div>
+          <div class="pref" id="fukushima">福島</div>
         </div>
       </div><!--#hokkaido-touhoku-->
 
@@ -326,13 +329,13 @@
         <p class="area-title">関東</p>
   
         <div class="area">
-          <div id="gunma"><p>群馬</p></div>
-          <div id="tochigi"><p>栃木</p></div>
-          <div id="ibaraki"><p>茨城</p></div>
-          <div id="saitama"><p>埼玉</p></div>
-          <div id="chiba"><p>千葉</p></div>
-          <div id="tokyo"><p>東京</p></div>
-          <div id="kanagawa"><p>神奈川</p></div>
+          <div class="pref" id="gunma">群馬</div>
+          <div class="pref" id="tochigi">栃木</div>
+          <div class="pref" id="ibaraki">茨城</div>
+          <div class="pref" id="saitama">埼玉</div>
+          <div class="pref" id="chiba">千葉</div>
+          <div class="pref" id="tokyo">東京</div>
+          <div class="pref" id="kanagawa">神奈川</div>
         </div>
       </div><!--#kantou-->
 
@@ -340,15 +343,15 @@
         <p class="area-title">中部</p>
   
         <div class="area">
-          <div id="nigata"><p>新潟</p></div>
-          <div id="toyama"><p>富山</p></div>
-          <div id="ishikawa"><p>石川</p></div>
-          <div id="fukui"><p>福井</p></div>
-          <div id="nagano"><p>長野</p></div>
-          <div id="gifu"><p>岐阜</p></div>
-          <div id="yamanashi"><p>山梨</p></div>
-          <div id="aichi"><p>愛知</p></div>
-          <div id="shizuoka"><p>静岡</p></div>
+          <div class="pref" id="nigata">新潟</div>
+          <div class="pref" id="toyama">富山</div>
+          <div class="pref" id="ishikawa">石川</div>
+          <div class="pref" id="fukui">福井</div>
+          <div class="pref" id="nagano">長野</div>
+          <div class="pref" id="gifu">岐阜</div>
+          <div class="pref" id="yamanashi">山梨</div>
+          <div class="pref" id="aichi">愛知</div>
+          <div class="pref" id="shizuoka">静岡</div>
         </div>
       </div><!--#tyubu-->
 
@@ -356,13 +359,13 @@
         <p class="area-title">近畿</p>
   
         <div class="area">
-          <div id="kyoto"><p>京都</p></div>
-          <div id="shiga"><p>滋賀</p></div>
-          <div id="osaka"><p>大阪</p></div>
-          <div id="nara"><p>奈良</p></div>
-          <div id="mie"><p>三重</p></div>
-          <div id="wakayama"><p>和歌山</p></div>
-          <div id="hyougo"><p>兵庫</p></div>
+          <div class="pref" id="kyoto">京都</div>
+          <div class="pref" id="shiga">滋賀</div>
+          <div class="pref" id="osaka">大阪</div>
+          <div class="pref" id="nara">奈良</div>
+          <div class="pref" id="mie">三重</div>
+          <div class="pref" id="wakayama">和歌山</div>
+          <div class="pref" id="hyougo">兵庫</div>
         </div>
       </div><!--#kinki-->
 
@@ -370,11 +373,11 @@
         <p class="area-title">中国</p>
   
         <div class="area">
-          <div id="tottori"><p>鳥取</p></div>
-          <div id="okayama"><p>岡山</p></div>
-          <div id="shimane"><p>島根</p></div>
-          <div id="hiroshima"><p>広島</p></div>
-          <div id="yamaguchi"><p>山口</p></div>
+          <div class="pref" id="tottori">鳥取</div>
+          <div class="pref" id="okayama">岡山</div>
+          <div class="pref" id="shimane">島根</div>
+          <div class="pref" id="hiroshima">広島</div>
+          <div class="pref" id="yamaguchi">山口</div>
         </div>
       </div><!--#tyugoku-->
 
@@ -382,10 +385,10 @@
         <p class="area-title">四国</p>
   
         <div class="area">
-          <div id="kagawa"><p>香川</p></div>
-          <div id="ehime"><p>愛媛</p></div>
-          <div id="tokushima"><p>徳島</p></div>
-          <div id="kouchi"><p>高知</p></div>
+          <div class="pref" id="kagawa">香川</div>
+          <div class="pref" id="ehime">愛媛</div>
+          <div class="pref" id="tokushima">徳島</div>
+          <div class="pref" id="kouchi">高知</div>
         </div>
       </div><!--#shikoku-->
 
@@ -393,19 +396,19 @@
         <p class="area-title">九州</p>
   
         <div class="area">
-          <div id="fukuoka"><p>福岡</p></div>
-          <div id="saga"><p>佐賀</p></div>
-          <div id="nagasaki"><p>長崎</p></div>
-          <div id="oita"><p>大分</p></div>
-          <div id="kumamoto"><p>熊本</p></div>
-          <div id="miyazaki"><p>宮崎</p></div>
-          <div id="kagoshima"><p>鹿児島</p></div>
+          <div class="pref" id="fukuoka">福岡</div>
+          <div class="pref" id="saga">佐賀</div>
+          <div class="pref" id="nagasaki">長崎</div>
+          <div class="pref" id="oita">大分</div>
+          <div class="pref" id="kumamoto">熊本</div>
+          <div class="pref" id="miyazaki">宮崎</div>
+          <div class="pref" id="kagoshima">鹿児島</div>
         </div>
       </div><!--#kyusyu-->
       
     </div> <!-- japan-map -->
 
-    <div id="close_jpn_map_modal">close</div>
+    <div id="close_jpn_map_modal" v-on:click="hide_jpn_map_modal">close</div>
 
   </div><!--#vueapp-->
   

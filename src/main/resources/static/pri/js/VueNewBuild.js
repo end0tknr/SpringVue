@@ -16,7 +16,8 @@
                     "shop_sales"      : {},
                     "city_sales"      : {},
                     "town_sales"      : {},
-                    "near_city_sales" : {} }
+                    "near_city_sales" : {} },
+                show_jpn_map: false
             }
         },
         mounted(){
@@ -26,6 +27,29 @@
             this.load_near_city_data(this.pref_name,this.city_name);
         },
         methods : {
+	    set_pref_name(event){
+		if( event.target.className != "pref"){
+		    return;
+		}
+		
+		let pref = event.target.innerText;
+		if (! pref ){
+		    return;
+		}
+		
+		if ( pref =="東京"){
+		    pref += "都"
+		} else if( pref=="北海道"){
+		    
+		} else if( pref=="京都" || pref=="大阪"){
+		    pref += "府"
+		} else {
+		    pref += "県"
+		}
+		this.pref_name = pref;
+		this.hide_jpn_map_modal();
+	    },
+	    
             conv_to_graph_siz(org_val){
                 return org_val / 50;
             },
@@ -55,9 +79,10 @@
                                                        sort_dir);
             },
             show_jpn_map_modal(){
-                alert("HOGE")
-                // modal.classList.remove('hidden');
-                // mask.classList.remove('hidden');
+                this.show_jpn_map = true;
+            },
+            hide_jpn_map_modal(){
+                this.show_jpn_map = false;
             }
         }
     })
