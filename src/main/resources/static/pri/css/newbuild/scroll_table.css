@@ -48,7 +48,7 @@ table th {
 
 .graph_bar {
     background-image:url("/pri/img/graph_bar_blue.svg");
-    background-position: 0% 90%;
+    background-position: 6px 90%;
     background-repeat: no-repeat;
     text-align: right;
 }

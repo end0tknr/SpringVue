@@ -987,6 +987,7 @@ LIMIT 1
         sql = """
 SELECT * FROM suumo_bukken
 WHERE build_type=%s and (check_date BETWEEN %s AND %s)
+      and shop is not null;
 """
         sql_args = (build_type, date_from, date_to )
         
@@ -1011,7 +1012,7 @@ WHERE build_type=%s and (check_date BETWEEN %s AND %s)
         ret_rows = []
         sql = """
 SELECT * FROM suumo_bukken
-WHERE build_type=%s and check_date >= %s
+WHERE build_type=%s and check_date >= %s and shop is null
 """
         chk_date_str = self.get_last_check_date()
         chk_date = datetime.datetime.strptime(chk_date_str, '%Y-%m-%d')

@@ -8,8 +8,9 @@ from service.newbuild import NewBuildService
 
 def main():
     newbuild_service = NewBuildService()
-    # newbuild_service.calc_save_sales_count_by_shop()
-    # newbuild_service.calc_save_sales_count_by_city()
+    newbuild_service.calc_save_sales_count_by_shop()
+    newbuild_service.calc_save_sales_count_by_shop_city()
+    newbuild_service.calc_save_sales_count_by_city()
     newbuild_service.calc_save_sales_count_by_town()
 
     

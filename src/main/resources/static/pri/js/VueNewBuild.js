@@ -1,19 +1,21 @@
 (function () {
     "use strict";
-    //const server_api_base_url = "http://localhost:8080/api/";
-    const server_api_base_url = "http://192.168.56.108:8080/pri/js/dummyapi/";
+    const server_api_base_url = "http://localhost:8080/api/";
+    //const server_api_base_url = "http://192.168.56.108:8080/pri/js/dummyapi/";
     
     let vueapp = Vue.createApp({
         data(){
             return {
                 pref_name : "東京都",
-                city_name : "国分寺市",
-                shop_sales : [],
-                city_sales : [],
-                town_sales : [],
+                city_name : "",
+                shop_sales      : [],
+                city_sales      : [],
+                shop_city_sales : [],
+                town_sales      : [],
                 near_city_sales : [],
                 sort_tbl_dirs : {
                     "shop_sales"      : {},
+                    "shop_city_sales" : {},
                     "city_sales"      : {},
                     "town_sales"      : {},
                     "near_city_sales" : {} },
@@ -23,39 +25,52 @@
         mounted(){
             this.load_shop_data(this.pref_name);
             this.load_city_data(this.pref_name);
-            this.load_town_data(this.pref_name,this.city_name);
-            this.load_near_city_data(this.pref_name,this.city_name);
         },
         methods : {
-	    set_pref_name(event){
-		if( event.target.className != "pref"){
-		    return;
-		}
-		
-		let pref = event.target.innerText;
-		if (! pref ){
-		    return;
-		}
-		
-		if ( pref =="東京"){
-		    pref += "都"
-		} else if( pref=="北海道"){
-		    
-		} else if( pref=="京都" || pref=="大阪"){
-		    pref += "府"
-		} else {
-		    pref += "県"
-		}
-		this.pref_name = pref;
-		this.hide_jpn_map_modal();
-	    },
-	    
+            load_city_datas(event){
+                this.city_name = event.target.innerText;
+
+                this.load_shop_city_data(this.pref_name,this.city_name);
+                this.load_town_data(this.pref_name,this.city_name);
+                this.load_near_city_data(this.pref_name,this.city_name);
+            },
+            
+            set_pref_name(event){
+                if( event.target.className != "pref"){
+                    return;
+                }
+                
+                let pref = event.target.innerText;
+                if (! pref ){
+                    return;
+                }
+                
+                if ( pref =="東京"){
+                    pref += "都"
+                } else if( pref=="北海道"){
+                    
+                } else if( pref=="京都" || pref=="大阪"){
+                    pref += "府"
+                } else {
+                    pref += "県"
+                }
+                this.pref_name = pref;
+                
+                this.load_shop_data(this.pref_name);
+                this.load_city_data(this.pref_name);
+                
+                this.hide_jpn_map_modal();
+            },
+            
             conv_to_graph_siz(org_val){
                 return org_val / 50;
             },
 
             load_shop_data(pref){
                 vue_newbuild.load_shop_data(pref,this);
+            },
+            load_shop_city_data(pref,city){
+                vue_newbuild.load_shop_city_data(pref,city,this);
             },
             load_city_data(pref){
                 vue_newbuild.load_city_data(pref,this);
@@ -137,6 +152,13 @@
             let city_sales = await res.json();
             city_sales = this.conv_counts_for_disp( city_sales );
             vue_obj.city_sales = city_sales;
+            
+            vue_obj.city_name = city_sales[0].city;
+
+            vue_obj.load_shop_city_data(vue_obj.pref_name,vue_obj.city_name);
+            vue_obj.load_town_data(vue_obj.pref_name,vue_obj.city_name);
+            vue_obj.load_near_city_data(vue_obj.pref_name,vue_obj.city_name);
+
         }
         
         async load_town_data(pref,city,vue_obj){
@@ -148,6 +170,17 @@
             let town_sales = await res.json();
             town_sales = this.conv_counts_for_disp( town_sales );
             vue_obj.town_sales = town_sales;
+        }
+        
+        async load_shop_city_data(pref,city,vue_obj){
+            let req_url = server_api_base_url +
+                "newbuild/SalesCountByShopCity/"+
+                encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+            
+            let res = await fetch(req_url);
+            let town_sales = await res.json();
+            town_sales = this.conv_counts_for_disp( town_sales );
+            vue_obj.shop_city_sales = town_sales;
         }
         
         async load_near_city_data(pref,city,vue_obj){
@@ -162,20 +195,28 @@
         }
         
         conv_counts_for_disp( sales_counts ){
+            // 最大/最小値を算出する為の準備
             let atri_sets = {}
             const atri_keys = ["sold_count",   "sold_price",   "sold_days",
                                "on_sale_count","on_sale_price","on_sale_days"]
+            
             for( let atri_key of atri_keys ) {
                 atri_sets[atri_key] = new Set();
             }
 
-            // sort
-            sales_counts = sales_counts.sort(function(a, b) {
-                for( let atri_key of atri_keys ) {
-                    atri_sets[atri_key].add(a[atri_key]);
-                    atri_sets[atri_key].add(b[atri_key]);
+            for( let sales_count of sales_counts ) {
+                // 円→百万円
+                for( let atri_key of ["sold_price","on_sale_price"] ) {
+                    sales_count[atri_key] = Math.round(sales_count[atri_key] /1000000)
                 }
                 
+                for( let atri_key of atri_keys ) {
+                    atri_sets[atri_key].add( sales_count[atri_key] );
+                }
+            }
+        
+            // sort
+            sales_counts = sales_counts.sort(function(a, b) {
                 return b["sold_count"] - a["sold_count"];
             });
             
@@ -216,4 +257,3 @@
     vue_newbuild.init_page();
 
 }());
-

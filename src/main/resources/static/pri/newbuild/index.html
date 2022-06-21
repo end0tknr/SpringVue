@@ -9,12 +9,15 @@
   <link rel="stylesheet" href="/pri/css/common.css">
   <link rel="stylesheet" href="/pri/css/newbuild.css">
   <style>
-    .scroll_tbl2 .sort_keys th       {  cursor: pointer;           }
-    .scroll_tbl2 .sort_keys th:hover {  text-decoration: underline;}
-    .scroll_tbl2 .col_key            {  cursor: pointer;           }
-    .scroll_tbl2 .col_key:hover      {  text-decoration: underline;}
+    .scroll_tbl2 .sort_keys th       {cursor: pointer;           }
+    .scroll_tbl2 .sort_keys th:hover {text-decoration: underline;}
+    .scroll_tbl2 .col_key            {cursor: pointer;           }
+    .scroll_tbl2 .col_key:hover      {text-decoration: underline;}
 
-    .open_jpn_map_modal              {  cursor: pointer;           }
+    .open_jpn_map_modal              {cursor: pointer;           }
+    .scroll_tbl2 .sort_keys th       {cursor: pointer;
+                                      width: 65px;}
+    
   </style>
 </head>
 <body>
@@ -34,7 +37,8 @@
           <input type="date" name="disp_date_from">
         </div>
         <div class="container_title_sub_right">
-          <a class="open_jpn_map_modal" v-on:click="show_jpn_map_modal">都道府県選択</a>
+          <a class="open_jpn_map_modal" v-on:click="show_jpn_map_modal">
+            都道府県選択</a>
         </div>
       </div>
     </div><!--.container_title-->
@@ -69,22 +73,22 @@
               <tr v-for="shop_data in shop_sales">
                 <th><div>{{ shop_data.shop }}</div></th>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:shop_data.sold_count_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:shop_data.sold_count_px+'px 3px'}">
                   {{ shop_data.sold_count }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:shop_data.sold_price_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:shop_data.sold_price_px+'px 3px'}">
                   {{ shop_data.sold_price }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:shop_data.sold_days+'px 4px'}">
+                    v-bind:style="{backgroundSize:shop_data.sold_days+'px 3px'}">
                   {{ shop_data.sold_days }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:shop_data.on_sale_count_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:shop_data.on_sale_count_px+'px 3px'}">
                   {{ shop_data.on_sale_count }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:shop_data.on_sale_price_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:shop_data.on_sale_price_px+'px 3px'}">
                   {{ shop_data.on_sale_price }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:shop_data.on_sale_days+'px 4px'}">
+                    v-bind:style="{backgroundSize:shop_data.on_sale_days+'px 3px'}">
                   {{ shop_data.on_sale_days }}</td>
               </tr>
             </table>
@@ -115,24 +119,29 @@
               </tr>
               
               <tr v-for="city_data in city_sales">
-                <th><div class="col_key">{{ city_data.city }}</div></th>
+                <th>
+		  <div class="col_key"
+		       v-on:click="load_city_datas($event)">
+		    {{ city_data.city }}
+		  </div>
+		</th>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:city_data.sold_count_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:city_data.sold_count_px+'px 3px'}">
                   {{ city_data.sold_count }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:city_data.sold_price_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:city_data.sold_price_px+'px 3px'}">
                   {{ city_data.sold_price }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:city_data.sold_days+'px 4px'}">
+                    v-bind:style="{backgroundSize:city_data.sold_days+'px 3px'}">
                   {{ city_data.sold_days }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:city_data.on_sale_count_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:city_data.on_sale_count_px+'px 3px'}">
                   {{ city_data.on_sale_count }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:city_data.on_sale_price_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:city_data.on_sale_price_px+'px 3px'}">
                   {{ city_data.on_sale_price }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:city_data.on_sale_days+'px 4px'}">
+                    v-bind:style="{backgroundSize:city_data.on_sale_days+'px 3px'}">
                   {{ city_data.on_sale_days }}</td>
               </tr>
             </table>
@@ -158,6 +167,54 @@
       <div class="two_cols_layout">
         <div class="column_left">
 
+          <h2>会社別</h2>
+          
+          <div class="scroll_tbl2">
+            <table>
+              <tr>
+                <th></th>
+                <th colspan="3">販売済</th>
+                <th colspan="3">販売中</th>
+                <th></th>
+              </tr>
+              <tr class="sort_keys">
+                <th v-on:click="sort_tbl('shop_city_sales','shop')">会社</th>
+                <th v-on:click="sort_tbl('shop_city_sales','sold_count')">数</th>
+                <th v-on:click="sort_tbl('shop_city_sales','sold_price')">百万円</th>
+                <th v-on:click="sort_tbl('shop_city_sales','sold_days')">販売日数</th>
+                <th v-on:click="sort_tbl('shop_city_sales','on_sale_count')">数</th>
+                <th v-on:click="sort_tbl('shop_city_sales','on_sale_price')">百万円</th>
+                <th v-on:click="sort_tbl('shop_city_sales','on_sale_days')">販売日数</th>
+              </tr>
+              
+              <tr v-for="shop_data in shop_city_sales">
+                <th><div>{{ shop_data.shop }}</div></th>
+                <td class="graph_bar"
+                    v-bind:style="{backgroundSize:shop_data.sold_count_px+'px 3px'}">
+                  {{ shop_data.sold_count }}</td>
+                <td class="graph_bar"
+                    v-bind:style="{backgroundSize:shop_data.sold_price_px+'px 3px'}">
+                  {{ shop_data.sold_price }}</td>
+                <td class="graph_bar"
+                    v-bind:style="{backgroundSize:shop_data.sold_days+'px 3px'}">
+                  {{ shop_data.sold_days }}</td>
+                <td class="graph_bar"
+                    v-bind:style="{backgroundSize:shop_data.on_sale_count_px+'px 3px'}">
+                  {{ shop_data.on_sale_count }}</td>
+                <td class="graph_bar"
+                    v-bind:style="{backgroundSize:shop_data.on_sale_price_px+'px 3px'}">
+                  {{ shop_data.on_sale_price }}</td>
+                <td class="graph_bar"
+                    v-bind:style="{backgroundSize:shop_data.on_sale_days+'px 3px'}">
+                  {{ shop_data.on_sale_days }}</td>
+              </tr>
+            </table>
+          </div><!--.scroll_tbl2-->
+          
+        </div><!--.column_left-->
+        
+        <div class="wcolumn_right">
+          
           <h2>地区別</h2>
           
           <div class="scroll_tbl2">
@@ -179,34 +236,33 @@
               </tr>
               
               <tr v-for="town_data in town_sales">
-                <th><div class="col_key">{{ town_data.town }}</div></th>
+                <th>{{ town_data.town }}</th>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:town_data.sold_count_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:town_data.sold_count_px+'px 3px'}">
                   {{ town_data.sold_count }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:town_data.sold_price_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:town_data.sold_price_px+'px 3px'}">
                   {{ town_data.sold_price }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:town_data.sold_days+'px 4px'}">
+                    v-bind:style="{backgroundSize:town_data.sold_days+'px 3px'}">
                   {{ town_data.sold_days }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:town_data.on_sale_count_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:town_data.on_sale_count_px+'px 3px'}">
                   {{ town_data.on_sale_count }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:town_data.on_sale_price_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:town_data.on_sale_price_px+'px 3px'}">
                   {{ town_data.on_sale_price }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:town_data.on_sale_days+'px 4px'}">
+                    v-bind:style="{backgroundSize:town_data.on_sale_days+'px 3px'}">
                   {{ town_data.on_sale_days }}</td>
               </tr>
             </table>
           </div><!--.scroll_tbl2-->
-          
-        </div><!--.column_left-->
-        
-        <div class="wcolumn_right">
-          
-          <h2>近隣 市区町村</h2>
+
+        </div><!--.column_right-->
+
+        <div class="column_left">
+                    <h2>近隣 市区町村</h2>
           
           <div class="scroll_tbl2">
             
@@ -228,77 +284,81 @@
               </tr>
               
               <tr v-for="city_data in near_city_sales">
-                <th><div class="col_key">{{ city_data.city }}</div></th>
+                <th>
+		  <div class="col_key"
+		       v-on:click="load_city_datas($event)">
+		    {{ city_data.city }}
+		  </div>
+		</th>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:city_data.sold_count_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:city_data.sold_count_px+'px 3px'}">
                   {{ city_data.sold_count }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:city_data.sold_price_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:city_data.sold_price_px+'px 3px'}">
                   {{ city_data.sold_price }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:city_data.sold_days+'px 4px'}">
+                    v-bind:style="{backgroundSize:city_data.sold_days+'px 3px'}">
                   {{ city_data.sold_days }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:city_data.on_sale_count_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:city_data.on_sale_count_px+'px 3px'}">
                   {{ city_data.on_sale_count }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:city_data.on_sale_price_px+'px 4px'}">
+                    v-bind:style="{backgroundSize:city_data.on_sale_price_px+'px 3px'}">
                   {{ city_data.on_sale_price }}</td>
                 <td class="graph_bar"
-                    v-bind:style="{backgroundSize:city_data.on_sale_days+'px 4px'}">
+                    v-bind:style="{backgroundSize:city_data.on_sale_days+'px 3px'}">
                   {{ city_data.on_sale_days }}</td>
               </tr>
             </table>
             
           </div><!--.scroll_tbl2-->
+        </div><!--.column_left-->
+        
+        <div class="column_right">
 
+          <h2>その他</h2>
+          <table>
+            <tr>
+              <th>人口</th>
+              <th>総人口</th>
+              <th>変動</th><td></td>
+              <th>20～29歳</th><td></td>
+              <th>変動</th><td></td>
+              <th>30～49歳</th><td></td>
+              <th>変動</th><td></td>
+              <th>50歳～</th><td></td>
+              <th>変動</th><td></td>
+            </tr>
+            <tr>
+              <th>世帯</th>
+              <th>総世帯</th><td></td>
+              <th>変動</th><td></td>
+              <th>家族世帯</th><td></td>
+              <th>単身世帯</th><td></td>
+            </tr>
+            <tr>
+              <th>面積</th><td></td>
+              <th>住居面積</th><td></td>
+              <th>生産緑地</th><td></td>
+            </tr>
+            <tr>
+              <th>年収</th><td></td>
+              <th></th><td></td>
+              <th></th><td></td>
+            </tr>
+            <tr>
+              <th>持家:賃貸</th><td></td>
+              <th>戸建:集合</th><td></td>
+              <th></th><td></td>
+          </table>
+          
         </div><!--.column_right-->
       </div><!--.two_cols_layout-->
-        
-        
-        
-      <h2>その他</h2>
-
-      <table>
-        <tr>
-          <th>人口</th>
-          <th>総人口</th>
-          <th>変動</th><td></td>
-          <th>20～29歳</th><td></td>
-          <th>変動</th><td></td>
-          <th>30～49歳</th><td></td>
-          <th>変動</th><td></td>
-          <th>50歳～</th><td></td>
-          <th>変動</th><td></td>
-        </tr>
-        <tr>
-          <th>世帯</th>
-          <th>総世帯</th><td></td>
-          <th>変動</th><td></td>
-          <th>家族世帯</th><td></td>
-          <th>単身世帯</th><td></td>
-        </tr>
-        <tr>
-          <th>面積</th><td></td>
-          <th>住居面積</th><td></td>
-          <th>生産緑地</th><td></td>
-        </tr>
-        <tr>
-          <th>年収</th><td></td>
-          <th></th><td></td>
-          <th></th><td></td>
-        </tr>
-        <tr>
-          <th>持家:賃貸</th><td></td>
-          <th>戸建:集合</th><td></td>
-          <th></th><td></td>
-      </table>
 
     </div><!--.page_middle_container-->
   </div><!--.page_middle-->
 
-  <div class="page_bottom">
-  </div><!--.page_bottom-->
+  <div class="page_bottom">&nbsp;</div>
 
   <footer>
     &copy; <span class="copyright_year"></span>
@@ -308,7 +368,7 @@
   <div v-show="show_jpn_map" id="mask"></div>
   
   <section v-show="show_jpn_map" id="jpn_map_modal"
-	   v-on:click="set_pref_name($event)">
+           v-on:click="set_pref_name($event)">
     <div id="japan-map" class="clearfix">
 
       <div id="hokkaido-touhoku" class="clearfix">
