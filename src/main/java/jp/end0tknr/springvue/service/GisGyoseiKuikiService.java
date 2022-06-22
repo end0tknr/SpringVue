@@ -14,13 +14,15 @@ public class GisGyoseiKuikiService extends GisServiceFactory {
     @Autowired
     GisGyoseiKuikiRepository gisGyoseiKuikiRepository;
 
-    public String[] descsForDisp(){
+    @Override
+	public String[] descsForDisp(){
     	String[] retStrs = {"都道府県名","郡・政令都市名","市区町村名"};
     	//Arrays.asList(retStrs).contains("Apple");
     	return retStrs;
     }
 
-    public  List<GisEntityAbstract> findByCoordFromRepo(List coord) {
+    @Override
+	public  List<GisEntityAbstract> findByCoordFromRepo(List coord) {
     	return gisGyoseiKuikiRepository.findByCoord(coord);
     }
 

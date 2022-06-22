@@ -26,7 +26,7 @@ public abstract class GisEntityAbstract {
 //	}
 
 	public List<Double> getGeom() {
-		List<Double> lng_lat = new ArrayList<Double>();
+		List<Double> lng_lat = new ArrayList<>();
 		lng_lat.add(getLng());
 		lng_lat.add(getLat());
 		return lng_lat;

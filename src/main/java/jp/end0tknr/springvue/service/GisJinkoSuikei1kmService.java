@@ -14,10 +14,12 @@ public class GisJinkoSuikei1kmService extends GisServiceFactory {
     @Autowired
     GisJinkoSuikei1kmRepository gisJinkoSuikei1kmRepository;
 
+	@Override
 	public String tblName() {
     	return "gis_jinko_suikei_1km";
 	}
 
+	@Override
 	public String[] descsForDisp(){
     	String[] retStrs = {
     			"2030年男女計0～14歳人口",
@@ -33,7 +35,8 @@ public class GisJinkoSuikei1kmService extends GisServiceFactory {
     	return retStrs;
     }
 
-    public  List<GisEntityAbstract> findByCoordFromRepo(List coord) {
+    @Override
+	public  List<GisEntityAbstract> findByCoordFromRepo(List coord) {
     	return gisJinkoSuikei1kmRepository.findByCoord(coord);
     }
 

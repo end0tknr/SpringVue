@@ -32,12 +32,8 @@
 		<property name="useActualColumnNames" value="true" />
     </table>
  -->
-    <table schema="" tableName="newbuild_sales_count_by_city"
-	domainObjectName="NewbuildSalesCountByCity">
-		<property name="useActualColumnNames" value="true" />
-    </table>
-    <table schema="" tableName="newbuild_sales_count_by_town"
-	domainObjectName="NewbuildSalesCountByTown">
+    <table schema="" tableName="city_profile"
+	domainObjectName="CityProfile">
 		<property name="useActualColumnNames" value="true" />
     </table>
 

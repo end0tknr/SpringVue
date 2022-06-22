@@ -46,7 +46,7 @@ public class GisRestController {
     		@PathVariable("dataName") String dataName,
     		@RequestParam("co") String coordStr) {
 
-		List<Double> coords = new ArrayList<Double>();
+		List<Double> coords = new ArrayList<>();
 
 		for(String tmpStr : Arrays.asList(coordStr.split(",")) ){
 			coords.add(Double.valueOf(tmpStr));
