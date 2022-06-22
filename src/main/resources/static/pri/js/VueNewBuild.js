@@ -217,7 +217,7 @@
         
             // sort
             sales_counts = sales_counts.sort(function(a, b) {
-                return b["sold_count"] - a["sold_count"];
+                return b["on_sale_count"] - a["on_sale_count"];
             });
             
             let atri_min_max = {}

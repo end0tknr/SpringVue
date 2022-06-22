@@ -281,25 +281,25 @@ WHERE tmp.url NOT IN ( SELECT url FROM UPSERT )
 
         for atri_key in ['price','build_area_m2','land_area_m2','build_year']:
             if not org_row[atri_key]:
-                org_row[atri_key] = 0
-
-            ret_tuple = ( org_row['url'],
-                          build_type,
-                          org_row['bukken_name'],
-                          int(org_row['price']),
-                          org_row['price_org'],
-                          org_row['pref'],
-                          org_row['city'],
-                          org_row['address'],
-                          org_row['plan'],
-                          float( org_row['build_area_m2'] ),
-                          org_row['build_area_org'],
-                          float( org_row['land_area_m2'] ),
-                          org_row['land_area_org'],
-                          int( org_row['build_year'] ),
-                          org_row['shop_org'],
-                          date_str,
-                          date_str )
+                org_row[atri_key] = "0"
+                
+        ret_tuple = ( org_row['url'],
+                      build_type,
+                      org_row['bukken_name'],
+                      int(org_row['price']),
+                      org_row['price_org'],
+                      org_row['pref'],
+                      org_row['city'],
+                      org_row['address'],
+                      org_row['plan'],
+                      float( org_row['build_area_m2'] ),
+                      org_row['build_area_org'],
+                      float( org_row['land_area_m2'] ),
+                      org_row['land_area_org'],
+                      int( org_row['build_year'] ),
+                      org_row['shop_org'],
+                      date_str,
+                      date_str )
             
         tuple_key = org_row['url']
         return ret_tuple, tuple_key
@@ -987,8 +987,9 @@ LIMIT 1
         sql = """
 SELECT * FROM suumo_bukken
 WHERE build_type=%s and (check_date BETWEEN %s AND %s)
-      and shop is not null;
+      -- and shop is not null;
 """
+
         sql_args = (build_type, date_from, date_to )
         
         with self.db_connect() as db_conn:

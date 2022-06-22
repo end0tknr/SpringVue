@@ -34,7 +34,7 @@
       <h1 id="pref_name">{{pref_name}}</h1>
       <div class="container_title_sub">
         <div>
-          <input type="date" name="disp_date_from">
+	  <!-- <input type="date" name="disp_date_from"> -->
         </div>
         <div class="container_title_sub_right">
           <a class="open_jpn_map_modal" v-on:click="show_jpn_map_modal">
@@ -319,37 +319,57 @@
           <h2>その他</h2>
           <table>
             <tr>
-              <th>人口</th>
-              <th>総人口</th>
-              <th>変動</th><td></td>
+              <th>人口(2020)</th>
+              <th>総人口</th><td></td>
               <th>20～29歳</th><td></td>
-              <th>変動</th><td></td>
               <th>30～49歳</th><td></td>
-              <th>変動</th><td></td>
-              <th>50歳～</th><td></td>
-              <th>変動</th><td></td>
             </tr>
             <tr>
-              <th>世帯</th>
+              <th>(対2015)</th>
+              <th></th><td></td>
+              <th></th><td></td>
+              <th></th><td></td>
+            </tr>
+            <tr>
+              <th>世帯(2020)</th>
               <th>総世帯</th><td></td>
-              <th>変動</th><td></td>
               <th>家族世帯</th><td></td>
               <th>単身世帯</th><td></td>
             </tr>
             <tr>
-              <th>面積</th><td></td>
-              <th>住居面積</th><td></td>
+              <th>(対2015)</th>
+              <th></th><td></td>
+              <th></th><td></td>
+              <th></th><td></td>
+            </tr>
+            <tr>
+              <th>面積</th>
+              <th>総面積</th><td></td>
+              <th>住居系</th><td></td>
               <th>生産緑地</th><td></td>
             </tr>
             <tr>
+              <th>持家,戸建率</th>
+              <th>持家/賃貸</th><td>??%</td>
+              <th>戸建/集合</th><td>??%</td>
               <th>年収</th><td></td>
-              <th></th><td></td>
-              <th></th><td></td>
             </tr>
             <tr>
-              <th>持家:賃貸</th><td></td>
-              <th>戸建:集合</th><td></td>
-              <th></th><td></td>
+              <th>外部ﾘﾝｸ</th>
+	      <td colspan="2">
+		<a href="https://www.google.com/maps/place/東京都国分寺市" target="_blank">GoogleMap</a>
+	      </td>
+	      <td colspan="2">
+		<a href="http://maps.gsi.go.jp/#12/35.710350/139.463272" target="_blank">地理院地図</a>
+	      </td>
+              <td colspan="2">
+		MapExpert (
+		<a href="https://people.mapexpert.net/StatMap?L=13214&N=国分寺市" target="_blank">人口世帯</a>
+		<a href="https://landprice.mapexpert.net/LandPrice?L=13214&N=国分寺市" target="_blank">地価</a>
+		<a href="https://cityzone.mapexpert.net/ZoneMap?L=13214&N=国分寺市" target="_blank">用途</a>
+		)
+	      </td>
+            </tr>
           </table>
           
         </div><!--.column_right-->

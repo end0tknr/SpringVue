@@ -35,6 +35,12 @@ lat             double precision,
 primary key(code));
 COMMENT ON COLUMN city.code IS '市町村code';
 
+CREATE TABLE IF NOT EXISTS city_profile (
+pref            varchar(4),
+city            varchar(8),
+summary         varchar(4096),
+primary key(pref,city));
+
 CREATE TABLE IF NOT EXISTS near_city (
 pref            varchar(4),
 city            varchar(8),
