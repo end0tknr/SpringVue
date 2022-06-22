@@ -35,6 +35,12 @@ lat             double precision,
 primary key(code));
 COMMENT ON COLUMN city.code IS '市町村code';
 
+CREATE TABLE IF NOT EXISTS city_profile (
+pref            varchar(4),
+city            varchar(8),
+summary         varchar(4096),
+primary key(pref,city));
+
 CREATE TABLE IF NOT EXISTS near_city (
 pref            varchar(4),
 city            varchar(8),
@@ -525,20 +531,20 @@ primary key(url) );
 
 
 CREATE TABLE IF NOT EXISTS suumo_bukken (
-build_type      varchar(32)  NOT NULL DEFAULT '',
-bukken_name     varchar(64)  NOT NULL DEFAULT '',
+url             varchar(128),
+build_type      varchar(32),
+bukken_name     varchar(64),
 price           bigint,
 price_org       varchar(64),
-pref            varchar(4)   NOT NULL DEFAULT '',
-city            varchar(8)   NOT NULL DEFAULT '',
-address         varchar(128) NOT NULL DEFAULT '',
-plan            varchar(64)  NOT NULL DEFAULT '',
+pref            varchar(4),
+city            varchar(8),
+address         varchar(128),
+plan            varchar(64),
 build_area_m2   int,
-build_area_org  varchar(64)  NOT NULL DEFAULT '',
+build_area_org  varchar(64),
 land_area_m2    int,
-land_area_org   varchar(64)  NOT NULL DEFAULT '',
-build_year      int          NOT NULL DEFAULT 0,
-url             varchar(128),
+land_area_org   varchar(64),
+build_year      int,
 shop_org        varchar(64),
 shop            varchar(64),
 total_house     int,
@@ -546,11 +552,8 @@ house_for_sale  int,
 found_date      date,
 show_date       date,
 check_date      date,
-primary key ( build_type,bukken_name,pref,city,address,plan,
-              build_area_org,land_area_org,build_year)
+primary key ( url )
 );
-
-CREATE INDEX suumo_bukken_url ON suumo_bukken (url);
 
 
 -- CREATE TABLE IF NOT EXISTS lifell_bukken (
@@ -658,6 +661,20 @@ on_sale_count           int,
 on_sale_price           bigint,
 on_sale_days            int,
 primary key(pref,shop,calc_date,calc_days) );
+
+CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_shop_city (
+pref                    varchar(4),
+city                    varchar(16),
+shop                    varchar(64),
+calc_date               date,
+calc_days               int,
+sold_count              int,
+sold_price              bigint,
+sold_days               int,
+on_sale_count           int,
+on_sale_price           bigint,
+on_sale_days            int,
+primary key(pref,city,shop,calc_date,calc_days) );
 
 CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_city (
 pref                    varchar(4),

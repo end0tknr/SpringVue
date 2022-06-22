@@ -179,6 +179,12 @@ h2 {
 }
 
 
+.two_cols_layout {
+    display: grid;
+    gap:     5px;
+    grid-template-columns: 1fr 1fr;
+}
+
 .three_cols_layout {
     display: grid;
     gap:     5px;
@@ -211,10 +217,10 @@ li a:hover {
     gap: 5px;
 }
 
-@media (min-width: 1040px) {
+@media (min-width: 1200px) {
 
     header {
-	width:  1040px;
+	width:  1200px;
 	margin: 0 auto;
     }
 
@@ -223,7 +229,7 @@ li a:hover {
     }
     .page_top_container {
 	position: relative;
-	width:  1040px;
+	width:  1200px;
 	height: 400px;
 	margin: 0 auto;
     }
@@ -247,20 +253,20 @@ li a:hover {
     }
 
     .page_middle_container {
-	width:  1040px;
+	width:  1200px;
 	margin: 0 auto;
     }
     .page_bottom {
-	width:  1040px;
+	width:  1200px;
 	margin: 0 auto;
     }
     .container_title {
-	width:  1040px;
+	width:  1200px;
 	margin: 0 auto;
     }
 
     footer {
-	width:  1040px;
+	width:  1200px;
 	margin: 0 auto;
     }
     

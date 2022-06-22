@@ -175,29 +175,60 @@ SELECT * FROM suumo_bukken where pref =''
     def save_bukken_infos(self, build_type, bukken_infos):
 
         bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
-        date_str = datetime.datetime.now().strftime('%Y-%m-%d')
+        date_str = datetime.datetime.now()
+        #date_str = datetime.datetime.now().strftime('%Y-%m-%d')
         row_groups = self.divide_rows_info(build_type,
                                            bukken_infos,
                                            bulk_insert_size,
                                            date_str )
-
+        
+# refer to https://qiita.com/yuuuuukou/items/d7723f45e83deb164d68
         sql = """
+WITH
+tmp(url,build_type,bukken_name,price,price_org,pref,city,address,
+    plan,build_area_m2,build_area_org,land_area_m2,land_area_org,
+    build_year,shop_org,found_date,check_date)
+AS ( values %s ),
+-- updateを実施
+upsert AS (
+  UPDATE suumo_bukken sb
+  SET bukken_name    = tmp.bukken_name,
+      price          = tmp.price,
+      price_org      = tmp.price_org,
+      address        = tmp.address,
+      plan           = tmp.plan,
+      build_area_m2  = tmp.build_area_m2,
+      build_area_org = tmp.build_area_org,
+      land_area_m2   = tmp.land_area_m2,
+      land_area_org  = tmp.land_area_org,
+      shop_org       = tmp.shop_org,
+      check_date     = tmp.check_date
+  FROM tmp
+  WHERE sb.url = tmp.url
+  RETURNING sb.url
+)
+-- update対象が無ければinsert
 INSERT INTO suumo_bukken
-  (build_type,bukken_name,price,price_org,pref,city,address,
-   plan,build_area_m2,build_area_org,land_area_m2,land_area_org,
-   build_year,shop_org,url,found_date,check_date)
-  VALUES %s
-ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
-  DO UPDATE SET check_date='%s'
+   (url,build_type,bukken_name,price,price_org,pref,city,address,
+    plan,build_area_m2,build_area_org,land_area_m2,land_area_org,
+    build_year,shop_org,found_date,check_date)
+SELECT
+  tmp.url,         tmp.build_type,   tmp.bukken_name,
+  tmp.price,       tmp.price_org,    tmp.pref, tmp.city, tmp.address,
+  tmp.plan,        tmp.build_area_m2,tmp.build_area_org,
+  tmp.land_area_m2,tmp.land_area_org,
+  tmp.build_year,  tmp.shop_org,     tmp.found_date, tmp.check_date
+FROM tmp
+WHERE tmp.url NOT IN ( SELECT url FROM UPSERT )
 """
-        sql = sql % ("%s", date_str)
+        # sql = sql % ("%s", date_str)
         
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:
 
                 for row_group in row_groups:
                     try:
-                        # bulk insert
+                        # bulk upsert
                         extras.execute_values(db_cur,sql, row_group )
                     except Exception as e:
                         logger.error(e)
@@ -208,33 +239,69 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
             db_conn.commit()
         return True
     
-    def make_tuple_for_insert(self, build_type, org_row, date_str):
         
-        ret_tuple = ( build_type                or "",
-                      org_row['bukken_name']    or "",
-                      org_row['price'],
+#     def save_bukken_infos(self, build_type, bukken_infos):
+
+#         bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
+#         date_str = datetime.datetime.now().strftime('%Y-%m-%d')
+#         row_groups = self.divide_rows_info(build_type,
+#                                            bukken_infos,
+#                                            bulk_insert_size,
+#                                            date_str )
+
+#         sql = """
+# INSERT INTO suumo_bukken
+#   (build_type,bukken_name,price,price_org,pref,city,address,
+#    plan,build_area_m2,build_area_org,land_area_m2,land_area_org,
+#    build_year,shop_org,url,found_date,check_date)
+#   VALUES %s
+# ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
+#   DO UPDATE SET check_date='%s'
+# """
+#         sql = sql % ("%s", date_str)
+        
+#         with self.db_connect() as db_conn:
+#             with self.db_cursor(db_conn) as db_cur:
+
+#                 for row_group in row_groups:
+#                     try:
+#                         # bulk insert
+#                         extras.execute_values(db_cur,sql, row_group )
+#                     except Exception as e:
+#                         logger.error(e)
+#                         logger.error(sql)
+#                         logger.error(row_group)
+#                         return False
+                    
+#             db_conn.commit()
+#         return True
+
+    
+    def make_tuple_for_insert(self, build_type, org_row, date_str):
+
+        for atri_key in ['price','build_area_m2','land_area_m2','build_year']:
+            if not org_row[atri_key]:
+                org_row[atri_key] = "0"
+                
+        ret_tuple = ( org_row['url'],
+                      build_type,
+                      org_row['bukken_name'],
+                      int(org_row['price']),
                       org_row['price_org'],
-                      org_row['pref']           or "",
-                      org_row['city']           or "",
-                      org_row['address']        or "",
+                      org_row['pref'],
+                      org_row['city'],
+                      org_row['address'],
                       org_row['plan'],
-                      org_row['build_area_m2'],
-                      org_row['build_area_org'] or "",
-                      org_row['land_area_m2'],
-                      org_row['land_area_org']  or "",
-                      org_row['build_year']     or 0,
+                      float( org_row['build_area_m2'] ),
+                      org_row['build_area_org'],
+                      float( org_row['land_area_m2'] ),
+                      org_row['land_area_org'],
+                      int( org_row['build_year'] ),
                       org_row['shop_org'],
-                      org_row['url'],
                       date_str,
                       date_str )
-        tuple_key = "\t".join([ ret_tuple[0],
-                                ret_tuple[1],
-                                ret_tuple[4],
-                                ret_tuple[5],
-                                ret_tuple[6],
-                                ret_tuple[9],
-                                ret_tuple[11],
-                                str( ret_tuple[12]) ] )
+            
+        tuple_key = org_row['url']
         return ret_tuple, tuple_key
 
         
@@ -250,7 +317,7 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
                                                               date_str)
 
             if tuple_key in tuple_keys:
-                logger.debug("duplicate bukken "+ tuple_key)
+                logger.warning("duplicate bukken "+ tuple_key)
                 continue
             
             tuple_keys[tuple_key] = 1
@@ -421,9 +488,14 @@ ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
             bukken_info = {}
             
             result_parse = self.parse_bukken_url(bukken_div)
-            if len(result_parse):
-                bukken_info["url"]    = result_parse[0]
-                bukken_info["物件名"] = result_parse[1]
+            if not len(result_parse):
+                logger.error("fail parse url "+ result_list_url)
+                logger.error(bukken_div)
+                continue
+
+            bukken_info["url"]    = result_parse[0]
+            bukken_info["物件名"] = result_parse[1]
+                
             
             dls = bukken_div.select("dl")
             for dl in dls:
@@ -915,7 +987,9 @@ LIMIT 1
         sql = """
 SELECT * FROM suumo_bukken
 WHERE build_type=%s and (check_date BETWEEN %s AND %s)
+      and shop is not null;
 """
+
         sql_args = (build_type, date_from, date_to )
         
         with self.db_connect() as db_conn:
@@ -939,7 +1013,8 @@ WHERE build_type=%s and (check_date BETWEEN %s AND %s)
         ret_rows = []
         sql = """
 SELECT * FROM suumo_bukken
-WHERE build_type=%s and check_date >= %s
+WHERE build_type=%s and check_date >= %s 
+      -- AND shop is null
 """
         chk_date_str = self.get_last_check_date()
         chk_date = datetime.datetime.strptime(chk_date_str, '%Y-%m-%d')

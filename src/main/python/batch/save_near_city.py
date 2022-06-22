@@ -14,7 +14,13 @@ def main():
     gyosei_kuiki_service = GisGyoseiKuikiService()
 
     cities = city_service.get_all_pref_city()
+    i = 0
     for city in cities:
+        i += 1
+        if i % 20 == 0:
+            print("%d/%d %s %s" %(i, len(cities), city["pref"], city["city"]))
+
+        
         if not city["city"]:
             continue
 
