@@ -59,13 +59,32 @@ INSERT INTO near_city (pref,city,near_pref,near_city) VALUES (%s,%s,%s,%s)
         return True
             
         
+    def get_all(self):
+        ret_data = []
+        sql = """
+SELECT pref,city
+FROM city
+"""
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+            
+            for ret_row in  db_cur.fetchall():
+                ret_data.append( dict( ret_row ))
+        return ret_data
+    
     def get_all_pref_city(self):
         ret_data = []
         sql = """
 SELECT pref,city
 FROM city
 GROUP BY pref,city
-ORDER BY  pref,city
+ORDER BY pref,city
 """
 
         db_conn = self.db_connect()

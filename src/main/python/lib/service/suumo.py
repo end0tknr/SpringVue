@@ -144,14 +144,14 @@ SELECT * FROM suumo_bukken where pref =''
     def save_bukken_infos_main(self):
         logger.info("start")
         
-        # # 物件一覧のurl探索
-        # result_list_urls = self.find_search_result_list_url()
-        # # 物件一覧の旧url 削除
-        # self.del_search_result_list_urls()
+        # 物件一覧のurl探索
+        result_list_urls = self.find_search_result_list_url()
+        # 物件一覧の旧url 削除
+        self.del_search_result_list_urls()
 
-        # # 物件一覧の新url 登録
-        # for build_type, result_list_urls in result_list_urls.items():
-        #     self.save_search_result_list_urls(build_type,result_list_urls)
+        # 物件一覧の新url 登録
+        for build_type, result_list_urls in result_list_urls.items():
+            self.save_search_result_list_urls(build_type,result_list_urls)
             
         # 物件一覧の新url 再? load
         result_list_urls = self.load_search_result_list_urls()
@@ -987,7 +987,7 @@ LIMIT 1
         sql = """
 SELECT * FROM suumo_bukken
 WHERE build_type=%s and (check_date BETWEEN %s AND %s)
-      -- and shop is not null;
+      and shop is not null;
 """
 
         sql_args = (build_type, date_from, date_to )
@@ -1013,7 +1013,8 @@ WHERE build_type=%s and (check_date BETWEEN %s AND %s)
         ret_rows = []
         sql = """
 SELECT * FROM suumo_bukken
-WHERE build_type=%s and check_date >= %s and shop is null
+WHERE build_type=%s and check_date >= %s 
+      -- AND shop is null
 """
         chk_date_str = self.get_last_check_date()
         chk_date = datetime.datetime.strptime(chk_date_str, '%Y-%m-%d')
