@@ -13,6 +13,7 @@
                 shop_city_sales : [],
                 town_sales      : [],
                 near_city_sales : [],
+                city_profile    : {},
                 sort_tbl_dirs : {
                     "shop_sales"      : {},
                     "shop_city_sales" : {},
@@ -33,6 +34,7 @@
                 this.load_shop_city_data(this.pref_name,this.city_name);
                 this.load_town_data(this.pref_name,this.city_name);
                 this.load_near_city_data(this.pref_name,this.city_name);
+                this.load_city_profile(this.pref_name,this.city_name);
             },
             
             set_pref_name(event){
@@ -74,6 +76,9 @@
             },
             load_city_data(pref){
                 vue_newbuild.load_city_data(pref,this);
+            },
+            load_city_profile(pref,city){
+                vue_newbuild.load_city_profile(pref,city,this);
             },
             load_town_data(pref,city){
                 vue_newbuild.load_town_data(pref,city,this);
@@ -158,6 +163,7 @@
             vue_obj.load_shop_city_data(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_town_data(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_near_city_data(vue_obj.pref_name,vue_obj.city_name);
+            vue_obj.load_city_profile(vue_obj.pref_name,vue_obj.city_name);
 
         }
         
@@ -181,6 +187,57 @@
             let town_sales = await res.json();
             town_sales = this.conv_counts_for_disp( town_sales );
             vue_obj.shop_city_sales = town_sales;
+        }
+        
+        async load_city_profile(pref,city,vue_obj){
+            let req_url = server_api_base_url +
+                "newbuild/CityProfile/"+
+                encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+            
+            let res = await fetch(req_url);
+            let city_profile = await res.json();
+
+            city_profile["戸建率"] =
+                city_profile["世帯_戸建"] /
+                (city_profile["世帯_戸建"] + city_profile["世帯_集合"]);
+            city_profile["戸建率"] = Math.round(city_profile["戸建率"] *100);
+            
+            city_profile["持家率"] =
+                city_profile["世帯_持家"] /
+                (city_profile["世帯_持家"] + city_profile["世帯_賃貸"]);
+            city_profile["持家率"] = Math.round(city_profile["持家率"] *100);
+
+            let atri_keys =
+                ["人口_20_29歳_万人","人口_30_59歳_万人",,"人口_60歳_万人",
+                 "総世帯","家族世帯","単身世帯"]
+            for( let atri_key of atri_keys ) {
+                city_profile[atri_key+"_差"] =
+                    city_profile[atri_key] - city_profile[atri_key+"_2015"];
+                city_profile[atri_key+"_差"] =
+                    city_profile[atri_key+"_差"].toLocaleString();
+                if(! city_profile[atri_key+"_差"]){
+                    city_profile[atri_key+"_差"] = "±0"
+                } else if (city_profile[atri_key+"_差"].indexOf("-") < 0 ){
+                    city_profile[atri_key+"_差"] =
+                        "+"+ city_profile[atri_key+"_差"];
+                }
+            }
+
+            atri_keys = ["総世帯","家族世帯","単身世帯","生産緑地_ha",
+                         "用途地域_住居系_ha","用途地域_商業系_ha"]
+            for( let atri_key of atri_keys ) {
+                if (! city_profile[atri_key]) {
+                    continue
+                }
+                city_profile[atri_key] =
+                    city_profile[atri_key].toLocaleString();
+            }
+            city_profile["mapexpert_id"] =
+		city_profile["citycode"].substr( 0, city_profile["citycode"].length-1 );
+
+            
+            //console.log(city_profile);
+            vue_obj.city_profile = city_profile;
         }
         
         async load_near_city_data(pref,city,vue_obj){
@@ -207,7 +264,8 @@
             for( let sales_count of sales_counts ) {
                 // 円→百万円
                 for( let atri_key of ["sold_price","on_sale_price"] ) {
-                    sales_count[atri_key] = Math.round(sales_count[atri_key] /1000000)
+                    sales_count[atri_key] =
+                        Math.round(sales_count[atri_key] /1000000)
                 }
                 
                 for( let atri_key of atri_keys ) {
@@ -223,10 +281,10 @@
             let atri_min_max = {}
             for( let atri_key of atri_keys ) {
                 let atri_list = Array.from( atri_sets[atri_key] );
-                atri_min_max[atri_key] = [Math.min(...atri_list), Math.max(...atri_list)]
+                atri_min_max[atri_key] =
+                    [Math.min(...atri_list), Math.max(...atri_list)]
             }
 
-            
             for( let sales_count of sales_counts ) {
                 for( let atri_key of atri_keys ) {
 
@@ -236,9 +294,9 @@
                                                atri_min_max[atri_key][0],
                                                atri_min_max[atri_key][1],
                                                50 );
-
                     //数値の3桁区切り化
-                    sales_count[atri_key] = Number(sales_count[atri_key]).toLocaleString();
+                    sales_count[atri_key] =
+                        Number(sales_count[atri_key]).toLocaleString();
                 }
             }
             return sales_counts;
@@ -250,10 +308,8 @@
             }
             return Math.ceil(val / val_max * bar_max);
         }
-
     }
 
     window.vue_newbuild = new VueNewBuild();
     vue_newbuild.init_page();
-
 }());

@@ -23,6 +23,23 @@ class CityProfileService(appbase.AppBase):
         global logger
         logger = self.get_logger()
 
+    def del_profiles(self):
+        logger.info("start")
+
+        sql = """
+DELETE FROM city_profile
+"""
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+                db_conn.commit()
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return False
+        return True
+        
     def save_profiles(self,profiles):
         logger.info("start")
 
@@ -54,7 +71,7 @@ VALUES (%s,%s,%s)
 
         # 総人口
         profiles = self.calc_population_setai(profiles)
-        # 年代別実行
+        # 年代別人口
         profiles = self.calc_kokusei_pop_b02(profiles)
         # 同居形態
         profiles = self.calc_kokusei_pop_b12(profiles)
@@ -89,7 +106,9 @@ VALUES (%s,%s,%s)
                 continue
 
             pref_city = org_city["pref"] +"\t"+ org_city["city"]
-            ret_datas[pref_city] = {}
+            ret_datas[pref_city] = {"citycode":org_city["code"],
+                                    "lng":org_city["lng"],
+                                    "lat":org_city["lat"] }
         return ret_datas
         
         
@@ -105,9 +124,9 @@ VALUES (%s,%s,%s)
                 continue
             
             profiles[pref_city]["総人口_万人"]     = \
-                round( ret_val["pop"]/10000, 1)
+                round( ret_val["pop"]/10000, 2)
             profiles[pref_city]["総人口_万人_2015"]= \
-                round( ret_val["pop_2015"]/10000,1)
+                round( ret_val["pop_2015"]/10000,2)
 
         return profiles
 
@@ -117,9 +136,11 @@ VALUES (%s,%s,%s)
 
         years = ["","_2015"]
         atri_keys_20_29 = ["pop_20_24","pop_25_29"]
-        atri_keys_30_59 = ["pop_30_34","pop_35_39",
-                           "pop_40_44","pop_45_49",
+        atri_keys_30_59 = ["pop_30_34","pop_35_39","pop_40_44","pop_45_49",
                            "pop_50_54","pop_55_59"]
+        atri_keys_60 = ["pop_60_64","pop_65_69","pop_70_74","pop_75_79",
+                        "pop_80_84","pop_85_89","pop_90_94","pop_95_99",
+                        "pop_100"]
         for ret_val in ret_vals:
             pref_city = ret_val["pref"]+"\t"+ret_val["city"]
             if not pref_city in profiles:
@@ -129,17 +150,22 @@ VALUES (%s,%s,%s)
             for year in years:
                 tmp_val = 0
                 for atri_key in atri_keys_20_29:
-                    tmp_val += ret_val[atri_key]
-
+                    tmp_val += ret_val[atri_key+year]
                 profiles[pref_city]["人口_20_29歳_万人"+year] = \
-                round( tmp_val / 10000,1)
+                    round( tmp_val / 10000,2)
                 
                 tmp_val = 0
                 for atri_key in atri_keys_30_59:
-                    tmp_val += ret_val[atri_key]
-
+                    tmp_val += ret_val[atri_key+year]
                 profiles[pref_city]["人口_30_59歳_万人"+year] = \
-                round( tmp_val / 10000,1)
+                    round( tmp_val / 10000,2)
+                
+                tmp_val = 0
+                for atri_key in atri_keys_60:
+                    tmp_val += ret_val[atri_key+year]
+                profiles[pref_city]["人口_60歳_万人"+year] = \
+                    round( tmp_val / 10000,2)
+        
         return profiles
 
 

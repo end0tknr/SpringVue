@@ -10,6 +10,8 @@ from service.city_profile       import CityProfileService
 
 def main():
     city_profile_service = CityProfileService()
+    
+    city_profile_service.del_profiles()
     profiles = city_profile_service.calc_profiles()
     city_profile_service.save_profiles( profiles )
 

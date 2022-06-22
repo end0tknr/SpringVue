@@ -62,7 +62,7 @@ INSERT INTO near_city (pref,city,near_pref,near_city) VALUES (%s,%s,%s,%s)
     def get_all(self):
         ret_data = []
         sql = """
-SELECT pref,city
+SELECT *
 FROM city
 """
         db_conn = self.db_connect()

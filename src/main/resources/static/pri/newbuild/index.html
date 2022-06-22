@@ -17,7 +17,8 @@
     .open_jpn_map_modal              {cursor: pointer;           }
     .scroll_tbl2 .sort_keys th       {cursor: pointer;
                                       width: 65px;}
-    
+    .city_profile th      {font-weight:bold;  }
+    .city_profile th .sub {font-weight:normal;}
   </style>
 </head>
 <body>
@@ -34,7 +35,7 @@
       <h1 id="pref_name">{{pref_name}}</h1>
       <div class="container_title_sub">
         <div>
-	  <!-- <input type="date" name="disp_date_from"> -->
+          <!-- <input type="date" name="disp_date_from"> -->
         </div>
         <div class="container_title_sub_right">
           <a class="open_jpn_map_modal" v-on:click="show_jpn_map_modal">
@@ -120,11 +121,11 @@
               
               <tr v-for="city_data in city_sales">
                 <th>
-		  <div class="col_key"
-		       v-on:click="load_city_datas($event)">
-		    {{ city_data.city }}
-		  </div>
-		</th>
+                  <div class="col_key"
+                       v-on:click="load_city_datas($event)">
+                    {{ city_data.city }}
+                  </div>
+                </th>
                 <td class="graph_bar"
                     v-bind:style="{backgroundSize:city_data.sold_count_px+'px 3px'}">
                   {{ city_data.sold_count }}</td>
@@ -285,11 +286,11 @@
               
               <tr v-for="city_data in near_city_sales">
                 <th>
-		  <div class="col_key"
-		       v-on:click="load_city_datas($event)">
-		    {{ city_data.city }}
-		  </div>
-		</th>
+                  <div class="col_key"
+                       v-on:click="load_city_datas($event)">
+                    {{ city_data.city }}
+                  </div>
+                </th>
                 <td class="graph_bar"
                     v-bind:style="{backgroundSize:city_data.sold_count_px+'px 3px'}">
                   {{ city_data.sold_count }}</td>
@@ -317,64 +318,70 @@
         <div class="column_right">
 
           <h2>その他</h2>
-          <table>
+          
+          <table class="city_profile">
             <tr>
-              <th>人口(2020)</th>
-              <th>総人口</th><td></td>
-              <th>20～29歳</th><td></td>
-              <th>30～49歳</th><td></td>
+              <th>人口</th>
+              <td>20～29歳</td><td>{{city_profile["人口_20_29歳_万人"]}}</td>
+              <td>30～59歳</td><td>{{city_profile["人口_30_59歳_万人"]}}</td>
+              <td>60歳～</td><td>{{city_profile["人口_60歳_万人"]}}</td><td>(万人)</td>
             </tr>
             <tr>
-              <th>(対2015)</th>
-              <th></th><td></td>
-              <th></th><td></td>
-              <th></th><td></td>
+              <td>(2020)</td>
+              <td></td><td>{{city_profile["人口_20_29歳_万人_差"]}}</td>
+              <td></td><td>{{city_profile["人口_30_59歳_万人_差"]}}</td>
+              <td></td><td>{{city_profile["人口_60歳_万人_差"]}}</td>
+              <td>(対2015)</td>
             </tr>
             <tr>
-              <th>世帯(2020)</th>
-              <th>総世帯</th><td></td>
-              <th>家族世帯</th><td></td>
-              <th>単身世帯</th><td></td>
+              <th>世帯</th>
+              <td>総世帯</td><td>{{city_profile["総世帯"]}}</td>
+              <td>家族世帯</td><td>{{city_profile["家族世帯"]}}</td>
+              <td>単身世帯</td><td>{{city_profile["単身世帯"]}}</td>
             </tr>
             <tr>
-              <th>(対2015)</th>
-              <th></th><td></td>
-              <th></th><td></td>
-              <th></th><td></td>
+              <td>(2020)</td>
+              <td></td><td>{{city_profile["総世帯_差"]}}</td>
+              <td></td><td>{{city_profile["家族世帯_差"]}}</td>
+              <td></td><td>{{city_profile["単身世帯_差"]}}</td>
+              <td>(対2015)</td>
             </tr>
             <tr>
               <th>面積</th>
-              <th>住居系</th><td></td>
-              <th>商業系</th><td></td>
-              <th>生産緑地</th><td></td>
+              <td>住居系</td><td>{{city_profile["用途地域_住居系_ha"]}}</td>
+              <td>商業系</td><td>{{city_profile["用途地域_商業系_ha"]}}</td>
+              <td>生産緑地</td><td>{{city_profile["生産緑地_ha"]}}</td><td>(ha)</td>
             </tr>
             <tr>
               <th>地価</th>
-              <th></th><td></td>
-              <th></th><td></td>
-              <th></th><td></td>
+              <td></td><td>{{city_profile["地価_千円_m2_住居系"]}}</td>
+              <td></td><td>{{city_profile["地価_千円_m2_商業系"]}}</td>
+              <td>(千円/㎡)</td><td></td>
             </tr>
             <tr>
-              <th>持家,戸建率</th>
-              <th>持家/賃貸</th><td>??%</td>
-              <th>戸建/集合</th><td>??%</td>
-              <th>給与年収</th><td></td>
+              <th>所有形態</th>
+              <td>持家率</td><td>{{city_profile["持家率"]}}%</td>
+              <td>戸建率</td><td>{{city_profile["戸建率"]}}%</td>
+              <th>年収</th>
+              <td>
+                {{city_profile["給与年収_万円"]+city_profile["資産年収_万円"]}}
+              </td>
+              <td>(万円)</td>
             </tr>
             <tr>
               <th>外部ﾘﾝｸ</th>
-	      <td colspan="2">
-		<a href="https://www.google.com/maps/place/東京都国分寺市" target="_blank">GoogleMap</a>
-	      </td>
-	      <td colspan="2">
-		<a href="http://maps.gsi.go.jp/#12/35.710350/139.463272" target="_blank">地理院地図</a>
-	      </td>
-              <td colspan="2">
-		MapExpert (
-		<a href="https://people.mapexpert.net/StatMap?L=13214&N=国分寺市" target="_blank">人口世帯</a>
-		<a href="https://landprice.mapexpert.net/LandPrice?L=13214&N=国分寺市" target="_blank">地価</a>
-		<a href="https://cityzone.mapexpert.net/ZoneMap?L=13214&N=国分寺市" target="_blank">用途</a>
-		)
-	      </td>
+              <td colspan="7">
+                <a v-bind:href="'https://www.google.com/maps/place/' + city_profile.pref+city_profile.city"
+                   target="_blank">GoogleMap</a>
+                &nbsp;
+                <a v-bind:href="'http://maps.gsi.go.jp/#12/'+city_profile.lng+'/'+city_profile.lat"
+                   target="_blank">地理院地図</a>
+                &nbsp;
+                MapExpert (
+                <a v-bind:href="'https://people.mapexpert.net/StatMap?L='+city_profile.mapexpert_id +'&N='+city_profile.city"
+                   target="_blank">人口世帯 地価 用途</a>
+                )
+              </td>
             </tr>
           </table>
           
