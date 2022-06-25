@@ -107,5 +107,21 @@ public class NewBuildRestController {
     	return cityProfile;
     }
 
+    @RequestMapping("/api/newbuild/NearCityProfiles/{prefCityName}")
+    public List<String> nearCityProfiles (
+    		@PathVariable("prefCityName") String prefCityName ){
+
+    	try {
+			prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	String[] names = prefCityName.split("_");
+
+    	List<String> cityProfile =
+    			cityProfileService.getNearCityProfiles(names[0],names[1]);
+    	return cityProfile;
+    }
+
 
 }
