@@ -123,7 +123,7 @@
               <tr v-for="city_data in city_sales">
                 <th>
                   <div class="col_key"
-                       v-on:click="load_city_datas($event)">
+                       v-on:click="load_city_datas(city_data.pref,city_data.city )">
                     {{ city_data.city }}
                   </div>
                 </th>
@@ -300,7 +300,7 @@
               <tr v-for="city_data in near_city_sales">
                 <th>
                   <div class="col_key"
-                       v-on:click="load_city_datas($event)">
+                       v-on:click="load_city_datas(city_data.pref,city_data.city )">
                     {{ city_data.city }}
                   </div>
                 </th>
@@ -440,7 +440,7 @@
         <tr v-for="city_profile in near_city_profiles">
           <th>
             <div class="col_key"
-                 v-on:click="load_city_datas($event)">
+                 v-on:click="load_city_datas(city_profile.pref,city_profile.city )">
               {{ city_profile.city }}
             </div>
           </th>

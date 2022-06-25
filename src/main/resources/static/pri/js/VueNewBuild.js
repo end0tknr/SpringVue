@@ -26,13 +26,20 @@
             }
         },
         mounted(){
-            this.load_shop_data(this.pref_name);
-            this.load_city_data(this.pref_name);
+            this.load_shops_data(this.pref_name);
+            this.load_cities_data(this.pref_name);
         },
         methods : {
-            load_city_datas(event){
-                this.city_name = event.target.innerText;
-
+            load_city_datas(pref_name, city_name){
+                
+                if ( this.pref_name != pref_name){
+                    this.pref_name = pref_name;
+                    this.load_shops_data(this.pref_name);
+                    this.load_cities_data(this.pref_name, city_name);
+                    return;
+                }
+          
+                this.city_name = city_name;
                 this.load_shop_city_data(this.pref_name,this.city_name);
                 this.load_town_data(this.pref_name,this.city_name);
                 this.load_near_city_data(this.pref_name,this.city_name);
@@ -61,8 +68,8 @@
                 }
                 this.pref_name = pref;
                 
-                this.load_shop_data(this.pref_name);
-                this.load_city_data(this.pref_name);
+                this.load_shops_data(this.pref_name);
+                this.load_cities_data(this.pref_name);
                 
                 this.hide_jpn_map_modal();
             },
@@ -71,14 +78,14 @@
                 return org_val / 50;
             },
 
-            load_shop_data(pref){
-                vue_newbuild.load_shop_data(pref,this);
+            load_shops_data(pref){
+                vue_newbuild.load_shops_data(pref,this);
             },
             load_shop_city_data(pref,city){
                 vue_newbuild.load_shop_city_data(pref,city,this);
             },
-            load_city_data(pref){
-                vue_newbuild.load_city_data(pref,this);
+            load_cities_data(pref,city){
+                vue_newbuild.load_cities_data(pref,city,this);
             },
             load_city_profile(pref,city){
                 vue_newbuild.load_city_profile(pref,city,this);
@@ -121,17 +128,16 @@
 
         sort_tbl(tbl_rows,sort_key,dir){
             tbl_rows = tbl_rows.sort(function(a, b) {
-		console.log(a[sort_key], b[sort_key]);
-		if(a[sort_key]==undefined && b[sort_key]==undefined ){
+                if(a[sort_key]==undefined && b[sort_key]==undefined ){
                     return 0;
-		}
-		if(a[sort_key]!=undefined && b[sort_key]==undefined ){
+                }
+                if(a[sort_key]!=undefined && b[sort_key]==undefined ){
                     return 1 * dir;
-		}
-		if(a[sort_key]==undefined && b[sort_key]!=undefined ){
+                }
+                if(a[sort_key]==undefined && b[sort_key]!=undefined ){
                     return -1 * dir;
-		}
-		
+                }
+                
                 let val_a = a[sort_key].replace(/,/g,'');
                 let val_b = b[sort_key].replace(/,/g,'');
                 val_a = Number( val_a );
@@ -154,7 +160,7 @@
             return tbl_rows;
         }
 
-        async load_shop_data(pref,vue_obj){
+        async load_shops_data(pref,vue_obj){
             let req_url = server_api_base_url +
                 "newbuild/SalesCountByShop/"+
                 encodeURIComponent(pref);
@@ -165,7 +171,7 @@
             vue_obj.shop_sales = shop_sales;
         }
         
-        async load_city_data(pref,vue_obj){
+        async load_cities_data(pref,city, vue_obj){
             let req_url = server_api_base_url +
                 "newbuild/SalesCountByCity/"+
                 encodeURIComponent(pref);
@@ -174,15 +180,18 @@
             let city_sales = await res.json();
             city_sales = this.conv_counts_for_disp( city_sales );
             vue_obj.city_sales = city_sales;
-            
-            vue_obj.city_name = city_sales[0].city;
 
+            if( city ){
+                vue_obj.city_name = city;
+            } else {
+                vue_obj.city_name = city_sales[0].city;
+            }
+            
             vue_obj.load_shop_city_data(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_town_data(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_near_city_data(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_city_profile(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_near_city_profiles(vue_obj.pref_name,vue_obj.city_name);
-
         }
         
         async load_town_data(pref,city,vue_obj){
