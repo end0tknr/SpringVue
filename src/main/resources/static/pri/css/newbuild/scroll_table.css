@@ -5,6 +5,7 @@
 
 table th {
     font-weight: normal;
+    white-space: nowrap;
 }
 
 .scroll_tbl,

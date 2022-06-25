@@ -46,6 +46,7 @@ pref_names = [
 ]
 
 base_host = "https://suumo.jp"
+
 base_urls = [
     [base_host+"/ikkodate/",       "新築戸建"],
     #[base_host+"/chukoikkodate/",  "中古戸建"],
@@ -56,9 +57,9 @@ base_urls = [
 
 http_conf = {"retry_limit":5, "retry_sleep":5 }
 re_compile_licenses = [
-    re.compile("((国土交通大臣).{0,6}第(\d\d+)号)"),
+    re.compile("会社概要.+?((国土交通大臣).{0,6}第(\d\d+)号)"),
     # refer to https://techacademy.jp/magazine/20932
-    re.compile("((神奈川県|和歌山県|鹿児島県|[一-龥]{2}[都道府県])"+
+    re.compile("会社概要.+?((神奈川県|和歌山県|鹿児島県|[一-龥]{2}[都道府県])"+
                ".{0,10}知事.{0,6}第(\d\d+)号)") ]
 
 re_compile_house_count_1 = re.compile("販売.*?数.*?(\d+)\s*(戸|室|棟|区画)")
@@ -784,8 +785,8 @@ limit 1
         return self.get_vals_group_by_city_sub(start_date_str,end_date_str)
 
 
-    def save_bukken_details(self,build_type):
-        org_bukkens = self.get_bukkens_for_detail(build_type)
+    def save_bukken_details(self,build_type,other_where):
+        org_bukkens = self.get_bukkens_for_detail(build_type,other_where)
         org_size = len(org_bukkens)
 
         while len(org_bukkens) >= parallel_size:
@@ -942,7 +943,8 @@ WHERE url=%s
     
         
     def parse_bukken_shop(self, soup):
-        all_text = soup.text.strip()
+        all_text = soup.text.strip().replace("\n"," ")
+        # all_text = soup.text.strip()
 
         shop_service = MlitRealEstateShopService()
 
@@ -1009,13 +1011,15 @@ WHERE build_type=%s and (check_date BETWEEN %s AND %s)
             ret_datas.append( ret_row )
         return ret_rows
         
-    def get_bukkens_for_detail(self, build_type):
+    def get_bukkens_for_detail(self, build_type,other_where):
         ret_rows = []
         sql = """
 SELECT * FROM suumo_bukken
-WHERE build_type=%s and check_date >= %s 
-      -- AND shop is null
+WHERE build_type=%s and check_date >= %s
 """
+        if other_where:
+            sql += (" AND "+ other_where)
+        
         chk_date_str = self.get_last_check_date()
         chk_date = datetime.datetime.strptime(chk_date_str, '%Y-%m-%d')
         
@@ -1027,7 +1031,9 @@ WHERE build_type=%s and check_date >= %s
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:
                 try:
-                    db_cur.execute(sql,(build_type,limit_date_str))
+                    db_cur.execute(sql,
+                                   (build_type,
+                                    limit_date_str))
                 except Exception as e:
                     logger.error(e)
                     logger.error(sql)

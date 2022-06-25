@@ -14,12 +14,14 @@
                 town_sales      : [],
                 near_city_sales : [],
                 city_profile    : {},
+                near_city_profiles : [],
                 sort_tbl_dirs : {
                     "shop_sales"      : {},
                     "shop_city_sales" : {},
                     "city_sales"      : {},
                     "town_sales"      : {},
-                    "near_city_sales" : {} },
+                    "near_city_sales" : {},
+                    "near_city_profiles" : {} },
                 show_jpn_map: false
             }
         },
@@ -35,6 +37,7 @@
                 this.load_town_data(this.pref_name,this.city_name);
                 this.load_near_city_data(this.pref_name,this.city_name);
                 this.load_city_profile(this.pref_name,this.city_name);
+                this.load_near_city_profiles(this.pref_name,this.city_name);
             },
             
             set_pref_name(event){
@@ -80,6 +83,9 @@
             load_city_profile(pref,city){
                 vue_newbuild.load_city_profile(pref,city,this);
             },
+            load_near_city_profiles(pref,city){
+                vue_newbuild.load_near_city_profiles(pref,city,this);
+            },
             load_town_data(pref,city){
                 vue_newbuild.load_town_data(pref,city,this);
             },
@@ -115,6 +121,17 @@
 
         sort_tbl(tbl_rows,sort_key,dir){
             tbl_rows = tbl_rows.sort(function(a, b) {
+		console.log(a[sort_key], b[sort_key]);
+		if(a[sort_key]==undefined && b[sort_key]==undefined ){
+                    return 0;
+		}
+		if(a[sort_key]!=undefined && b[sort_key]==undefined ){
+                    return 1 * dir;
+		}
+		if(a[sort_key]==undefined && b[sort_key]!=undefined ){
+                    return -1 * dir;
+		}
+		
                 let val_a = a[sort_key].replace(/,/g,'');
                 let val_b = b[sort_key].replace(/,/g,'');
                 val_a = Number( val_a );
@@ -164,6 +181,7 @@
             vue_obj.load_town_data(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_near_city_data(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_city_profile(vue_obj.pref_name,vue_obj.city_name);
+            vue_obj.load_near_city_profiles(vue_obj.pref_name,vue_obj.city_name);
 
         }
         
@@ -189,6 +207,38 @@
             vue_obj.shop_city_sales = town_sales;
         }
         
+        async load_near_city_profiles(pref,city,vue_obj){
+            let req_url = server_api_base_url +
+                "newbuild/NearCityProfiles/"+
+                encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+            
+            let res = await fetch(req_url);
+            let city_profiles = await res.json();
+            vue_obj.near_city_profiles = [];
+            for( let city_profile of city_profiles ) {
+                city_profile = JSON.parse( city_profile );
+
+                city_profile["戸建率"] =
+                    city_profile["世帯_戸建"] /
+                    (city_profile["世帯_戸建"] + city_profile["世帯_集合"]);
+                city_profile["戸建率"] = Math.round(city_profile["戸建率"] *100);
+                
+                city_profile["持家率"] =
+                    city_profile["世帯_持家"] /
+                    (city_profile["世帯_持家"] + city_profile["世帯_賃貸"]);
+                city_profile["持家率"] = Math.round(city_profile["持家率"] *100);
+                
+                for (let atri_key in city_profile){
+                    if (atri_key in ["持家率","戸建率"]){
+                        continue
+                    }
+                    
+                    city_profile[atri_key] = city_profile[atri_key].toLocaleString();
+                }
+                vue_obj.near_city_profiles.push(city_profile);
+            }
+        }
+        
         async load_city_profile(pref,city,vue_obj){
             let req_url = server_api_base_url +
                 "newbuild/CityProfile/"+
@@ -207,8 +257,15 @@
                 (city_profile["世帯_持家"] + city_profile["世帯_賃貸"]);
             city_profile["持家率"] = Math.round(city_profile["持家率"] *100);
 
+            let tmp_sum =
+                city_profile["入手_分譲"] + city_profile["入手_新築"] + city_profile["入手_建替"];
+            
+            city_profile["入手_分譲"] = Math.round(city_profile["入手_分譲"] / tmp_sum *100);
+            city_profile["入手_新築"] = Math.round(city_profile["入手_新築"] / tmp_sum *100);
+            city_profile["入手_建替"] = Math.round(city_profile["入手_建替"] / tmp_sum *100);
+
             let atri_keys =
-                ["人口_20_29歳_万人","人口_30_59歳_万人",,"人口_60歳_万人",
+                ["人口_20_24歳_万人","人口_25_59歳_万人",,"人口_60歳_万人",
                  "総世帯","家族世帯","単身世帯"]
             for( let atri_key of atri_keys ) {
                 city_profile[atri_key+"_差"] =
@@ -233,7 +290,7 @@
                     city_profile[atri_key].toLocaleString();
             }
             city_profile["mapexpert_id"] =
-		city_profile["citycode"].substr( 0, city_profile["citycode"].length-1 );
+                city_profile["citycode"].substr( 0, city_profile["citycode"].length-1 );
 
             
             //console.log(city_profile);

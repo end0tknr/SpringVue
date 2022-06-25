@@ -49,6 +49,9 @@ class CityService(appbase.AppBase):
         
         cities = self.get_all()
         for city in cities:
+            if city["lng"] and city["lat"]:
+                continue
+            
             pref_city = city["pref"] + city["city"]
             req_url = "https://www.google.com/maps/place/" + pref_city
             browser.get(req_url)

@@ -17,7 +17,8 @@
     .open_jpn_map_modal              {cursor: pointer;           }
     .scroll_tbl2 .sort_keys th       {cursor: pointer;
                                       width: 65px;}
-    .city_profile th      {font-weight:bold;  }
+    .scroll_tbl2 tr td    {text-align: right; }
+    .city_profile th      {font-weight:bold;}
     .city_profile th .sub {font-weight:normal;}
   </style>
 </head>
@@ -35,7 +36,7 @@
       <h1 id="pref_name">{{pref_name}}</h1>
       <div class="container_title_sub">
         <div>
-          <!-- <input type="date" name="disp_date_from"> -->
+          戸建分譲速報<!-- <input type="date" name="disp_date_from"> -->
         </div>
         <div class="container_title_sub_right">
           <a class="open_jpn_map_modal" v-on:click="show_jpn_map_modal">
@@ -158,7 +159,19 @@
   <div class="container_title">
     <h1 id="pref_name">{{city_name}}</h1>
     <div class="container_title_sub">
-      <div class="container_title_sub_right"></div>
+      <div>
+        戸建分譲速報
+      </div>
+      <div class="container_title_sub_right">
+        <a v-bind:href="'https://www.google.com/maps/place/' + city_profile.pref+city_profile.city"
+           target="_blank">GoogleMap</a>
+        &nbsp;
+        <a v-bind:href="'http://maps.gsi.go.jp/#12/'+city_profile.lng+'/'+city_profile.lat"
+           target="_blank">地理院地図</a>
+        &nbsp;
+        <a v-bind:href="'https://people.mapexpert.net/StatMap?L='+city_profile.mapexpert_id +'&N='+city_profile.city"
+           target="_blank">人口世帯 地価 用途</a>
+      </div>
     </div>
   </div><!--.container_title-->
     
@@ -237,7 +250,7 @@
               </tr>
               
               <tr v-for="town_data in town_sales">
-                <th>{{ town_data.town }}</th>
+                <th><div>{{ town_data.town }}</div></th>
                 <td class="graph_bar"
                     v-bind:style="{backgroundSize:town_data.sold_count_px+'px 3px'}">
                   {{ town_data.sold_count }}</td>
@@ -316,28 +329,27 @@
         </div><!--.column_left-->
         
         <div class="column_right">
-
-          <h2>その他</h2>
+          <h2>プロファイル</h2>
           
           <table class="city_profile">
             <tr>
               <th>人口</th>
-              <td>20～29歳</td><td>{{city_profile["人口_20_29歳_万人"]}}</td>
-              <td>30～59歳</td><td>{{city_profile["人口_30_59歳_万人"]}}</td>
+              <td>20～24歳</td><td>{{city_profile["人口_20_24歳_万人"]}}</td>
+              <td>25～59歳</td><td>{{city_profile["人口_25_59歳_万人"]}}</td>
               <td>60歳～</td><td>{{city_profile["人口_60歳_万人"]}}</td><td>(万人)</td>
             </tr>
             <tr>
               <td>(2020)</td>
-              <td></td><td>{{city_profile["人口_20_29歳_万人_差"]}}</td>
-              <td></td><td>{{city_profile["人口_30_59歳_万人_差"]}}</td>
+              <td></td><td>{{city_profile["人口_20_24歳_万人_差"]}}</td>
+              <td></td><td>{{city_profile["人口_25_59歳_万人_差"]}}</td>
               <td></td><td>{{city_profile["人口_60歳_万人_差"]}}</td>
               <td>(対2015)</td>
             </tr>
             <tr>
               <th>世帯</th>
               <td>総世帯</td><td>{{city_profile["総世帯"]}}</td>
-              <td>家族世帯</td><td>{{city_profile["家族世帯"]}}</td>
-              <td>単身世帯</td><td>{{city_profile["単身世帯"]}}</td>
+              <td>家族同居</td><td>{{city_profile["家族世帯"]}}</td>
+              <td>単身</td><td>{{city_profile["単身世帯"]}}</td>
             </tr>
             <tr>
               <td>(2020)</td>
@@ -354,34 +366,23 @@
             </tr>
             <tr>
               <th>地価</th>
-              <td></td><td>{{city_profile["地価_千円_m2_住居系"]}}</td>
+              <td>(千円/㎡)</td><td>{{city_profile["地価_千円_m2_住居系"]}}</td>
               <td></td><td>{{city_profile["地価_千円_m2_商業系"]}}</td>
-              <td>(千円/㎡)</td><td></td>
+              <th>個人年収</th>
+              <td>{{city_profile["年収_万円"]/100}}</td>
+              <td>(百万円)</td>
             </tr>
             <tr>
               <th>所有形態</th>
-              <td>持家率</td><td>{{city_profile["持家率"]}}%</td>
-              <td>戸建率</td><td>{{city_profile["戸建率"]}}%</td>
-              <th>年収</th>
-              <td>
-                {{city_profile["給与年収_万円"]+city_profile["資産年収_万円"]}}
-              </td>
-              <td>(万円)</td>
+              <td>持家(※)</td><td>{{city_profile["持家率"]}}%</td>
+              <td>戸建</td><td>{{city_profile["戸建率"]}}%</td>
+              <td></td><td></td><td>※ﾏﾝｼｮﾝ含</td>
             </tr>
             <tr>
-              <th>外部ﾘﾝｸ</th>
-              <td colspan="7">
-                <a v-bind:href="'https://www.google.com/maps/place/' + city_profile.pref+city_profile.city"
-                   target="_blank">GoogleMap</a>
-                &nbsp;
-                <a v-bind:href="'http://maps.gsi.go.jp/#12/'+city_profile.lng+'/'+city_profile.lat"
-                   target="_blank">地理院地図</a>
-                &nbsp;
-                MapExpert (
-                <a v-bind:href="'https://people.mapexpert.net/StatMap?L='+city_profile.mapexpert_id +'&N='+city_profile.city"
-                   target="_blank">人口世帯 地価 用途</a>
-                )
-              </td>
+              <th>新築入手</th>
+              <td>分譲(※)</td><td>{{city_profile["入手_分譲"]}}%</td>
+              <td>新築</td><td>{{city_profile["入手_新築"]}}%</td>
+              <td>建替</td><td>{{city_profile["入手_建替"]}}%</td>
             </tr>
           </table>
           
@@ -391,7 +392,85 @@
     </div><!--.page_middle_container-->
   </div><!--.page_middle-->
 
-  <div class="page_bottom">&nbsp;</div>
+  <div class="container_title">
+    <div class="container_title_sub">
+      <div>プロファイル比較</div>
+      <div class="container_title_sub_right"></div>
+    </div>
+  </div><!--.container_title-->
+
+  <div class="page_bottom">
+    
+    <div class="scroll_tbl2">
+      
+      <table>
+        <tr class="city_profile">
+          <th></th>
+          <th>人口</th>
+          <th colspan="2">世帯</th>
+          <th>地価</th>
+          <th colspan="2">所有形態</th>
+          <th colspan="6">新築世帯主年齢</th>
+          <th colspan="9">年収別世帯数<span class="sub">(百万円)</span></th>
+        </tr>
+        <tr class="sort_keys">
+          <th v-on:click="sort_tbl('near_city_profiles','city')">市区町村</th>
+          <th v-on:click="sort_tbl('near_city_profiles','人口_25_59歳_万人')">25-59歳</th>
+          <th v-on:click="sort_tbl('near_city_profiles','家族世帯')">家族同居</th>
+          <th v-on:click="sort_tbl('near_city_profiles','単身世帯')">単身</th>
+          <th v-on:click="sort_tbl('near_city_profiles','地価_千円_m2_住居系')">住居系</th>
+          <th v-on:click="sort_tbl('near_city_profiles','持家率')">持家</th>
+          <th v-on:click="sort_tbl('near_city_profiles','戸建率')">戸建</th>
+          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_24')">-24</th>
+          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_25_34')">25-34</th>
+          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_35_44')">35-44</th>
+          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_45_54')">45-54</th>
+          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_55_64')">55-64</th>
+          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_65')">65-</th>
+          <th v-on:click="sort_tbl('near_city_profiles','世帯年収_100')">-1</th>
+          <th v-on:click="sort_tbl('near_city_profiles','世帯年収_100～200')">1-2</th>
+          <th v-on:click="sort_tbl('near_city_profiles','世帯年収_200～300')">2-3</th>
+          <th v-on:click="sort_tbl('near_city_profiles','世帯年収_300～400')">3-4</th>
+          <th v-on:click="sort_tbl('near_city_profiles','世帯年収_400～500')">4-5</th>
+          <th v-on:click="sort_tbl('near_city_profiles','世帯年収_500～700')">5-7</th>
+          <th v-on:click="sort_tbl('near_city_profiles','世帯年収_700～1000')">7-10</th>
+          <th v-on:click="sort_tbl('near_city_profiles','世帯年収_1000～1500')">10-15</th>
+          <th v-on:click="sort_tbl('near_city_profiles','世帯年収_1500～')">15-</th>
+        </tr>
+        <tr v-for="city_profile in near_city_profiles">
+          <th>
+            <div class="col_key"
+                 v-on:click="load_city_datas($event)">
+              {{ city_profile.city }}
+            </div>
+          </th>
+          <td>{{city_profile["人口_25_59歳_万人"]}}</td>
+          <td>{{city_profile["家族世帯"]}}</td>
+          <td>{{city_profile["単身世帯"]}}</td>
+          <td>{{city_profile["地価_千円_m2_住居系"]}}</td>
+          <td>{{city_profile["持家率"]}}%</td>
+          <td>{{city_profile["戸建率"]}}%</td>
+          <td>{{city_profile["新築_世帯主_年齢_24"]}}</td>
+          <td>{{city_profile["新築_世帯主_年齢_25_34"]}}</td>
+          <td>{{city_profile["新築_世帯主_年齢_35_44"]}}</td>
+          <td>{{city_profile["新築_世帯主_年齢_45_54"]}}</td>
+          <td>{{city_profile["新築_世帯主_年齢_55_64"]}}</td>
+          <td>{{city_profile["新築_世帯主_年齢_65"]}}</td>
+          <td>{{city_profile["世帯年収_100"]}}</td>
+          <td>{{city_profile["世帯年収_100～200"]}}</td>
+          <td>{{city_profile["世帯年収_200～300"]}}</td>
+          <td>{{city_profile["世帯年収_300～400"]}}</td>
+          <td>{{city_profile["世帯年収_400～500"]}}</td>
+          <td>{{city_profile["世帯年収_500～700"]}}</td>
+          <td>{{city_profile["世帯年収_700～1000"]}}</td>
+          <td>{{city_profile["世帯年収_1000～1500"]}}</td>
+          <td>{{city_profile["世帯年収_1500"]}}</td>
+        </tr>
+      </table>
+    </div><!--.scroll_tbl2-->
+    
+    <div>&nbsp;</div>
+  </div>
 
   <footer>
     &copy; <span class="copyright_year"></span>
