@@ -231,6 +231,11 @@ VALUES (%s,%s,%s)
                     tmp_val += ret_val[atri_key+year]
                 profiles[pref_city]["人口_60歳_万人"+year] = \
                     round( tmp_val / 10000,2)
+
+            profiles[pref_city]["人口_25_59歳_万人_変動"] = \
+                profiles[pref_city]["人口_25_59歳_万人"] - \
+                profiles[pref_city]["人口_25_59歳_万人_2015"]
+                
         return profiles
 
 
@@ -255,6 +260,11 @@ VALUES (%s,%s,%s)
                     int( ret_val["family_setai"+year] )
                 profiles[pref_city]["単身世帯"+year] = \
                     int( ret_val["single_setai"+year])
+
+            profiles[pref_city]["家族世帯_変動"] = \
+                profiles[pref_city]["家族世帯"] - profiles[pref_city]["家族世帯_2015"]
+            profiles[pref_city]["単身世帯_変動"] = \
+                profiles[pref_city]["単身世帯"] - profiles[pref_city]["単身世帯_2015"]
         return profiles
         
         
@@ -328,8 +338,8 @@ VALUES (%s,%s,%s)
 
             for atri_key in ["住居系","商業系"]:
                 if atri_key in ret_val:
-                    profiles[pref_city]["地価_千円_m2_"+atri_key] = \
-                        int(ret_val[atri_key]/1000)
+                    profiles[pref_city]["地価_万円_m2_"+atri_key] = \
+                        int(ret_val[atri_key]/10000)
         return profiles
 
     
@@ -361,8 +371,8 @@ VALUES (%s,%s,%s)
                 logger.warning("%s not exist" % (pref_city,) )
                 continue
                 
-            profiles[pref_city]["年収_万円"] = \
-                int(ret_val["salary"]/10000) + int(ret_val["capital_income"]/10000)
+            profiles[pref_city]["年収_百万円"] = \
+                round(ret_val["salary"]/1000000 + ret_val["capital_income"]/1000000,2)
         return profiles
 
 

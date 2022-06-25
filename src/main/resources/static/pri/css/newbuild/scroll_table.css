@@ -21,6 +21,10 @@ table th {
     top:  0;
     left: 0;
 }
+.scroll_tbl  th .sub,
+.scroll_tbl2 th .sub {
+    font-weight: normal;
+}
 .scroll_tbl  td,
 .scroll_tbl2 td {
     padding: 0 10px;
