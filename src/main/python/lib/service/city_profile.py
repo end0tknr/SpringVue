@@ -3,6 +3,9 @@
 
 from service.city                   import CityService
 from service.estat_jutakutochi_d002 import EstatJutakuTochiD002Service
+from service.estat_jutakutochi_e044 import EstatJutakuTochiE044Service
+from service.estat_jutakutochi_e048 import EstatJutakuTochiE048Service
+from service.estat_jutakutochi_e101 import EstatJutakuTochiE101Service
 from service.gis_chika_koji         import GisChikaKojiService
 from service.gis_youto_chiiki       import GisYoutoChiikiService
 from service.kokusei_population_b01 import KokuseiPopulationB01Service
@@ -50,6 +53,7 @@ VALUES (%s,%s,%s)
         db_conn = self.db_connect()
         with self.db_cursor(db_conn) as db_cur:
             for profile in profiles:
+
                 sql_args = (profile["pref"],
                             profile["city"],
                             json.dumps( profile, ensure_ascii=False) )
@@ -83,14 +87,21 @@ VALUES (%s,%s,%s)
         profiles = self.calc_chika_koji(profiles)
         # 戸建/集合、持家/賃貸
         profiles = self.calc_jutakutochi_d002(profiles)
+        # 入手方法
+        profiles = self.calc_jutakutochi_e101(profiles)
         # 年収
         profiles = self.calc_soumu_zeisei(profiles)
-
+        # 世帯年収
+        profiles = self.calc_jutakutochi_e044(profiles)
+        # 新築 世帯主年齢
+        profiles = self.calc_jutakutochi_e048(profiles)
+        
         ret_datas = []
         for pref_city, profile in profiles.items():
             (profile["pref"],profile["city"]) = pref_city.split("\t")
             ret_datas.append( profile )
         return ret_datas
+    
         
     def make_profile_base(self):
         city_service = CityService()
@@ -127,17 +138,72 @@ VALUES (%s,%s,%s)
                 round( ret_val["pop"]/10000, 2)
             profiles[pref_city]["総人口_万人_2015"]= \
                 round( ret_val["pop_2015"]/10000,2)
-
         return profiles
+    
+    def calc_jutakutochi_e044(self,profiles):
+        jutakutochi_service = EstatJutakuTochiE044Service()
+
+        ret_vals = jutakutochi_service.get_group_by_city_income()
+
+        for ret_val in ret_vals:
+            pref_city = ret_val["pref"]+"\t"+ret_val["city"]
+            if not pref_city in profiles:
+                logger.warning("%s not exist" % (pref_city,) )
+                continue
+
+            if not "持ち家" in ret_val:
+                continue
+
+            income = ret_val["year_income"].replace('万円未満','').replace('万円以上','')
+            
+            profiles[pref_city]["世帯年収_"+income ] = ret_val["持ち家"]
+        return profiles
+
+    def calc_jutakutochi_e048(self,profiles):
+        jutakutochi_service = EstatJutakuTochiE048Service()
+
+        ret_vals = jutakutochi_service.get_shinchiku_vals_group_by_city()
+
+        for ret_val in ret_vals:
+            pref_city = ret_val["pref"]+"\t"+ret_val["city"]
+            if not pref_city in profiles:
+                logger.warning("%s not exist" % (pref_city,) )
+                continue
+            
+            profiles[pref_city]["新築_世帯主_年齢_24"]    = ret_val["owner_age_24"]
+            profiles[pref_city]["新築_世帯主_年齢_25_34"] = ret_val["owner_age_25_34"]
+            profiles[pref_city]["新築_世帯主_年齢_35_44"] = ret_val["owner_age_35_44"]
+            profiles[pref_city]["新築_世帯主_年齢_45_54"] = ret_val["owner_age_45_54"]
+            profiles[pref_city]["新築_世帯主_年齢_55_64"] = ret_val["owner_age_55_64"]
+            profiles[pref_city]["新築_世帯主_年齢_65"]    = ret_val["owner_age_65"]
+            
+        return profiles
+
+    def calc_jutakutochi_e101(self, profiles):
+        jutakutochi_service = EstatJutakuTochiE101Service()
+
+        ret_vals = jutakutochi_service.get_shinchiku_vals_group_by_city()
+
+        for ret_val in ret_vals:
+            pref_city = ret_val["pref"]+"\t"+ret_val["city"]
+            if not pref_city in profiles:
+                logger.warning("%s not exist" % (pref_city,) )
+                continue
+
+            profiles[pref_city]["入手_新築"] = ret_val["build_new"]
+            profiles[pref_city]["入手_分譲"] = ret_val["buy_new"]
+            profiles[pref_city]["入手_建替"] = ret_val["rebuild"]
+        return profiles
+    
 
     def calc_kokusei_pop_b02(self, profiles):
         kokusei_pop_b02_service = KokuseiPopulationB02Service()
         ret_vals = kokusei_pop_b02_service.get_trend()
 
         years = ["","_2015"]
-        atri_keys_20_29 = ["pop_20_24","pop_25_29"]
-        atri_keys_30_59 = ["pop_30_34","pop_35_39","pop_40_44","pop_45_49",
-                           "pop_50_54","pop_55_59"]
+        atri_keys_20_24 = ["pop_20_24",]
+        atri_keys_25_59 = ["pop_25_29","pop_30_34","pop_35_39",
+                           "pop_40_44","pop_45_49","pop_50_54","pop_55_59"]
         atri_keys_60 = ["pop_60_64","pop_65_69","pop_70_74","pop_75_79",
                         "pop_80_84","pop_85_89","pop_90_94","pop_95_99",
                         "pop_100"]
@@ -149,15 +215,15 @@ VALUES (%s,%s,%s)
             
             for year in years:
                 tmp_val = 0
-                for atri_key in atri_keys_20_29:
+                for atri_key in atri_keys_20_24:
                     tmp_val += ret_val[atri_key+year]
-                profiles[pref_city]["人口_20_29歳_万人"+year] = \
+                profiles[pref_city]["人口_20_24歳_万人"+year] = \
                     round( tmp_val / 10000,2)
                 
                 tmp_val = 0
-                for atri_key in atri_keys_30_59:
+                for atri_key in atri_keys_25_59:
                     tmp_val += ret_val[atri_key+year]
-                profiles[pref_city]["人口_30_59歳_万人"+year] = \
+                profiles[pref_city]["人口_25_59歳_万人"+year] = \
                     round( tmp_val / 10000,2)
                 
                 tmp_val = 0
@@ -165,7 +231,6 @@ VALUES (%s,%s,%s)
                     tmp_val += ret_val[atri_key+year]
                 profiles[pref_city]["人口_60歳_万人"+year] = \
                     round( tmp_val / 10000,2)
-        
         return profiles
 
 
@@ -296,10 +361,8 @@ VALUES (%s,%s,%s)
                 logger.warning("%s not exist" % (pref_city,) )
                 continue
                 
-            profiles[pref_city]["給与年収_万円"] = \
-                int(ret_val["salary"]/10000)
-            profiles[pref_city]["資産年収_万円"] = \
-                int(ret_val["capital_income"]/10000)
+            profiles[pref_city]["年収_万円"] = \
+                int(ret_val["salary"]/10000) + int(ret_val["capital_income"]/10000)
         return profiles
 
 

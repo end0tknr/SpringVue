@@ -33,6 +33,7 @@ class MlitRealEstateShopService(appbase.AppBase):
         util_db = Db()
         util_db.save_tbl_rows("real_estate_shop",insert_cols,rows )
         
+
     # selenium の headless modeでは動作しないみたい...
     def download_and_save_master(self):
         logger.info("start")

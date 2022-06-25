@@ -7,6 +7,7 @@ import openpyxl
 import os
 import re
 import tempfile
+import time
 import urllib.request
 
 # https://www.soumu.go.jp/denshijiti/code.html
@@ -40,6 +41,62 @@ class CityService(appbase.AppBase):
         logger = self.get_logger()
 
 
+    def calc_save_lnglat(self):
+        browser = self.get_browser()
+        re_compile = re.compile("/@(\d+.\d+),(\d+\.\d+)\,\d+z/")
+
+        max_retry = 10
+        
+        cities = self.get_all()
+        for city in cities:
+            if city["lng"] and city["lat"]:
+                continue
+            
+            pref_city = city["pref"] + city["city"]
+            req_url = "https://www.google.com/maps/place/" + pref_city
+            browser.get(req_url)
+            i = 0
+            longitude = None
+            latitude  = None
+            while i < max_retry:
+                i += 1
+                time.sleep(1)
+                re_result = re_compile.search( browser.current_url )
+                if not re_result:
+                    continue
+                longitude = re_result.group(1) # 緯度
+                latitude  = re_result.group(2) # 経度
+                self.save_lnglat(city, longitude, latitude )
+                break
+
+            if not longitude or not latitude:
+                logger.error("fail calc lng lat for %s" % (pref_city,))
+
+        browser.close()
+
+    def save_lnglat(self,city,longitude,latitude):
+        logger.info("%s %s %s %s"%(city["pref"],city["city"],longitude,latitude))
+        
+        sql = """
+UPDATE city set lng=%s, lat=%s where code=%s 
+"""
+        sql_args = (longitude,latitude,city["code"])
+
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql,sql_args)
+                db_conn.commit()
+            except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    logger.error(sql_args)
+                    return False
+        return True
+            
+        
+        
+        
     def save_near_cities(self, pref,city, near_cities):
         sql = """
 INSERT INTO near_city (pref,city,near_pref,near_city) VALUES (%s,%s,%s,%s)

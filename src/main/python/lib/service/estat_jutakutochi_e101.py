@@ -111,20 +111,21 @@ class EstatJutakuTochiE101Service(
             row_no += 1
             
         return ret_data
+    
 
-
-    def get_shinchiku_vals_group_by_city(self):
+    def get_shinchiku_vals_group_by_city(self,build_year_str="2016～2018年9月"):
+        
         sql = """
 select *
 from  estat_jutakutochi_e101
-where build_year='2016～2018年9月'
+where build_year=%s
 """
         ret_data = []
         
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:
                 try:
-                    db_cur.execute(sql)
+                    db_cur.execute(sql,(build_year_str,))
                 except Exception as e:
                     logger.error(e)
                     logger.error(sql)

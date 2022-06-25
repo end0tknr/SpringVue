@@ -110,26 +110,26 @@ order by pref,city,year_income,own_type
         pre_pref_city = None
         ret_data_tmp = {}
         
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-                try:
-                    db_cur.execute(sql)
-                    for ret_row in  db_cur.fetchall():
-                        ret_row = dict( ret_row )
-                        pref_city_income = "\t".join([ ret_row["pref"],
-                                                       ret_row["city"],
-                                                       ret_row["year_income"] ])
-                        if not pref_city_income in ret_data_tmp:
-                            ret_data_tmp[pref_city_income] = {}
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+                for ret_row in  db_cur.fetchall():
+                    ret_row = dict( ret_row )
+                    pref_city_income = "\t".join([ ret_row["pref"],
+                                                   ret_row["city"],
+                                                   ret_row["year_income"] ])
+                    if not pref_city_income in ret_data_tmp:
+                        ret_data_tmp[pref_city_income] = {}
 
-                        own_type = ret_row["own_type"]
-                        ret_data_tmp[pref_city_income][own_type] = \
-                            ret_row["setai"]
-                    
-                except Exception as e:
-                    logger.error(e)
-                    logger.error(sql)
-                    return []
+                    own_type = ret_row["own_type"]
+                    ret_data_tmp[pref_city_income][own_type] = \
+                        ret_row["setai"]
+
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
                 
         ret_data = []
         for pref_city_income in ret_data_tmp:
