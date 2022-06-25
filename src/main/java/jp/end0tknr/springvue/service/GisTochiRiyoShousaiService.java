@@ -14,11 +14,13 @@ public class GisTochiRiyoShousaiService extends GisServiceFactory {
     @Autowired
     GisTochiRiyoShousaiRepository gisTochiRiyoShousaiRepository;
 
-    public  List<GisEntityAbstract> findByCoordFromRepo(List coord) {
+    @Override
+	public  List<GisEntityAbstract> findByCoordFromRepo(List coord) {
     	return gisTochiRiyoShousaiRepository.findByCoord(coord);
     }
 
-    public String[] descsForDisp(){
+    @Override
+	public String[] descsForDisp(){
     	String[] retStrs = {"土地利用種別"};
     	//Arrays.asList(retStrs).contains("Apple");
     	return retStrs;

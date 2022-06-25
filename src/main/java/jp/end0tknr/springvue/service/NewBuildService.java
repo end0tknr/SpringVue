@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByCity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByShop;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByTown;
 import jp.end0tknr.springvue.repository.NewBuildRepository;
 
@@ -19,6 +20,10 @@ public class NewBuildService {
     public  List<NewBuildSalesCountByShop>
     getSalesCountByShop(String prefName) {
     	return newBuildRepository.getSalesCountByShop(prefName);
+    }
+    public  List<NewBuildSalesCountByShopCity>
+    getSalesCountByShopCity(String prefName, String cityName) {
+    	return newBuildRepository.getSalesCountByShopCity(prefName,cityName);
     }
 
     public  List<NewBuildSalesCountByCity>

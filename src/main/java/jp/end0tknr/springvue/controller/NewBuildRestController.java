@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByCity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByShop;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByTown;
+import jp.end0tknr.springvue.service.CityProfileService;
 import jp.end0tknr.springvue.service.NewBuildService;
 
 @RestController
@@ -21,6 +23,8 @@ public class NewBuildRestController {
 
     @Autowired
     NewBuildService newBuildService;
+    @Autowired
+    CityProfileService cityProfileService;
 
     @RequestMapping("/api/newbuild/SalesCountByShop/{prefName}")
     public List<NewBuildSalesCountByShop> salesCountByShop(
@@ -32,6 +36,19 @@ public class NewBuildRestController {
 			e.printStackTrace();
 		}
     	return newBuildService.getSalesCountByShop(prefName);
+    }
+
+    @RequestMapping("/api/newbuild/SalesCountByShopCity/{prefCityName}")
+    public List<NewBuildSalesCountByShopCity> salesCountByShopCity(
+    		@PathVariable("prefCityName") String prefCityName ){
+
+    	try {
+			prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	String[] names = prefCityName.split("_");
+    	return newBuildService.getSalesCountByShopCity(names[0],names[1]);
     }
 
     @RequestMapping("/api/newbuild/SalesCountByCity/{prefName}")
@@ -56,8 +73,6 @@ public class NewBuildRestController {
 			e.printStackTrace();
 		}
     	String[] names = prefCityName.split("_");
-    	System.out.println( names[0] );
-    	System.out.println( names[1] );
     	return newBuildService.getSalesCountByNearCity(names[0],names[1]);
     }
 
@@ -74,4 +89,23 @@ public class NewBuildRestController {
     	String[] names = prefCityName.split("_");
     	return newBuildService.getSalesCountByTown(names[0],names[1]);
     }
+
+
+    @RequestMapping("/api/newbuild/CityProfile/{prefCityName}")
+    public String cityProfile(
+    		@PathVariable("prefCityName") String prefCityName ){
+
+    	try {
+			prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	String[] names = prefCityName.split("_");
+
+    	String cityProfile = cityProfileService.getCityProfile(names[0],names[1]);
+
+    	return cityProfile;
+    }
+
+
 }

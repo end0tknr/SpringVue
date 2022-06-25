@@ -33,7 +33,7 @@ public abstract class GisServiceFactory {
     	HashMap<String,String> colDefs	= getDescedColumnDefs();
     	String[] descsForDisp = descsForDisp();
 
-    	List<String> delColNames = new ArrayList<String>();
+    	List<String> delColNames = new ArrayList<>();
 
         for (String colName : colDefs.keySet()) {
             String description = colDefs.get(colName);
@@ -115,7 +115,7 @@ public abstract class GisServiceFactory {
 
     public  List<HashMap> findByCoord(List coord) {
 
-    	List<HashMap> retEntities = new ArrayList<HashMap>();
+    	List<HashMap> retEntities = new ArrayList<>();
     	if( coord.size() != 4) {
     		return retEntities;
     	}
@@ -123,7 +123,7 @@ public abstract class GisServiceFactory {
     	HashMap<String,String> colDefs	= getDescedColumnDefs4Disp();
 
     	for( GisEntityAbstract tmpEntity :
-    		(List<GisEntityAbstract>) findByCoordFromRepo(coord) ) {
+    		findByCoordFromRepo(coord) ) {
 
     		HashMap<String,Object> retEntity = new HashMap();
 

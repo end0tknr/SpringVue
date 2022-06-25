@@ -14,12 +14,14 @@ public class GisYoutoChiikiService extends GisServiceFactory {
     @Autowired
     GisYoutoChiikiRepository gisYoutoChiikiRepository;
 
-    public  List<GisEntityAbstract> findByCoordFromRepo(List coord) {
+    @Override
+	public  List<GisEntityAbstract> findByCoordFromRepo(List coord) {
     	return gisYoutoChiikiRepository.findByCoord(coord);
     }
 
 
-    public String[] descsForDisp(){
+    @Override
+	public String[] descsForDisp(){
     	String[] retStrs = {"用途地域名","建蔽率","容積率"};
     	//Arrays.asList(retStrs).contains("Apple");
     	return retStrs;

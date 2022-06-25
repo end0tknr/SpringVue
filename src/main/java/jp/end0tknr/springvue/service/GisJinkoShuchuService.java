@@ -14,13 +14,15 @@ public class GisJinkoShuchuService extends GisServiceFactory {
     @Autowired
     GisJinkoShuchuRepository gisJinkoShuchuRepository;
 
-    public String[] descsForDisp(){
+    @Override
+	public String[] descsForDisp(){
     	String[] retStrs = {"人口","面積"};
     	//Arrays.asList(retStrs).contains("Apple");
     	return retStrs;
     }
 
-    public  List<GisEntityAbstract> findByCoordFromRepo(List coord) {
+    @Override
+	public  List<GisEntityAbstract> findByCoordFromRepo(List coord) {
     	return gisJinkoShuchuRepository.findByCoord(coord);
     }
 

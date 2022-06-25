@@ -239,7 +239,9 @@ public class GisJinkoSuikei1kmEntity extends GisEntityAbstract {
 
 	private Double lng;
 	private Double lat;
+	@Override
 	public Double getLng() {		return lng;		}
+	@Override
 	public Double getLat() {		return lat;		}
 
     public Integer getGid() {	return gid;}
