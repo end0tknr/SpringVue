@@ -48,8 +48,8 @@ pref_names = [
 base_host = "https://suumo.jp"
 
 base_urls = [
-    [base_host+"/ikkodate/",       "新築戸建"],
-    #[base_host+"/chukoikkodate/",  "中古戸建"],
+    #[base_host+"/ikkodate/",       "新築戸建"],
+    [base_host+"/chukoikkodate/",  "中古戸建"],
     #[base_host+"/ms/chuko/",       "中古マンション"],
     # 新築マンションは価格等が記載されていないことが多い為、無視
     #[base_host+"/ms/shinchiku/",  "新築マンション"]

@@ -703,3 +703,59 @@ on_sale_price           bigint,
 on_sale_days            int,
 primary key(pref,city,town,calc_date,calc_days) );
 
+
+
+
+CREATE TABLE IF NOT EXISTS sumstock_sales_count_by_shop (
+pref                    varchar(4),
+shop                    varchar(64),
+calc_date               date,
+calc_days               int,
+sold_count              int,
+sold_price              bigint,
+sold_days               int,
+on_sale_count           int,
+on_sale_price           bigint,
+on_sale_days            int,
+primary key(pref,shop,calc_date,calc_days) );
+
+CREATE TABLE IF NOT EXISTS sumstock_sales_count_by_shop_city (
+pref                    varchar(4),
+city                    varchar(16),
+shop                    varchar(64),
+calc_date               date,
+calc_days               int,
+sold_count              int,
+sold_price              bigint,
+sold_days               int,
+on_sale_count           int,
+on_sale_price           bigint,
+on_sale_days            int,
+primary key(pref,city,shop,calc_date,calc_days) );
+
+CREATE TABLE IF NOT EXISTS sumstock_sales_count_by_city (
+pref                    varchar(4),
+city                    varchar(16),
+calc_date               date,
+calc_days               int,
+sold_count              int,
+sold_price              bigint,
+sold_days               int,
+on_sale_count           int,
+on_sale_price           bigint,
+on_sale_days            int,
+primary key(pref,city,calc_date,calc_days) );
+
+CREATE TABLE IF NOT EXISTS sumstock_sales_count_by_town (
+pref                    varchar(4),
+city                    varchar(16),
+town                    varchar(64),
+calc_date               date,
+calc_days               int,
+sold_count              int,
+sold_price              bigint,
+sold_days               int,
+on_sale_count           int,
+on_sale_price           bigint,
+on_sale_days            int,
+primary key(pref,city,town,calc_date,calc_days) );
