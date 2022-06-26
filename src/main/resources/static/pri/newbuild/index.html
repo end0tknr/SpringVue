@@ -123,7 +123,7 @@
               <tr v-for="city_data in city_sales">
                 <th>
                   <div class="col_key"
-                       v-on:click="load_city_datas($event)">
+                       v-on:click="load_city_datas(city_data.pref,city_data.city )">
                     {{ city_data.city }}
                   </div>
                 </th>
@@ -300,7 +300,7 @@
               <tr v-for="city_data in near_city_sales">
                 <th>
                   <div class="col_key"
-                       v-on:click="load_city_datas($event)">
+                       v-on:click="load_city_datas(city_data.pref,city_data.city )">
                     {{ city_data.city }}
                   </div>
                 </th>
@@ -366,10 +366,10 @@
             </tr>
             <tr>
               <th>地価</th>
-              <td>(千円/㎡)</td><td>{{city_profile["地価_千円_m2_住居系"]}}</td>
-              <td></td><td>{{city_profile["地価_千円_m2_商業系"]}}</td>
+              <td>(万円/㎡)</td><td>{{city_profile["地価_万円_m2_住居系"]}}</td>
+              <td></td><td>{{city_profile["地価_万円_m2_商業系"]}}</td>
               <th>個人年収</th>
-              <td>{{city_profile["年収_万円"]/100}}</td>
+              <td>{{city_profile["年収_万円"]}}</td>
               <td>(百万円)</td>
             </tr>
             <tr>
@@ -406,27 +406,33 @@
       <table>
         <tr class="city_profile">
           <th></th>
-          <th>人口</th>
-          <th colspan="2">世帯</th>
-          <th>地価</th>
+          <th colspan="2">人口</th>
+          <th colspan="4">世帯</th>
+          <th colspan="2">住居系</th>
           <th colspan="2">所有形態</th>
+          <th>個人年収</th>
+          <th colspan="9">年収別世帯数</th>
           <th colspan="6">新築世帯主年齢</th>
-          <th colspan="9">年収別世帯数<span class="sub">(百万円)</span></th>
         </tr>
         <tr class="sort_keys">
           <th v-on:click="sort_tbl('near_city_profiles','city')">市区町村</th>
           <th v-on:click="sort_tbl('near_city_profiles','人口_25_59歳_万人')">25-59歳</th>
+          <th v-on:click="sort_tbl('near_city_profiles','人口_25_59歳_万人_変動')">
+	    <span class="sub">対2015<span></th>
           <th v-on:click="sort_tbl('near_city_profiles','家族世帯')">家族同居</th>
+          <th v-on:click="sort_tbl('near_city_profiles','家族世帯_変動')">
+	    <span class="sub">対2015<span></th>
           <th v-on:click="sort_tbl('near_city_profiles','単身世帯')">単身</th>
-          <th v-on:click="sort_tbl('near_city_profiles','地価_千円_m2_住居系')">住居系</th>
+          <th v-on:click="sort_tbl('near_city_profiles','単身世帯_変動')">
+	    <span class="sub">対2015<span></th>
+          <th v-on:click="sort_tbl('near_city_profiles','用途地域_住居系_ha')">
+            面積<span class="sub">ha</span></th>
+          <th v-on:click="sort_tbl('near_city_profiles','地価_万円_m2_住居系')">
+            地価<span class="sub">万円/㎡</span></th>
           <th v-on:click="sort_tbl('near_city_profiles','持家率')">持家</th>
           <th v-on:click="sort_tbl('near_city_profiles','戸建率')">戸建</th>
-          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_24')">-24</th>
-          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_25_34')">25-34</th>
-          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_35_44')">35-44</th>
-          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_45_54')">45-54</th>
-          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_55_64')">55-64</th>
-          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_65')">65-</th>
+          <th v-on:click="sort_tbl('near_city_profiles','年収_百万円')">
+	    <span class="sub">百万円</aub></th>
           <th v-on:click="sort_tbl('near_city_profiles','世帯年収_100')">-1</th>
           <th v-on:click="sort_tbl('near_city_profiles','世帯年収_100～200')">1-2</th>
           <th v-on:click="sort_tbl('near_city_profiles','世帯年収_200～300')">2-3</th>
@@ -436,20 +442,31 @@
           <th v-on:click="sort_tbl('near_city_profiles','世帯年収_700～1000')">7-10</th>
           <th v-on:click="sort_tbl('near_city_profiles','世帯年収_1000～1500')">10-15</th>
           <th v-on:click="sort_tbl('near_city_profiles','世帯年収_1500～')">15-</th>
+          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_24')">-24</th>
+          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_25_34')">25-34</th>
+          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_35_44')">35-44</th>
+          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_45_54')">45-54</th>
+          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_55_64')">55-64</th>
+          <th v-on:click="sort_tbl('near_city_profiles','新築_世帯主_年齢_65')">65-</th>
         </tr>
         <tr v-for="city_profile in near_city_profiles">
           <th>
             <div class="col_key"
-                 v-on:click="load_city_datas($event)">
+                 v-on:click="load_city_datas(city_profile.pref,city_profile.city )">
               {{ city_profile.city }}
             </div>
           </th>
           <td>{{city_profile["人口_25_59歳_万人"]}}</td>
+          <td>{{city_profile["人口_25_59歳_万人_変動"]}}</td>
           <td>{{city_profile["家族世帯"]}}</td>
+          <td>{{city_profile["家族世帯_変動"]}}</td>
           <td>{{city_profile["単身世帯"]}}</td>
-          <td>{{city_profile["地価_千円_m2_住居系"]}}</td>
+          <td>{{city_profile["単身世帯_変動"]}}</td>
+          <td>{{city_profile["用途地域_住居系_ha"]}}</td>
+          <td>{{city_profile["地価_万円_m2_住居系"]}}</td>
           <td>{{city_profile["持家率"]}}%</td>
           <td>{{city_profile["戸建率"]}}%</td>
+          <td>{{city_profile["年収_百万円"]}}</td>
           <td>{{city_profile["新築_世帯主_年齢_24"]}}</td>
           <td>{{city_profile["新築_世帯主_年齢_25_34"]}}</td>
           <td>{{city_profile["新築_世帯主_年齢_35_44"]}}</td>
