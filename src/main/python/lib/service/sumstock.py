@@ -7,17 +7,16 @@ import appbase
 import datetime
 import re
 
-logger = None
+logger = NewBuildService().get_logger()
 
 class SumStockService(NewBuildService):
 
     def __init__(self):
-        global logger
-        logger = self.get_logger()
+        pass
 
-    def build_type():
+    def build_type(self):
         return "中古戸建"
     
-    def tbl_name_header():
-        return "stock"
+    def tbl_name_header(self):
+        return "sumstock"
 

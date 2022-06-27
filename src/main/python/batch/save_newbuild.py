@@ -13,8 +13,6 @@ def main():
     newbuild_service.calc_save_sales_count_by_city()
     newbuild_service.calc_save_sales_count_by_town()
 
-    
-
 if __name__ == '__main__':
     main()
 
