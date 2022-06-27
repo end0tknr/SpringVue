@@ -18,27 +18,34 @@ public class NewBuildService {
     NewBuildRepository newBuildRepository;
 
     public  List<NewBuildSalesCountByShop>
-    getSalesCountByShop(String prefName) {
-    	return newBuildRepository.getSalesCountByShop(prefName);
+    getSalesCountByShop(
+    		String prefName, String dateFrom, String dateTo) {
+    	return newBuildRepository.getSalesCountByShop(prefName, dateFrom, dateTo );
     }
     public  List<NewBuildSalesCountByShopCity>
-    getSalesCountByShopCity(String prefName, String cityName) {
-    	return newBuildRepository.getSalesCountByShopCity(prefName,cityName);
+    getSalesCountByShopCity(
+    		String prefName, String cityName, String dateFrom, String dateTo) {
+    	return newBuildRepository.getSalesCountByShopCity(
+    			prefName,cityName, dateFrom, dateTo );
     }
 
     public  List<NewBuildSalesCountByCity>
-    getSalesCountByCity(String prefName) {
-    	return newBuildRepository.getSalesCountByCity(prefName);
+    getSalesCountByCity(String prefName, String dateFrom, String dateTo) {
+    	return newBuildRepository.getSalesCountByCity(prefName, dateFrom, dateTo );
     }
 
     public  List<NewBuildSalesCountByTown>
-    getSalesCountByTown(String prefName,String cityName) {
-    	return newBuildRepository.getSalesCountByTown(prefName,cityName);
+    getSalesCountByTown(
+    		String prefName,String cityName, String dateFrom, String dateTo) {
+    	return newBuildRepository.getSalesCountByTown(
+    			prefName,cityName, dateFrom, dateTo );
     }
 
     public  List<NewBuildSalesCountByCity>
-    getSalesCountByNearCity(String prefName,String cityName) {
-    	return newBuildRepository.getSalesCountByNearCity(prefName,cityName);
+    getSalesCountByNearCity(
+    		String prefName,String cityName, String dateFrom, String dateTo) {
+    	return newBuildRepository.getSalesCountByNearCity(
+    			prefName,cityName, dateFrom, dateTo );
     }
 
 

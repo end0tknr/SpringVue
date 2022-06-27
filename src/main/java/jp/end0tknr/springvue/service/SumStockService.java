@@ -18,27 +18,36 @@ public class SumStockService {
     SumStockRepository sumStockRepository;
 
     public  List<SumStockSalesCountByShop>
-    getSalesCountByShop(String prefName) {
-    	return sumStockRepository.getSalesCountByShop(prefName);
+    getSalesCountByShop(String prefName,String dateFrom, String dateTo) {
+    	return sumStockRepository.getSalesCountByShop(
+    			prefName, dateFrom, dateTo);
     }
     public  List<SumStockSalesCountByShopCity>
-    getSalesCountByShopCity(String prefName, String cityName) {
-    	return sumStockRepository.getSalesCountByShopCity(prefName,cityName);
+    getSalesCountByShopCity(
+    		String prefName, String cityName,String dateFrom, String dateTo) {
+    	return sumStockRepository.getSalesCountByShopCity(
+    			prefName,cityName, dateFrom, dateTo);
     }
 
     public  List<SumStockSalesCountByCity>
-    getSalesCountByCity(String prefName) {
-    	return sumStockRepository.getSalesCountByCity(prefName);
+    getSalesCountByCity(
+    		String prefName,String dateFrom, String dateTo) {
+    	return sumStockRepository.getSalesCountByCity(
+    			prefName, dateFrom, dateTo);
     }
 
     public  List<SumStockSalesCountByTown>
-    getSalesCountByTown(String prefName,String cityName) {
-    	return sumStockRepository.getSalesCountByTown(prefName,cityName);
+    getSalesCountByTown(
+    		String prefName,String cityName,String dateFrom, String dateTo) {
+    	return sumStockRepository.getSalesCountByTown(
+    			prefName,cityName, dateFrom, dateTo);
     }
 
     public  List<SumStockSalesCountByCity>
-    getSalesCountByNearCity(String prefName,String cityName) {
-    	return sumStockRepository.getSalesCountByNearCity(prefName,cityName);
+    getSalesCountByNearCity(
+    		String prefName,String cityName,String dateFrom, String dateTo) {
+    	return sumStockRepository.getSalesCountByNearCity(
+    			prefName,cityName, dateFrom, dateTo);
     }
 
 
