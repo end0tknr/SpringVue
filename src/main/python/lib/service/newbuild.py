@@ -15,6 +15,12 @@ class NewBuildService(appbase.AppBase):
         global logger
         logger = self.get_logger()
 
+    def build_type():
+        return "新築戸建"
+    
+    def tbl_name_header():
+        return "newbuild"
+
     def calc_sales_count_by_shop_sub(self,
                                      ret_datas_tmp,
                                      calc_key,
@@ -22,9 +28,11 @@ class NewBuildService(appbase.AppBase):
                                      calc_date_to):
         
         suumo_service = SuumoService()
-        org_bukkens = suumo_service.get_bukkens_by_check_date("新築戸建",
-                                                              calc_date_from,
-                                                              calc_date_to)
+        org_bukkens = suumo_service.get_bukkens_by_check_date(
+            self.build_type(),
+            calc_date_from,
+            calc_date_to )
+
         for org_bukken in org_bukkens:
             if not org_bukken["pref"]:
                 org_bukken["pref"] = "?"
@@ -63,9 +71,11 @@ class NewBuildService(appbase.AppBase):
                                           calc_date_to):
         
         suumo_service = SuumoService()
-        org_bukkens = suumo_service.get_bukkens_by_check_date("新築戸建",
-                                                              calc_date_from,
-                                                              calc_date_to)
+        org_bukkens = suumo_service.get_bukkens_by_check_date(
+            self.build_type(),
+            calc_date_from,
+            calc_date_to )
+        
         for org_bukken in org_bukkens:
             if not org_bukken["pref"]:
                 org_bukken["pref"] = "?"
@@ -105,7 +115,7 @@ class NewBuildService(appbase.AppBase):
     def calc_save_sales_count_by_shop(self):
         logger.info("start")
         
-        today = datetime.datetime.today().date()
+        today = datetime.datetime.today().date() - datetime.timedelta(2)
         calc_date_from, calc_date_to = self.get_weekly_period(today)
 
         ret_datas_tmp = self.calc_sales_count_by_shop_sub({},
@@ -141,11 +151,13 @@ class NewBuildService(appbase.AppBase):
             ret_datas.append(shop_info)
 
         util_db = Db()
-        util_db.save_tbl_rows("newbuild_sales_count_by_shop",
-                              ["pref","shop","calc_date","calc_days",
-                               "sold_count",   "sold_price",   "sold_days",
-                               "on_sale_count","on_sale_price","on_sale_days"],
-                              ret_datas)
+        util_db.save_tbl_rows(
+            self.tbl_name_header()+"_sales_count_by_shop",
+            ["pref","shop","calc_date","calc_days",
+             "sold_count",   "sold_price",   "sold_days",
+             "on_sale_count","on_sale_price","on_sale_days"],
+            ret_datas )
+        
         return ret_datas
 
     def calc_save_sales_count_by_shop_city(self):
@@ -188,11 +200,13 @@ class NewBuildService(appbase.AppBase):
             ret_datas.append(shop_info)
 
         util_db = Db()
-        util_db.save_tbl_rows("newbuild_sales_count_by_shop_city",
-                              ["pref","city","shop","calc_date","calc_days",
-                               "sold_count",   "sold_price",   "sold_days",
-                               "on_sale_count","on_sale_price","on_sale_days"],
-                              ret_datas)
+        util_db.save_tbl_rows(
+            self.tbl_name_header()+"_sales_count_by_shop_city",
+            ["pref","city","shop","calc_date","calc_days",
+             "sold_count",   "sold_price",   "sold_days",
+             "on_sale_count","on_sale_price","on_sale_days"],
+            ret_datas )
+        
         return ret_datas
 
     def calc_save_sales_count_by_city(self):
@@ -235,11 +249,12 @@ class NewBuildService(appbase.AppBase):
             ret_datas.append(city_info)
 
         util_db = Db()
-        util_db.save_tbl_rows("newbuild_sales_count_by_city",
-                              ["pref","city","calc_date","calc_days",
-                               "sold_count",   "sold_price",   "sold_days",
-                               "on_sale_count","on_sale_price","on_sale_days"],
-                              ret_datas)
+        util_db.save_tbl_rows(
+            self.tbl_name_header()+"_sales_count_by_city",
+            ["pref","city","calc_date","calc_days",
+             "sold_count",   "sold_price",   "sold_days",
+             "on_sale_count","on_sale_price","on_sale_days"],
+            ret_datas )
         return ret_datas
 
     def calc_sales_count_by_city_sub(self,
@@ -249,9 +264,11 @@ class NewBuildService(appbase.AppBase):
                                      calc_date_to):
         
         suumo_service = SuumoService()
-        org_bukkens = suumo_service.get_bukkens_by_check_date("新築戸建",
-                                                              calc_date_from,
-                                                              calc_date_to)
+        org_bukkens = suumo_service.get_bukkens_by_check_date(
+            self.build_type(),
+            calc_date_from,
+            calc_date_to )
+        
         for org_bukken in org_bukkens:
             if not org_bukken["pref"]:
                 org_bukken["pref"] = "?"
@@ -331,11 +348,13 @@ class NewBuildService(appbase.AppBase):
             ret_datas.append(town_info)
 
         util_db = Db()
-        util_db.save_tbl_rows("newbuild_sales_count_by_town",
-                              ["pref","city","town","calc_date","calc_days",
-                               "sold_count",   "sold_price",   "sold_days",
-                               "on_sale_count","on_sale_price","on_sale_days"],
-                              ret_datas)
+        util_db.save_tbl_rows(
+            self.tbl_name_header()+"_sales_count_by_town",
+            ["pref","city","town","calc_date","calc_days",
+             "sold_count",   "sold_price",   "sold_days",
+             "on_sale_count","on_sale_price","on_sale_days"],
+            ret_datas )
+        
         return ret_datas
 
     def calc_sales_count_by_town_sub(self,
@@ -345,9 +364,11 @@ class NewBuildService(appbase.AppBase):
                                      calc_date_to):
         
         suumo_service = SuumoService()
-        org_bukkens = suumo_service.get_bukkens_by_check_date("新築戸建",
-                                                              calc_date_from,
-                                                              calc_date_to)
+        org_bukkens = suumo_service.get_bukkens_by_check_date(
+            self.build_type(),
+            calc_date_from,
+            calc_date_to )
+        
         # refer to https://qiita.com/acro5piano/items/e0a48905159e8a4911ab
         re_compile = re.compile("^([あ-んア-ン一-鿐]+)")
 
