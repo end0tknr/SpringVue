@@ -7,7 +7,7 @@ import appbase
 import datetime
 import re
 
-logger = None
+logger = appbase.AppBase().get_logger()
 
 class NewBuildService(appbase.AppBase):
 
@@ -15,10 +15,10 @@ class NewBuildService(appbase.AppBase):
         global logger
         logger = self.get_logger()
 
-    def build_type():
+    def build_type(self):
         return "新築戸建"
     
-    def tbl_name_header():
+    def tbl_name_header(self):
         return "newbuild"
 
     def calc_sales_count_by_shop_sub(self,
@@ -43,7 +43,6 @@ class NewBuildService(appbase.AppBase):
 
             if not pref_shop in ret_datas_tmp:
                 ret_datas_tmp[pref_shop] = {
-                    "calc_date" : str(calc_date_to),
                     "calc_days" : 7,
                     "sold_count": 0,
                     "sold_price": 0,
@@ -51,7 +50,6 @@ class NewBuildService(appbase.AppBase):
                     "on_sale_count":0,
                     "on_sale_price":0,
                     "on_sale_days" :0 }
-
 
             if not org_bukken["price"]: # 価格未公開の場合、集計対象外
                 continue
@@ -87,7 +85,6 @@ class NewBuildService(appbase.AppBase):
             pref_shop = "%s\t%s\t%s" % (org_bukken["pref"],
                                         org_bukken["city"],
                                         org_bukken["shop"])
-            #print(pref_shop)
 
             if not pref_shop in ret_datas_tmp:
                 ret_datas_tmp[pref_shop] = {
@@ -115,25 +112,28 @@ class NewBuildService(appbase.AppBase):
     def calc_save_sales_count_by_shop(self):
         logger.info("start")
         
-        today = datetime.datetime.today().date() - datetime.timedelta(2)
+        today = datetime.datetime.today().date()
+        #today = datetime.datetime.today().date() - datetime.timedelta(2)
+        
         calc_date_from, calc_date_to = self.get_weekly_period(today)
 
         ret_datas_tmp = self.calc_sales_count_by_shop_sub({},
                                                           "on_sale",
                                                           calc_date_from,
                                                           calc_date_to)
-        
-        calc_date_from, calc_date_to = \
+        pre_calc_date_from, pre_calc_date_to = \
             self.get_weekly_period( today - datetime.timedelta(days= 7) )
 
         ret_datas_tmp = self.calc_sales_count_by_shop_sub(ret_datas_tmp,
                                                           "sold",
-                                                          calc_date_from,
-                                                          calc_date_to)
+                                                          pre_calc_date_from,
+                                                          pre_calc_date_to)
         
         ret_datas = []
         for pref_shop, shop_info in ret_datas_tmp.items():
             (shop_info["pref"],shop_info["shop"]) = pref_shop.split("\t")
+
+            shop_info["calc_date"]  = str(calc_date_to)
 
             for calc_key in ["on_sale","sold"]:
                 count_key = calc_key+"_count"
@@ -143,6 +143,7 @@ class NewBuildService(appbase.AppBase):
                 if not shop_info[count_key]:
                     continue
 
+                
                 avg_price = shop_info[price_key] / shop_info[count_key]
                 avg_days  = shop_info[days_key] / shop_info[count_key]
                 shop_info[price_key] = avg_price
@@ -171,19 +172,21 @@ class NewBuildService(appbase.AppBase):
                                                                calc_date_from,
                                                                calc_date_to)
         
-        calc_date_from, calc_date_to = \
+        pre_calc_date_from, pre_calc_date_to = \
             self.get_weekly_period( today - datetime.timedelta(days= 7) )
 
         ret_datas_tmp = self.calc_sales_count_by_shop_city_sub(ret_datas_tmp,
                                                                "sold",
-                                                               calc_date_from,
-                                                               calc_date_to)
+                                                               pre_calc_date_from,
+                                                               pre_calc_date_to)
         
         ret_datas = []
         for pref_shop, shop_info in ret_datas_tmp.items():
             (shop_info["pref"],shop_info["city"],shop_info["shop"]) = \
                 pref_shop.split("\t")
 
+            shop_info["calc_date"]  = str(calc_date_to)
+            
             for calc_key in ["on_sale","sold"]:
                 count_key = calc_key+"_count"
                 price_key = calc_key+"_price"
@@ -220,18 +223,20 @@ class NewBuildService(appbase.AppBase):
                                                           calc_date_from,
                                                           calc_date_to)
         
-        calc_date_from, calc_date_to = \
+        pre_calc_date_from, pre_calc_date_to = \
             self.get_weekly_period( today - datetime.timedelta(days= 7) )
 
         ret_datas_tmp = self.calc_sales_count_by_city_sub(ret_datas_tmp,
                                                           "sold",
-                                                          calc_date_from,
-                                                          calc_date_to)
+                                                          pre_calc_date_from,
+                                                          pre_calc_date_to)
         
         ret_datas = []
         for pref_city, city_info in ret_datas_tmp.items():
             (city_info["pref"],city_info["city"]) = pref_city.split("\t")
 
+            city_info["calc_date"]  = str(calc_date_to)
+            
             for calc_key in ["on_sale","sold"]:
                 count_key = calc_key+"_count"
                 price_key = calc_key+"_price"
@@ -319,19 +324,21 @@ class NewBuildService(appbase.AppBase):
                                                           calc_date_from,
                                                           calc_date_to)
         
-        calc_date_from, calc_date_to = \
+        pre_calc_date_from, pre_calc_date_to = \
             self.get_weekly_period( today - datetime.timedelta(days= 7) )
 
         ret_datas_tmp = self.calc_sales_count_by_town_sub(ret_datas_tmp,
                                                           "sold",
-                                                          calc_date_from,
-                                                          calc_date_to)
+                                                          pre_calc_date_from,
+                                                          pre_calc_date_to)
         
         ret_datas = []
         for pref_city_town, town_info in ret_datas_tmp.items():
             (town_info["pref"],town_info["city"],town_info["town"]) = \
                 pref_city_town.split("\t")
 
+            town_info["calc_date"]  = str(calc_date_to)
+            
             for calc_key in ["on_sale","sold"]:
                 count_key = calc_key+"_count"
                 price_key = calc_key+"_price"
