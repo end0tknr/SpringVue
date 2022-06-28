@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
 import jp.end0tknr.springvue.entity.SumStockSalesCountByCity;
+import jp.end0tknr.springvue.entity.SumStockSalesCountByPrice;
 import jp.end0tknr.springvue.entity.SumStockSalesCountByShop;
 import jp.end0tknr.springvue.entity.SumStockSalesCountByShopCity;
 import jp.end0tknr.springvue.entity.SumStockSalesCountByTown;
@@ -39,6 +40,13 @@ public interface SumStockRepository {
     		limit)
     List<SumStockSalesCountByTown> getSalesCountByTown(
     		String prefName,String cityName, String dateFrom, String dateTo);
+
+    @Select("SELECT * FROM sumstock_sales_count_by_city_price "+
+    		"WHERE pref='${prefName}' AND city='${cityName}' "+
+    		"AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
+    		limit)
+    List<SumStockSalesCountByPrice> getSalesCountByPrice(
+    		String prefName,String cityName,String dateFrom,String dateTo);
 
    @Select(" SELECT tbl1.* FROM sumstock_sales_count_by_city tbl1 "+
 		   " JOIN near_city tbl2 "+

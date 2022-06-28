@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByCity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByPrice;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByShop;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByTown;
@@ -38,6 +39,13 @@ public class NewBuildService {
     getSalesCountByTown(
     		String prefName,String cityName, String dateFrom, String dateTo) {
     	return newBuildRepository.getSalesCountByTown(
+    			prefName,cityName, dateFrom, dateTo );
+    }
+
+    public  List<NewBuildSalesCountByPrice>
+    getSalesCountByPrice(
+    		String prefName,String cityName, String dateFrom, String dateTo) {
+    	return newBuildRepository.getSalesCountByPrice(
     			prefName,cityName, dateFrom, dateTo );
     }
 

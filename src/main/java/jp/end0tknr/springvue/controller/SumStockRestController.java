@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jp.end0tknr.springvue.entity.SumStockSalesCountByCity;
+import jp.end0tknr.springvue.entity.SumStockSalesCountByPrice;
 import jp.end0tknr.springvue.entity.SumStockSalesCountByShop;
 import jp.end0tknr.springvue.entity.SumStockSalesCountByShopCity;
 import jp.end0tknr.springvue.entity.SumStockSalesCountByTown;
@@ -138,6 +139,23 @@ public class SumStockRestController {
     			names[0],names[1],calcDate.get(0),calcDate.get(1));
     }
 
+    @RequestMapping("/api/sumstock/SalesCountByPrice/{prefCityName}")
+    public List<SumStockSalesCountByPrice> salesCountByPrice(
+    		@PathVariable("prefCityName") String prefCityName,
+    		@RequestParam(value="date", required=false) String calcDateStr ){
+
+    	List<String> calcDate = convStr2CalcDate(calcDateStr);
+
+    	try {
+    		prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
+    	String[] names = prefCityName.split("_");
+    	return sumStockService.getSalesCountByPrice(
+    			names[0],names[1],calcDate.get(0),calcDate.get(1) );
+    }
 
     @RequestMapping("/api/sumstock/CityProfile/{prefCityName}")
     public String cityProfile(

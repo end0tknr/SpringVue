@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByCity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByPrice;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByShop;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByTown;
@@ -38,6 +39,13 @@ public interface NewBuildRepository {
     		"AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
     		limit)
     List<NewBuildSalesCountByTown> getSalesCountByTown(
+    		String prefName,String cityName,String dateFrom,String dateTo);
+
+    @Select("SELECT * FROM newbuild_sales_count_by_city_price "+
+    		"WHERE pref='${prefName}' AND city='${cityName}' "+
+    		"AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
+    		limit)
+    List<NewBuildSalesCountByPrice> getSalesCountByPrice(
     		String prefName,String cityName,String dateFrom,String dateTo);
 
    @Select(" SELECT tbl1.* FROM newbuild_sales_count_by_city tbl1 "+

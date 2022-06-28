@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByCity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByPrice;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByShop;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByTown;
@@ -137,6 +138,23 @@ public class NewBuildRestController {
     			names[0],names[1],calcDate.get(0),calcDate.get(1) );
     }
 
+    @RequestMapping("/api/newbuild/SalesCountByPrice/{prefCityName}")
+    public List<NewBuildSalesCountByPrice> salesCountByPrice(
+    		@PathVariable("prefCityName") String prefCityName,
+    		@RequestParam(value="date", required=false) String calcDateStr ){
+
+    	List<String> calcDate = convStr2CalcDate(calcDateStr);
+
+    	try {
+    		prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
+    	String[] names = prefCityName.split("_");
+    	return newBuildService.getSalesCountByPrice(
+    			names[0],names[1],calcDate.get(0),calcDate.get(1) );
+    }
 
     @RequestMapping("/api/newbuild/CityProfile/{prefCityName}")
     public String cityProfile(
