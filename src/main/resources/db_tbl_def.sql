@@ -703,7 +703,17 @@ on_sale_price           bigint,
 on_sale_days            int,
 primary key(pref,city,town,calc_date,calc_days) );
 
-
+CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_city_price (
+pref                    varchar(4),
+city                    varchar(16),
+price                   int,
+calc_date               date,
+calc_days               int,
+sold_count              int,
+sold_days               int,
+on_sale_count           int,
+on_sale_days            int,
+primary key(pref,city,price,calc_date,calc_days) );
 
 
 CREATE TABLE IF NOT EXISTS sumstock_sales_count_by_shop (
@@ -759,3 +769,15 @@ on_sale_count           int,
 on_sale_price           bigint,
 on_sale_days            int,
 primary key(pref,city,town,calc_date,calc_days) );
+
+CREATE TABLE IF NOT EXISTS sumstock_sales_count_by_city_price (
+pref                    varchar(4),
+city                    varchar(16),
+price                   int,
+calc_date               date,
+calc_days               int,
+sold_count              int,
+sold_days               int,
+on_sale_count           int,
+on_sale_days            int,
+primary key(pref,city,price,calc_date,calc_days) );

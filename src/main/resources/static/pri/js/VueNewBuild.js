@@ -10,6 +10,7 @@
                 city_name : "",
                 shop_sales      : [],
                 city_sales      : [],
+                price_sales     : [],
                 shop_city_sales : [],
                 town_sales      : [],
                 near_city_sales : [],
@@ -19,6 +20,7 @@
                     "shop_sales"      : {},
                     "shop_city_sales" : {},
                     "city_sales"      : {},
+                    "price_sales"     : {},
                     "town_sales"      : {},
                     "near_city_sales" : {},
                     "near_city_profiles" : {} },
@@ -43,6 +45,7 @@
                 this.load_shop_city_data(this.pref_name,this.city_name);
                 this.load_town_data(this.pref_name,this.city_name);
                 this.load_near_city_data(this.pref_name,this.city_name);
+                this.load_price_data(this.pref_name,this.city_name);
                 this.load_city_profile(this.pref_name,this.city_name);
                 this.load_near_city_profiles(this.pref_name,this.city_name);
             },
@@ -87,6 +90,9 @@
             load_cities_data(pref,city){
                 vue_newbuild.load_cities_data(pref,city,this);
             },
+            load_price_data(pref,city){
+                vue_newbuild.load_price_data(pref,city,this);
+            },
             load_city_profile(pref,city){
                 vue_newbuild.load_city_profile(pref,city,this);
             },
@@ -106,7 +112,7 @@
 
                 this.sort_tbl_dirs[tbl_name][sort_key] *= -1;
                 let sort_dir = this.sort_tbl_dirs[tbl_name][sort_key];
-                
+
                 this[tbl_name] = vue_newbuild.sort_tbl(this[tbl_name],
                                                        sort_key,
                                                        sort_dir);
@@ -137,11 +143,16 @@
                 if(a[sort_key]==undefined && b[sort_key]!=undefined ){
                     return -1 * dir;
                 }
-                
-                let val_a = a[sort_key].replace(/,/g,'');
-                let val_b = b[sort_key].replace(/,/g,'');
-                val_a = Number( val_a );
-                val_b = Number( val_b );
+
+                let val_a = a[sort_key];
+                let val_b = b[sort_key];
+		
+		if (typeof val_a != 'number'){
+                    val_a = Number( val_a.replace(/,/g,'') );
+		}
+		if (typeof val_b != 'number'){
+                    val_b = Number( val_b.replace(/,/g,'') );
+		}
 
                 if( isNaN(val_a) ){
                     val_a = a[sort_key];
@@ -190,6 +201,7 @@
             vue_obj.load_shop_city_data(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_town_data(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_near_city_data(vue_obj.pref_name,vue_obj.city_name);
+            vue_obj.load_price_data(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_city_profile(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_near_city_profiles(vue_obj.pref_name,vue_obj.city_name);
         }
@@ -214,6 +226,17 @@
             let town_sales = await res.json();
             town_sales = this.conv_counts_for_disp( town_sales );
             vue_obj.shop_city_sales = town_sales;
+        }
+        
+        async load_price_data(pref,city,vue_obj){
+            let req_url = server_api_base_url +
+                "newbuild/SalesCountByPrice/"+
+                encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+            
+            let res = await fetch(req_url);
+            let price_sales = await res.json();
+            price_sales = this.conv_counts_for_disp( price_sales );
+            vue_obj.price_sales = price_sales;
         }
         
         async load_near_city_profiles(pref,city,vue_obj){
@@ -341,7 +364,8 @@
         
             // sort
             sales_counts = sales_counts.sort(function(a, b) {
-                return b["on_sale_count"] - a["on_sale_count"];
+                return b["sold_count"] - a["sold_count"];
+//                return b["on_sale_count"] - a["on_sale_count"];
             });
             
             let atri_min_max = {}

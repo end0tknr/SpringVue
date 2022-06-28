@@ -61,6 +61,7 @@ class NewBuildService(appbase.AppBase):
             ret_datas_tmp[pref_shop][calc_key+"_days"] += tmp_days.days
 
         return ret_datas_tmp
+    
         
     def calc_sales_count_by_shop_city_sub(self,
                                           ret_datas_tmp,
@@ -138,7 +139,7 @@ class NewBuildService(appbase.AppBase):
             for calc_key in ["on_sale","sold"]:
                 count_key = calc_key+"_count"
                 price_key = calc_key+"_price"
-                days_key  = calc_key+"_price"
+                days_key  = calc_key+"_days"
                 
                 if not shop_info[count_key]:
                     continue
@@ -146,6 +147,7 @@ class NewBuildService(appbase.AppBase):
                 
                 avg_price = shop_info[price_key] / shop_info[count_key]
                 avg_days  = shop_info[days_key] / shop_info[count_key]
+
                 shop_info[price_key] = avg_price
                 shop_info[days_key]  = avg_days
 
@@ -190,7 +192,7 @@ class NewBuildService(appbase.AppBase):
             for calc_key in ["on_sale","sold"]:
                 count_key = calc_key+"_count"
                 price_key = calc_key+"_price"
-                days_key  = calc_key+"_price"
+                days_key  = calc_key+"_days"
                 
                 if not shop_info[count_key]:
                     continue
@@ -240,7 +242,7 @@ class NewBuildService(appbase.AppBase):
             for calc_key in ["on_sale","sold"]:
                 count_key = calc_key+"_count"
                 price_key = calc_key+"_price"
-                days_key  = calc_key+"_price"
+                days_key  = calc_key+"_days"
                 
                 if not city_info[count_key]:
                     continue
@@ -342,7 +344,7 @@ class NewBuildService(appbase.AppBase):
             for calc_key in ["on_sale","sold"]:
                 count_key = calc_key+"_count"
                 price_key = calc_key+"_price"
-                days_key  = calc_key+"_price"
+                days_key  = calc_key+"_days"
                 
                 if not town_info[count_key]:
                     continue
@@ -413,5 +415,101 @@ class NewBuildService(appbase.AppBase):
 
             tmp_days = org_bukken["check_date"] - org_bukken["found_date"]
             ret_datas_tmp[pref_city_town][calc_key+"_days"] += tmp_days.days
+
+        return ret_datas_tmp
+
+    
+    def calc_save_sales_count_by_price(self):
+        logger.info("start")
+        
+        today = datetime.datetime.today().date()
+        #today = datetime.datetime.today().date() - datetime.timedelta(2)
+        
+        calc_date_from, calc_date_to = self.get_weekly_period(today)
+
+        ret_datas_tmp = \
+            self.calc_sales_count_by_city_price_sub({},
+                                                    "on_sale",
+                                                    calc_date_from,
+                                                    calc_date_to)
+        pre_calc_date_from, pre_calc_date_to = \
+            self.get_weekly_period( today - datetime.timedelta(days= 7) )
+
+        ret_datas_tmp = \
+            self.calc_sales_count_by_city_price_sub(ret_datas_tmp,
+                                                    "sold",
+                                                    pre_calc_date_from,
+                                                    pre_calc_date_to)
+        
+        ret_datas = []
+        for pref_shop, shop_info in ret_datas_tmp.items():
+            (shop_info["pref"],shop_info["city"],shop_info["price"]) = \
+                pref_shop.split("\t")
+
+            shop_info["calc_date"]  = str(calc_date_to)
+
+            for calc_key in ["on_sale","sold"]:
+                count_key = calc_key+"_count"
+                days_key  = calc_key+"_days"
+                
+                if not shop_info[count_key]:
+                    continue
+
+                avg_days  = shop_info[days_key] / shop_info[count_key]
+                shop_info[days_key]  = avg_days
+
+            ret_datas.append(shop_info)
+
+        util_db = Db()
+        util_db.save_tbl_rows(
+            self.tbl_name_header()+"_sales_count_by_city_price",
+            ["pref","city","price","calc_date","calc_days",
+             "sold_count",   "sold_days",
+             "on_sale_count","on_sale_days"],
+            ret_datas )
+        
+        return ret_datas
+
+
+    def calc_sales_count_by_city_price_sub(self,
+                                           ret_datas_tmp,
+                                           calc_key,
+                                           calc_date_from,
+                                           calc_date_to):
+        
+        suumo_service = SuumoService()
+        org_bukkens = suumo_service.get_bukkens_by_check_date(
+            self.build_type(),
+            calc_date_from,
+            calc_date_to )
+        
+        for org_bukken in org_bukkens:
+            if not org_bukken["pref"]:
+                org_bukken["pref"] = "?"
+            if not org_bukken["city"]:
+                org_bukken["city"] = "?"
+
+            # 200万円単位で丸め
+            org_bukken["price"] = round(org_bukken["price"]/2000000) * 2
+            if not org_bukken["price"]:
+                org_bukken["price"] = "0"
+
+            pref_city_price = "%s\t%s\t%s" % (org_bukken["pref"],
+                                              org_bukken["city"],
+                                              org_bukken["price"])
+            
+            if not pref_city_price in ret_datas_tmp:
+                ret_datas_tmp[pref_city_price] = {
+                    "calc_date" : str(calc_date_to),
+                    "calc_days" : 7,
+                    "sold_count": 0,
+                    "sold_days" : 0,
+                    "on_sale_count":0,
+                    "on_sale_days" :0 }
+
+            ret_datas_tmp[pref_city_price][calc_key+"_count"] += 1
+
+            tmp_days = org_bukken["check_date"] - org_bukken["found_date"]
+            ret_datas_tmp[pref_city_price][calc_key+"_days"] += tmp_days.days
 
         return ret_datas_tmp
