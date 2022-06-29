@@ -23,6 +23,7 @@ insert_cols = ["pref","city",
                "rented_house",          #借家
                ]
 insert_sql  = "INSERT INTO estat_jutakutochi_e033 (%s) VALUES %s"
+
 logger = None
 
 class EstatJutakuTochiE033Service(
@@ -98,3 +99,68 @@ class EstatJutakuTochiE033Service(
             row_no += 1
             
         return ret_data
+
+
+    def parse_build_year_str(self,year_str):
+
+        if year_str == "1970年以前":
+            return "0\t1970"
+        if year_str == "1971～1980年":
+            return "1971\t1980"
+        if year_str == "1981～1990年":
+            return "1981\t1990"
+        if year_str in ["1991～1995年","1996～2000年"]:
+            return "1991\t2000"
+        if year_str in ["2001～2005年","2006～2010年"]:
+            return "2001\t2010"
+        if year_str == "2011～2015年":
+            return "2011\t2015"
+        if year_str == "2016～2018年9月":
+            return "2016\t2018"
+        
+        return None
+    
+
+    def get_group_by_city(self):
+        sql = "select * from estat_jutakutochi_e033"
+        
+        ret_data_tmp = {}
+        
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+            
+            for ret_row in  db_cur.fetchall():
+                ret_row = dict( ret_row )
+
+                if not ret_row["city"]:
+                    continue
+                
+                pref_city = "%s\t%s" % ( ret_row["pref"],ret_row["city"])
+                if not pref_city in ret_data_tmp:
+                    ret_data_tmp[pref_city] = {}
+
+                build_year = self.parse_build_year_str( ret_row["build_year"] )
+
+                if not build_year in ret_data_tmp[pref_city]:
+                    ret_data_tmp[pref_city][build_year] = {}
+
+                has_damage  = ret_row["damage"]
+                owned_house = ret_row["owned_house"]
+                if not has_damage in ret_data_tmp[pref_city][build_year]:
+                    ret_data_tmp[pref_city][build_year][has_damage] = 0
+
+                ret_data_tmp[pref_city][build_year][has_damage] += owned_house
+
+        ret_datas = []
+        for pref_city, ret_data in ret_data_tmp.items():
+            (ret_data["pref"],ret_data["city"]) = pref_city.split("\t")
+            ret_datas.append(ret_data)
+            
+        return ret_datas
+        

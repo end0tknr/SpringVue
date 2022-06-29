@@ -3,9 +3,11 @@
 
 from service.city                   import CityService
 from service.estat_jutakutochi_d002 import EstatJutakuTochiD002Service
+from service.estat_jutakutochi_e033 import EstatJutakuTochiE033Service
 from service.estat_jutakutochi_e044 import EstatJutakuTochiE044Service
 from service.estat_jutakutochi_e048 import EstatJutakuTochiE048Service
 from service.estat_jutakutochi_e101 import EstatJutakuTochiE101Service
+from service.estat_jutakutochi_g157 import EstatJutakuTochiG157Service
 from service.gis_chika_koji         import GisChikaKojiService
 from service.gis_youto_chiiki       import GisYoutoChiikiService
 from service.kokusei_population_b01 import KokuseiPopulationB01Service
@@ -14,6 +16,7 @@ from service.kokusei_population_b12 import KokuseiPopulationB12Service
 from service.mlit_seisanryokuchi    import MlitSeisanRyokuchiService
 from service.soumu_zeisei_j5120b    import SoumuZeiseiJ5120bService
 import appbase
+import dictknife
 import json
 import re
 
@@ -88,7 +91,7 @@ VALUES (%s,%s,%s)
         # 戸建/集合、持家/賃貸
         profiles = self.calc_jutakutochi_d002(profiles)
         # 入手方法
-        profiles = self.calc_jutakutochi_e101(profiles)
+        profiles = self.calc_jutakutochi_e101_recenct(profiles)
         # 年収
         profiles = self.calc_soumu_zeisei(profiles)
         # 世帯年収
@@ -179,7 +182,7 @@ VALUES (%s,%s,%s)
             
         return profiles
 
-    def calc_jutakutochi_e101(self, profiles):
+    def calc_jutakutochi_e101_recenct(self, profiles):
         jutakutochi_service = EstatJutakuTochiE101Service()
 
         ret_vals = jutakutochi_service.get_shinchiku_vals_group_by_city()
@@ -374,5 +377,154 @@ VALUES (%s,%s,%s)
             profiles[pref_city]["年収_百万円"] = \
                 round(ret_val["salary"]/1000000 + ret_val["capital_income"]/1000000,2)
         return profiles
+    
 
+    def calc_save_bild_year_profiles(self):
+        
+        profiles = self.get_bild_year_defaults()
 
+        # 築年数と損傷有無
+        profiles = self.calc_jutakutochi_e033(profiles)
+        # 築年数と建替え等
+        profiles = self.calc_jutakutochi_e101(profiles)
+        # 築年数とリフォーム
+        profiles = self.calc_jutakutochi_g157(profiles)
+
+        profiles_tmp = self.conv_build_year_profiles( profiles )
+
+        self.save_build_year_profiles(profiles_tmp)
+        
+        
+    def save_build_year_profiles(self,profiles):
+        logger.info("start")
+
+        sql = """
+UPDATE city_profile
+SET build_year_summary = %s
+WHERE pref=%s AND city=%s
+"""
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            for profile in profiles:
+                sql_args = (profile["build_year_summary"],
+                            profile["pref"],
+                            profile["city"] )
+            
+                try:
+                    db_cur.execute(sql, sql_args)
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    logger.error(sql_args)
+                    return False
+            try:
+                db_conn.commit()
+            except Exception as e:
+                logger.error(e)
+                return False
+            
+        return True
+
+        
+    def conv_build_year_profiles(self, profiles):
+        
+        profiles_tmp = []
+        for pref_city_str, profile_tmp_1 in profiles.items():
+            pref_city = pref_city_str.split("\t")
+
+            profile_tmp = {"pref":pref_city[0],
+                           "city":pref_city[1],
+                           "build_year_summary":[] }
+            
+            for build_year_str, profile_tmp_2 in profile_tmp_1.items():
+                build_years = build_year_str.split("\t")
+                if len(build_years) != 2:
+                    logger.error(build_year_str)
+                    logger.error(profile_tmp_2)
+                    continue
+
+                profile_tmp_2["build_year_from"] = build_years[0]
+                profile_tmp_2["build_year_to"]   = build_years[1]
+
+                profile_tmp["build_year_summary"].append( profile_tmp_2 )
+
+            json_str = json.dumps( profile_tmp["build_year_summary"],
+                                   ensure_ascii=False )
+            
+            profiles_tmp.append({"pref" : pref_city[0],
+                                 "city" : pref_city[1],
+                                 "build_year_summary": json_str })
+        return profiles_tmp
+        
+
+    def get_bild_year_defaults(self):
+        city_serivce = CityService()
+        cities = city_serivce.get_all()
+
+        ret_datas = {}
+        
+        for city in cities:
+            if not city["city"]:
+                continue
+            
+            pref_city = city["pref"] +"\t"+ city["city"]
+            ret_datas[pref_city] = {}
+            
+            # for build_year in default_build_years:
+            #     year_from_to = str(build_year[0]) +"\t"+ str(build_year[1])
+            #     ret_datas[pref_city][year_from_to] = {}
+                
+        return ret_datas
+    
+
+    def calc_jutakutochi_e033(self,profiles):
+        jutakutochi_service = EstatJutakuTochiE033Service()
+
+        ret_vals = jutakutochi_service.get_group_by_city()
+
+        for ret_val in ret_vals:
+            pref_city = ret_val["pref"]+"\t"+ret_val["city"]
+            del ret_val["pref"]
+            del ret_val["city"]
+            
+            if not pref_city in profiles:
+                profiles[pref_city] = {}
+
+            profiles[pref_city] = dictknife.deepmerge(profiles[pref_city], ret_val )
+        return profiles
+    
+    
+    def calc_jutakutochi_e101(self, profiles):
+        jutakutochi_service = EstatJutakuTochiE101Service()
+
+        ret_vals = jutakutochi_service.get_group_by_city()
+
+        for ret_val in ret_vals:
+            pref_city = ret_val["pref"]+"\t"+ret_val["city"]
+            del ret_val["pref"]
+            del ret_val["city"]
+            
+            if not pref_city in profiles:
+                profiles[pref_city] = {}
+
+            profiles[pref_city] = dictknife.deepmerge(profiles[pref_city], ret_val )
+            
+        return profiles
+        
+    def calc_jutakutochi_g157(self, profiles):
+        jutakutochi_service = EstatJutakuTochiG157Service()
+
+        ret_vals = jutakutochi_service.get_group_by_city()
+
+        for ret_val in ret_vals:
+            pref_city = ret_val["pref"]+"\t"+ret_val["city"]
+            del ret_val["pref"]
+            del ret_val["city"]
+            
+            if not pref_city in profiles:
+                profiles[pref_city] = {}
+
+            profiles[pref_city] = dictknife.deepmerge(profiles[pref_city], ret_val )
+            
+        return profiles
+        

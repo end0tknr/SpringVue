@@ -27,6 +27,8 @@ insert_cols = ["pref","city",
                "other"
                ]
 insert_sql  = "INSERT INTO estat_jutakutochi_e101 (%s) VALUES %s"
+re_compile_build_year_str = [re.compile("(\d+)～(\d+)年"),
+                             re.compile("(\d+)年以前")]
 logger = None
 
 class EstatJutakuTochiE101Service(
@@ -117,7 +119,7 @@ class EstatJutakuTochiE101Service(
         
         sql = """
 select *
-from  estat_jutakutochi_e101
+from estat_jutakutochi_e101
 where build_year=%s
 """
         ret_data = []
@@ -136,3 +138,60 @@ where build_year=%s
                 
         return ret_data
     
+    
+    def get_group_by_city(self):
+        sql = "select * from estat_jutakutochi_e101"
+        
+        ret_data_tmp = {}
+        
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+            
+            for ret_row in  db_cur.fetchall():
+                ret_row = dict( ret_row )
+
+                if not ret_row["city"]:
+                    continue
+                
+                pref_city = "%s\t%s" % ( ret_row["pref"],ret_row["city"])
+                if not pref_city in ret_data_tmp:
+                    ret_data_tmp[pref_city] = {}
+
+                build_year = self.parse_build_year_str( ret_row["build_year"] )
+
+                if not build_year in ret_data_tmp[pref_city]:
+                    ret_data_tmp[pref_city][build_year] = {}
+
+                del ret_row["pref"]
+                del ret_row["city"]
+                del ret_row["build_year"]
+
+                ret_data_tmp[pref_city][build_year] = ret_row
+
+        ret_datas = []
+        for pref_city, ret_data in ret_data_tmp.items():
+            (ret_data["pref"],ret_data["city"]) = pref_city.split("\t")
+            ret_datas.append(ret_data)
+            
+        return ret_datas
+        
+    def parse_build_year_str(self,year_str):
+
+        re_result = re_compile_build_year_str[0].search(year_str)
+        if re_result:
+            return "%s\t%s" % ( re_result.group(1),re_result.group(2) )
+        
+        re_result = re_compile_build_year_str[1].search(year_str)
+        if re_result:
+            return "%s\t%s" % ( 0,re_result.group(1) )
+
+        logger.error( year_str )
+        return None
+    
+
