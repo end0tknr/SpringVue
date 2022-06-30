@@ -366,7 +366,7 @@
             </table>
           </div><!--.scroll_tbl2-->
         </div><!--.column_right-->
-	
+        
         <div class="column_left">
           <h2>プロファイル</h2>
           
@@ -458,20 +458,15 @@
             </tr>
           </table>
         </div><!--.column_right-->
-	
+        
       </div><!--.two_cols_layout-->
 
     </div><!--.page_middle_container-->
   </div><!--.page_middle-->
 
-  <div class="container_title">
-    <div class="container_title_sub">
-      <div>プロファイル比較</div>
-      <div class="container_title_sub_right"></div>
-    </div>
-  </div><!--.container_title-->
 
   <div class="page_bottom">
+    <h2>近隣 市区町村 プロファイル</h2>
     
     <div class="scroll_tbl2">
       
@@ -490,13 +485,13 @@
           <th v-on:click="sort_tbl('near_city_profiles','city')">市区町村</th>
           <th v-on:click="sort_tbl('near_city_profiles','人口_25_59歳_万人')">25-59歳</th>
           <th v-on:click="sort_tbl('near_city_profiles','人口_25_59歳_万人_変動')">
-	    <span class="sub">対2015<span></th>
+            <span class="sub">対2015<span></th>
           <th v-on:click="sort_tbl('near_city_profiles','家族世帯')">家族同居</th>
           <th v-on:click="sort_tbl('near_city_profiles','家族世帯_変動')">
-	    <span class="sub">対2015<span></th>
+            <span class="sub">対2015<span></th>
           <th v-on:click="sort_tbl('near_city_profiles','単身世帯')">単身</th>
           <th v-on:click="sort_tbl('near_city_profiles','単身世帯_変動')">
-	    <span class="sub">対2015<span></th>
+            <span class="sub">対2015<span></th>
           <th v-on:click="sort_tbl('near_city_profiles','用途地域_住居系_ha')">
             面積<span class="sub">ha</span></th>
           <th v-on:click="sort_tbl('near_city_profiles','地価_万円_m2_住居系')">
@@ -504,7 +499,7 @@
           <th v-on:click="sort_tbl('near_city_profiles','持家率')">持家</th>
           <th v-on:click="sort_tbl('near_city_profiles','戸建率')">戸建</th>
           <th v-on:click="sort_tbl('near_city_profiles','年収_百万円')">
-	    <span class="sub">百万円</aub></th>
+            <span class="sub">百万円</aub></th>
           <th v-on:click="sort_tbl('near_city_profiles','世帯年収_100')">-1</th>
           <th v-on:click="sort_tbl('near_city_profiles','世帯年収_100～200')">1-2</th>
           <th v-on:click="sort_tbl('near_city_profiles','世帯年収_200～300')">2-3</th>
@@ -528,37 +523,143 @@
               {{ city_profile.city }}
             </div>
           </th>
-          <td>{{city_profile["人口_25_59歳_万人"]}}</td>
-          <td>{{city_profile["人口_25_59歳_万人_変動"]}}</td>
-          <td>{{city_profile["家族世帯"]}}</td>
-          <td>{{city_profile["家族世帯_変動"]}}</td>
-          <td>{{city_profile["単身世帯"]}}</td>
-          <td>{{city_profile["単身世帯_変動"]}}</td>
-          <td>{{city_profile["用途地域_住居系_ha"]}}</td>
-          <td>{{city_profile["地価_万円_m2_住居系"]}}</td>
-          <td>{{city_profile["持家率"]}}%</td>
-          <td>{{city_profile["戸建率"]}}%</td>
-          <td>{{city_profile["年収_百万円"]}}</td>
-          <td>{{city_profile["新築_世帯主_年齢_24"]}}</td>
-          <td>{{city_profile["新築_世帯主_年齢_25_34"]}}</td>
-          <td>{{city_profile["新築_世帯主_年齢_35_44"]}}</td>
-          <td>{{city_profile["新築_世帯主_年齢_45_54"]}}</td>
-          <td>{{city_profile["新築_世帯主_年齢_55_64"]}}</td>
-          <td>{{city_profile["新築_世帯主_年齢_65"]}}</td>
-          <td>{{city_profile["世帯年収_100"]}}</td>
-          <td>{{city_profile["世帯年収_100～200"]}}</td>
-          <td>{{city_profile["世帯年収_200～300"]}}</td>
-          <td>{{city_profile["世帯年収_300～400"]}}</td>
-          <td>{{city_profile["世帯年収_400～500"]}}</td>
-          <td>{{city_profile["世帯年収_500～700"]}}</td>
-          <td>{{city_profile["世帯年収_700～1000"]}}</td>
-          <td>{{city_profile["世帯年収_1000～1500"]}}</td>
-          <td>{{city_profile["世帯年収_1500"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['人口_25_59歳_万人_px']+'px 3px'}">
+            {{city_profile["人口_25_59歳_万人"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['人口_25_59歳_万人_変動_px']+'px 3px'}">
+            {{city_profile["人口_25_59歳_万人_変動"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['家族世帯_px']+'px 3px'}">
+            {{city_profile["家族世帯"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['家族世帯_変動_px']+'px 3px'}">
+            {{city_profile["家族世帯_変動"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['単身世帯_px']+'px 3px'}">
+            {{city_profile["単身世帯"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['単身世帯_変動_px']+'px 3px'}">
+            {{city_profile["単身世帯_変動"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['用途地域_住居系_ha_px']+'px 3px'}">
+            {{city_profile["用途地域_住居系_ha"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['地価_万円_m2_住居系_px']+'px 3px'}">
+            {{city_profile["地価_万円_m2_住居系"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['持家率_px']+'px 3px'}">
+            {{city_profile["持家率"]}}%</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['戸建率_px']+'px 3px'}">
+            {{city_profile["戸建率"]}}%</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['年収_百万円_px']+'px 3px'}">
+            {{city_profile["年収_百万円"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['世帯年収_100_px']+'px 3px'}">
+            {{city_profile["世帯年収_100"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['世帯年収_100～200_px']+'px 3px'}">
+            {{city_profile["世帯年収_100～200"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['世帯年収_200～300_px']+'px 3px'}">
+            {{city_profile["世帯年収_200～300"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['世帯年収_300～400_px']+'px 3px'}">
+            {{city_profile["世帯年収_300～400"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['世帯年収_400～500_px']+'px 3px'}">
+            {{city_profile["世帯年収_400～500"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['世帯年収_500～700_px']+'px 3px'}">
+            {{city_profile["世帯年収_500～700"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['世帯年収_700～1000_px']+'px 3px'}">
+            {{city_profile["世帯年収_700～1000"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['世帯年収_1000～1500_px']+'px 3px'}">
+            {{city_profile["世帯年収_1000～1500"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['世帯年収_1500_px']+'px 3px'}">
+            {{city_profile["世帯年収_1500"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['新築_世帯主_年齢_24_px']+'px 3px'}">
+            {{city_profile["新築_世帯主_年齢_24"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['新築_世帯主_年齢_25_34_px']+'px 3px'}">
+            {{city_profile["新築_世帯主_年齢_25_34"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['新築_世帯主_年齢_35_44_px']+'px 3px'}">
+            {{city_profile["新築_世帯主_年齢_35_44"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['新築_世帯主_年齢_45_54_px']+'px 3px'}">
+            {{city_profile["新築_世帯主_年齢_45_54"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['新築_世帯主_年齢_55_64_px']+'px 3px'}">
+            {{city_profile["新築_世帯主_年齢_55_64"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['新築_世帯主_年齢_65_px']+'px 3px'}">
+            {{city_profile["新築_世帯主_年齢_65"]}}</td>
         </tr>
       </table>
     </div><!--.scroll_tbl2-->
-    
-    <div>&nbsp;</div>
+
+    <h2>建築年別 リフォーム実績</h2>
+
+    <div class="scroll_tbl2">
+      <table>
+        <tr class="city_profile">
+          <th></th>
+          <th colspan="2">腐朽 破損</th>
+          <th colspan="7">リフォーム実績<span class="sub">2014～実施件数</span></th>
+          <th></th>
+        </tr>
+        <tr class="sort_keys">
+          <th v-on:click="sort_tbl('build_year_profiles','city')">建築年</th>
+          <th v-on:click="sort_tbl('build_year_profiles','腐朽・破損あり')">あり</th>
+          <th v-on:click="sort_tbl('build_year_profiles','腐朽・破損なし')">なし</th>
+          <th v-on:click="sort_tbl('build_year_profiles','rebuild')">建替</th>
+          <th v-on:click="sort_tbl('build_year_profiles','reform_plan')">増築</th>
+          <th v-on:click="sort_tbl('build_year_profiles','reform_kitchen_bath')">水回り</th>
+          <th v-on:click="sort_tbl('build_year_profiles','reform_roof_outer_wall')">屋根 外壁</th>
+          <th v-on:click="sort_tbl('build_year_profiles','reform_floor_inner_wall')">内装</th>
+          <th v-on:click="sort_tbl('build_year_profiles','reform_pillar_basic')">壁 柱 基礎</th>
+          <th v-on:click="sort_tbl('build_year_profiles','reform_insulation')">窓他 断熱</th>
+        </tr>
+        <tr v-for="city_profile in build_year_profiles">
+          <th>～{{ city_profile.build_year_to }}</th>
+
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['腐朽・破損あり_px']+'px 3px'}">
+            {{ city_profile["腐朽・破損あり"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['腐朽・破損なし_px']+'px 3px'}">
+            {{ city_profile["腐朽・破損なし"]}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['rebuild_px']+'px 3px'}">
+            {{ city_profile.rebuild    }}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['reform_plan_px']+'px 3px'}">
+            {{ city_profile.reform_plan}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['reform_kitchen_bath_px']+'px 3px'}">
+            {{ city_profile.reform_kitchen_bath }}   </td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['reform_roof_outer_wall_px']+'px 3px'}">
+            {{ city_profile.reform_roof_outer_wall}} </td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['reform_floor_inner_wall_px']+'px 3px'}">
+            {{ city_profile.reform_floor_inner_wall}}</td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['reform_pillar_basic_px']+'px 3px'}">
+            {{ city_profile.reform_pillar_basic }}   </td>
+          <td class="graph_bar"
+              v-bind:style="{backgroundSize:city_profile['reform_insulation_px']+'px 3px'}">
+            {{ city_profile.reform_insulation }}     </td>
+        </tr>
+      </table>
+    </div><!--.scroll_tbl2-->
   </div>
 
   <footer>

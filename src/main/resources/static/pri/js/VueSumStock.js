@@ -16,6 +16,7 @@
                 near_city_sales : [],
                 city_profile    : {},
                 near_city_profiles : [],
+                build_year_profiles: [],
                 sort_tbl_dirs : {
                     "shop_sales"      : {},
                     "shop_city_sales" : {},
@@ -23,7 +24,9 @@
                     "price_sales"     : {},
                     "town_sales"      : {},
                     "near_city_sales" : {},
-                    "near_city_profiles" : {} },
+                    "near_city_profiles" : {},
+                    "build_year_profiles": {}
+                },
                 show_jpn_map: false
             }
         },
@@ -48,6 +51,7 @@
                 this.load_price_data(this.pref_name,this.city_name);
                 this.load_city_profile(this.pref_name,this.city_name);
                 this.load_near_city_profiles(this.pref_name,this.city_name);
+                this.load_build_year_profiles(this.pref_name,this.city_name);
             },
             
             set_pref_name(event){
@@ -99,6 +103,9 @@
             load_near_city_profiles(pref,city){
                 vue_sumstock.load_near_city_profiles(pref,city,this);
             },
+            load_build_year_profiles(pref,city){
+                vue_sumstock.load_build_year_profiles(pref,city,this);
+            },
             load_town_data(pref,city){
                 vue_sumstock.load_town_data(pref,city,this);
             },
@@ -146,13 +153,13 @@
                 
                 let val_a = a[sort_key];
                 let val_b = b[sort_key];
-		
-		if (typeof val_a != 'number'){
+                
+                if (typeof val_a != 'number'){
                     val_a = Number( val_a.replace(/,/g,'') );
-		}
-		if (typeof val_b != 'number'){
+                }
+                if (typeof val_b != 'number'){
                     val_b = Number( val_b.replace(/,/g,'') );
-		}
+                }
 
                 if( isNaN(val_a) ){
                     val_a = a[sort_key];
@@ -204,6 +211,7 @@
             vue_obj.load_price_data(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_city_profile(vue_obj.pref_name,vue_obj.city_name);
             vue_obj.load_near_city_profiles(vue_obj.pref_name,vue_obj.city_name);
+            vue_obj.load_build_year_profiles(vue_obj.pref_name,vue_obj.city_name);
         }
         
         async load_town_data(pref,city,vue_obj){
@@ -246,7 +254,46 @@
             
             let res = await fetch(req_url);
             let city_profiles = await res.json();
-            vue_obj.near_city_profiles = [];
+
+            let max_sets = [
+                {"key_name" :"pop", "max":0,
+                 "atri_keys":['人口_25_59歳_万人']},
+                {"key_name" :"pop_diff", "max":0,
+                 "atri_keys":['人口_25_59歳_万人_変動']},
+                {"key_name" :"setai", "max":0,
+                 "atri_keys":['家族世帯','単身世帯']},
+                {"key_name" :"setai_diff", "max":0,
+                 "atri_keys":['家族世帯_変動','単身世帯_変動']},
+                {"key_name" :"area", "max":0,
+                 "atri_keys":['用途地域_住居系_ha']},
+                {"key_name" :"chika", "max":0,
+                 "atri_keys":['地価_万円_m2_住居系']},
+                {"key_name" :"owned", "max":0,
+                 "atri_keys":['持家率']},
+                {"key_name" :"house", "max":0,
+                 "atri_keys":['戸建率']},
+                {"key_name" :"person_income", "max":0,
+                 "atri_keys":['年収_百万円']},
+                {"key_name" :"setai_income", "max":0,
+                 "atri_keys":['世帯年収_100',
+                              '世帯年収_100～200',
+                              '世帯年収_200～300',
+                              '世帯年収_300～400',
+                              '世帯年収_400～500',
+                              '世帯年収_500～700',
+                              '世帯年収_700～1000',
+                              '世帯年収_1000～1500',
+                              '世帯年収_1500']},
+                {"key_name" :"old", "max":0,
+                 "atri_keys":['新築_世帯主_年齢_24',
+                              '新築_世帯主_年齢_25_34',
+                              '新築_世帯主_年齢_35_44',
+                              '新築_世帯主_年齢_45_54',
+                              '新築_世帯主_年齢_55_64',
+                              '新築_世帯主_年齢_65']},
+                ];
+
+            let city_profiles_tmp = [];
             for( let city_profile of city_profiles ) {
                 city_profile = JSON.parse( city_profile );
 
@@ -259,15 +306,103 @@
                     city_profile["世帯_持家"] /
                     (city_profile["世帯_持家"] + city_profile["世帯_賃貸"]);
                 city_profile["持家率"] = Math.round(city_profile["持家率"] *100);
-                
-                for (let atri_key in city_profile){
-                    if (atri_key in ["持家率","戸建率"]){
+
+                //最大値算出
+                for( let max_set of max_sets ) {
+                    for( let atri_key of max_set.atri_keys ){
+                        if( city_profile[atri_key] <= max_set.max ){
+                            continue
+                        }
+                        max_set.max = city_profile[atri_key];
+                    }
+                }
+                city_profiles_tmp.push(city_profile);
+            }
+            
+            vue_obj.near_city_profiles = [];
+            for( let city_profile of city_profiles_tmp ) {
+                    
+                for( let max_set of max_sets ) {
+                    if ( max_set.max == 0 ){
                         continue
                     }
                     
-                    city_profile[atri_key] = city_profile[atri_key].toLocaleString();
+                    for( let atri_key of max_set.atri_keys ){
+                        let graph_bar_key = atri_key + "_px";
+                        
+                        city_profile[graph_bar_key] =
+                            this.calc_graph_bar_px(city_profile[atri_key],
+                                                   0,
+                                                   max_set.max,
+                                                   50 );
+                        
+                        if (atri_key in ["持家率","戸建率"]){
+                            continue
+                        }
+                        //数値の3桁区切り化
+                        city_profile[atri_key] =
+                            Number(city_profile[atri_key]).toLocaleString();
+                    }
                 }
-                vue_obj.near_city_profiles.push(city_profile);
+
+                vue_obj.near_city_profiles.push( city_profile );
+            }
+        }
+        
+        async load_build_year_profiles( pref,city,vue_obj ){
+            let req_url = server_api_base_url +
+                "sumstock/CityProfileByYear/"+
+                encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+
+            let res = await fetch(req_url);
+            let city_profiles = await res.json();
+
+            let max_sets = [
+                {"key_name" :"damage",
+                 "max"      :0,
+                 "atri_keys":["腐朽・破損あり","腐朽・破損なし"]},
+                {"key_name" :"reform",
+                 "max"      :0,
+                 "atri_keys":["rebuild","reform_plan","reform_kitchen_bath",
+                               "reform_roof_outer_wall","reform_floor_inner_wall",
+                               "reform_pillar_basic","reform_insulation"] }
+                ];
+            
+            //最大値算出
+            for( let city_profile of city_profiles ) {
+                
+                for( let max_set of max_sets ) {
+                    for( let atri_key of max_set.atri_keys ){
+                        if( city_profile[atri_key] <= max_set.max ){
+                            continue
+                        }
+                        max_set.max = city_profile[atri_key];
+                    }
+                }
+            }
+            
+            vue_obj.build_year_profiles = [];
+            for( let city_profile of city_profiles ) {
+                for( let max_set of max_sets ) {
+                    if ( max_set.max == 0 ){
+                        continue
+                    }
+
+                    for( let atri_key of max_set.atri_keys ){
+                        let graph_bar_key = atri_key + "_px";
+
+                        city_profile[graph_bar_key] =
+                            this.calc_graph_bar_px(city_profile[atri_key],
+                                                   0,
+                                                   max_set.max,
+                                                   50 );
+                        //数値の3桁区切り化
+                        city_profile[atri_key] =
+                            Number(city_profile[atri_key]).toLocaleString();
+                    }
+                }
+
+                vue_obj.build_year_profiles.push( city_profile );
             }
         }
         
@@ -324,8 +459,6 @@
             city_profile["mapexpert_id"] =
                 city_profile["citycode"].substr( 0, city_profile["citycode"].length-1 );
 
-            
-            //console.log(city_profile);
             vue_obj.city_profile = city_profile;
         }
         
