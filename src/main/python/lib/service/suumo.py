@@ -240,43 +240,6 @@ WHERE tmp.url NOT IN ( SELECT url FROM UPSERT )
             db_conn.commit()
         return True
     
-        
-#     def save_bukken_infos(self, build_type, bukken_infos):
-
-#         bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
-#         date_str = datetime.datetime.now().strftime('%Y-%m-%d')
-#         row_groups = self.divide_rows_info(build_type,
-#                                            bukken_infos,
-#                                            bulk_insert_size,
-#                                            date_str )
-
-#         sql = """
-# INSERT INTO suumo_bukken
-#   (build_type,bukken_name,price,price_org,pref,city,address,
-#    plan,build_area_m2,build_area_org,land_area_m2,land_area_org,
-#    build_year,shop_org,url,found_date,check_date)
-#   VALUES %s
-# ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
-#   DO UPDATE SET check_date='%s'
-# """
-#         sql = sql % ("%s", date_str)
-        
-#         with self.db_connect() as db_conn:
-#             with self.db_cursor(db_conn) as db_cur:
-
-#                 for row_group in row_groups:
-#                     try:
-#                         # bulk insert
-#                         extras.execute_values(db_cur,sql, row_group )
-#                     except Exception as e:
-#                         logger.error(e)
-#                         logger.error(sql)
-#                         logger.error(row_group)
-#                         return False
-                    
-#             db_conn.commit()
-#         return True
-
     
     def make_tuple_for_insert(self, build_type, org_row, date_str):
 

@@ -49,6 +49,14 @@ near_pref       varchar(4),
 near_city       varchar(8),
 primary key(pref,city,near_pref,near_city));
 
+CREATE TABLE IF NOT EXISTS town_profile (
+pref            varchar(4),
+city            varchar(16),
+town            varchar(64),
+lng             double precision,
+lat             double precision,
+summary         varchar(4096),
+primary key(pref,city,town) );
 
 -- 2015年の古いデータの為、対象外
 -- CREATE TABLE IF NOT EXISTS estat_jutakutochi (

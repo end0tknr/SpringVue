@@ -89,7 +89,7 @@ class NewBuildService(appbase.AppBase):
 
             if not pref_shop in ret_datas_tmp:
                 ret_datas_tmp[pref_shop] = {
-                    "calc_date" : str(calc_date_to),
+                    "calc_date" : calc_date_to,
                     "calc_days" : 7,
                     "sold_count": 0,
                     "sold_price": 0,
@@ -134,7 +134,9 @@ class NewBuildService(appbase.AppBase):
         for pref_shop, shop_info in ret_datas_tmp.items():
             (shop_info["pref"],shop_info["shop"]) = pref_shop.split("\t")
 
-            shop_info["calc_date"]  = str(calc_date_to)
+            # postgresはdate型の制約が厳しいのですが
+            # pythonが内部的に、datetime.date(2022, 7, 3) のようにcastしれくれます。
+            shop_info["calc_date"]  = calc_date_to
 
             for calc_key in ["on_sale","sold"]:
                 count_key = calc_key+"_count"
@@ -154,8 +156,9 @@ class NewBuildService(appbase.AppBase):
             ret_datas.append(shop_info)
 
         util_db = Db()
-        util_db.save_tbl_rows(
+        util_db.bulk_upsert(
             self.tbl_name_header()+"_sales_count_by_shop",
+            ["pref","shop","calc_date","calc_days"],
             ["pref","shop","calc_date","calc_days",
              "sold_count",   "sold_price",   "sold_days",
              "on_sale_count","on_sale_price","on_sale_days"],
@@ -187,7 +190,9 @@ class NewBuildService(appbase.AppBase):
             (shop_info["pref"],shop_info["city"],shop_info["shop"]) = \
                 pref_shop.split("\t")
 
-            shop_info["calc_date"]  = str(calc_date_to)
+            # postgresはdate型の制約が厳しいのですが
+            # pythonが内部的に、datetime.date(2022, 7, 3) のようにcastしれくれます。
+            shop_info["calc_date"]  = calc_date_to
             
             for calc_key in ["on_sale","sold"]:
                 count_key = calc_key+"_count"
@@ -205,12 +210,19 @@ class NewBuildService(appbase.AppBase):
             ret_datas.append(shop_info)
 
         util_db = Db()
-        util_db.save_tbl_rows(
+        util_db.bulk_upsert(
             self.tbl_name_header()+"_sales_count_by_shop_city",
+            ["pref","city","shop","calc_date"],
             ["pref","city","shop","calc_date","calc_days",
              "sold_count",   "sold_price",   "sold_days",
              "on_sale_count","on_sale_price","on_sale_days"],
             ret_datas )
+        # util_db.save_tbl_rows(
+        #     self.tbl_name_header()+"_sales_count_by_shop_city",
+        #     ["pref","city","shop","calc_date","calc_days",
+        #      "sold_count",   "sold_price",   "sold_days",
+        #      "on_sale_count","on_sale_price","on_sale_days"],
+        #     ret_datas )
         
         return ret_datas
 
@@ -237,7 +249,7 @@ class NewBuildService(appbase.AppBase):
         for pref_city, city_info in ret_datas_tmp.items():
             (city_info["pref"],city_info["city"]) = pref_city.split("\t")
 
-            city_info["calc_date"]  = str(calc_date_to)
+            city_info["calc_date"]  = calc_date_to
             
             for calc_key in ["on_sale","sold"]:
                 count_key = calc_key+"_count"
@@ -256,12 +268,20 @@ class NewBuildService(appbase.AppBase):
             ret_datas.append(city_info)
 
         util_db = Db()
-        util_db.save_tbl_rows(
+        util_db.bulk_upsert(
             self.tbl_name_header()+"_sales_count_by_city",
+            ["pref","city","calc_date","calc_days"],
             ["pref","city","calc_date","calc_days",
              "sold_count",   "sold_price",   "sold_days",
              "on_sale_count","on_sale_price","on_sale_days"],
             ret_datas )
+        
+        # util_db.save_tbl_rows(
+        #     self.tbl_name_header()+"_sales_count_by_city",
+        #     ["pref","city","calc_date","calc_days",
+        #      "sold_count",   "sold_price",   "sold_days",
+        #      "on_sale_count","on_sale_price","on_sale_days"],
+        #     ret_datas )
         return ret_datas
 
     def calc_sales_count_by_city_sub(self,
@@ -286,7 +306,7 @@ class NewBuildService(appbase.AppBase):
 
             if not pref_city in ret_datas_tmp:
                 ret_datas_tmp[pref_city] = {
-                    "calc_date" : str(calc_date_to),
+                    "calc_date" : calc_date_to,
                     "calc_days" : 7,
                     "sold_count": 0,
                     "sold_price": 0,
@@ -315,6 +335,28 @@ class NewBuildService(appbase.AppBase):
         return calc_date_from, calc_date_to
 
 
+    def get_all_town_names(self):
+        sql ="""
+SELECT pref,city,town
+FROM newbuild_sales_count_by_town
+GROUP BY pref,city,town
+ORDER BY pref,city,town
+"""
+        db_conn = self.db_connect()
+        ret_datas = []
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+            
+            for ret_row in  db_cur.fetchall():
+                ret_datas.append( dict( ret_row ))
+        return ret_datas
+        
+        
     def calc_save_sales_count_by_town(self):
         logger.info("start")
         
@@ -339,7 +381,9 @@ class NewBuildService(appbase.AppBase):
             (town_info["pref"],town_info["city"],town_info["town"]) = \
                 pref_city_town.split("\t")
 
-            town_info["calc_date"]  = str(calc_date_to)
+            # postgresはdate型の制約が厳しいのですが
+            # pythonが内部的に、datetime.date(2022, 7, 3) のようにcastしれくれます。
+            town_info["calc_date"]  = calc_date_to
             
             for calc_key in ["on_sale","sold"]:
                 count_key = calc_key+"_count"
@@ -357,8 +401,9 @@ class NewBuildService(appbase.AppBase):
             ret_datas.append(town_info)
 
         util_db = Db()
-        util_db.save_tbl_rows(
+        util_db.bulk_upsert(
             self.tbl_name_header()+"_sales_count_by_town",
+            ["pref","city","town","calc_date"],
             ["pref","city","town","calc_date","calc_days",
              "sold_count",   "sold_price",   "sold_days",
              "on_sale_count","on_sale_price","on_sale_days"],
@@ -398,7 +443,7 @@ class NewBuildService(appbase.AppBase):
             
             if not pref_city_town in ret_datas_tmp:
                 ret_datas_tmp[pref_city_town] = {
-                    "calc_date" : str(calc_date_to),
+                    "calc_date" : calc_date_to,
                     "calc_days" : 7,
                     "sold_count": 0,
                     "sold_price": 0,
@@ -446,7 +491,12 @@ class NewBuildService(appbase.AppBase):
             (shop_info["pref"],shop_info["city"],shop_info["price"]) = \
                 pref_shop.split("\t")
 
-            shop_info["calc_date"]  = str(calc_date_to)
+            # postgresの型制限(制約?)が厳しい為
+            shop_info["price"] = float( shop_info["price"] )
+
+            # postgresはdate型の制約が厳しいのですが
+            # pythonが内部的に、datetime.date(2022, 7, 3) のようにcastしれくれます。
+            shop_info["calc_date"]  = calc_date_to
 
             for calc_key in ["on_sale","sold"]:
                 count_key = calc_key+"_count"
@@ -461,8 +511,9 @@ class NewBuildService(appbase.AppBase):
             ret_datas.append(shop_info)
 
         util_db = Db()
-        util_db.save_tbl_rows(
+        util_db.bulk_upsert(
             self.tbl_name_header()+"_sales_count_by_city_price",
+            ["pref","city","price"],
             ["pref","city","price","calc_date","calc_days",
              "sold_count",   "sold_days",
              "on_sale_count","on_sale_days"],
@@ -500,7 +551,7 @@ class NewBuildService(appbase.AppBase):
             
             if not pref_city_price in ret_datas_tmp:
                 ret_datas_tmp[pref_city_price] = {
-                    "calc_date" : str(calc_date_to),
+                    "calc_date" : calc_date_to,
                     "calc_days" : 7,
                     "sold_count": 0,
                     "sold_days" : 0,

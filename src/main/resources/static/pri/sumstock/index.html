@@ -670,7 +670,8 @@
   <div v-show="show_jpn_map" id="mask"></div>
   
   <section v-show="show_jpn_map" id="jpn_map_modal"
-           v-on:click="set_pref_name($event)">
+           v-on:click="set_pref_name($event)"
+	   style="display:none;">
     <div id="japan-map" class="clearfix">
 
       <div id="hokkaido-touhoku" class="clearfix">
@@ -781,6 +782,11 @@
   <script src="/pri/js/AppBase.js"></script>
   <script src="https://unpkg.com/vue@next"></script>
   <script src="/pri/js/app_conf.js"></script>
+  <script src="/pri/js/VueNewBuild.js"></script>
   <script src="/pri/js/VueSumStock.js"></script>
+  <script>
+    window.sumstock = new SumStock();
+    sumstock.init_page();
+  </script>
 </body>
 </html>
