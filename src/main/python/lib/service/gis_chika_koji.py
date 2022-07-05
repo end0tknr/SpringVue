@@ -8,7 +8,8 @@ import service.gis
 logger = None
 
 youto_def = {
-    "住居系":['1低専','2低専','1中専','2中専','1住居','2住居','準住居'],
+    # 最後の「_」も住居系に入れました
+    "住居系":['1低専','2低専','1中専','2中専','1住居','2住居','準住居','_'],
     "商業系":['商業','近商'],
     "工業系":['工業','準工','工専']}
 
@@ -46,7 +47,7 @@ WHERE gid=%s
         return True
 
             
-    def get_pref_cities_for_modiry(self):
+    def get_pref_cities_for_modify(self):
 
         sql = """
 SELECT
@@ -139,4 +140,63 @@ union
             
         return ret_datas
 
-    
+    def find_by_lnglat(self,lng,lat,youto_group):
+        
+        if (not lng and not lat):
+            logger.warning("lng lat is null")
+            return {}
+
+        
+        sql ="""
+SELECT
+  gck.pref, gck.city, gck.l01_047 as youto,
+  gck.l01_006::integer as price,
+  gck.lng, gck.lat,
+  gck.l01_045 as station,
+  gck.l01_046::int as from_station,
+  ST_Distance(gck.geom,ST_PointFromText('POINT(%s %s)') )  AS st_distance
+FROM gis_chika_koji gck
+WHERE  gck.lng BETWEEN (%s - %s) AND (%s + %s) AND
+       gck.lat BETWEEN (%s - %s) AND (%s + %s) AND
+       l01_047 in %s
+UNION
+  SELECT
+    gc.pref,gc.city,gc.l02_046 as youto,
+    gc.l02_006 as price,
+    gc.lng, gc.lat,
+    gc.l02_044 as station,
+    gc.l02_045 as from_station,
+    ST_Distance(gc.geom,ST_PointFromText('POINT(%s %s)') )  AS st_distance
+  FROM gis_chika gc
+  WHERE gc.lng BETWEEN (%s - %s) AND (%s + %s) AND
+        gc.lat BETWEEN (%s - %s) AND (%s + %s) AND
+       l02_046 in %s
+ORDER BY st_distance
+LIMIT 1;
+"""
+        limit_deg  = 0.01
+        sql_args  = (lng, lat,
+                     lng, limit_deg, lng, limit_deg,
+                     lat, limit_deg, lat, limit_deg,
+                     tuple(youto_def[youto_group]),
+                     lng, lat,
+                     lng, limit_deg, lng, limit_deg,
+                     lat, limit_deg, lat, limit_deg,
+                     tuple(youto_def[youto_group]) )
+        db_conn = self.db_connect()
+        ret_data = {}
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql,sql_args)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return {}
+
+            ret_rows =  db_cur.fetchall()
+            if len(ret_rows) == 0:
+                return {}
+
+            ret_row = dict( ret_rows[0] )
+            ret_row["st_distance"] = round(ret_row["st_distance"], 4)
+            return ret_row

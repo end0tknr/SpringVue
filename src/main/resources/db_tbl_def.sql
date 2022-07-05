@@ -650,6 +650,10 @@ ALTER TABLE gis_chika_koji ADD COLUMN city varchar(8);
 ALTER TABLE gis_chika      ADD COLUMN pref varchar(4);
 ALTER TABLE gis_chika      ADD COLUMN city varchar(8);
 
+CREATE INDEX gis_jinko_suikei_500m_lng_lat ON gis_jinko_suikei_500m (lng,lat);
+CREATE INDEX gis_chika_koji_lng_lat        ON gis_chika_koji        (lng,lat);
+CREATE INDEX gis_chika_lng_lat             ON gis_chika_koji        (lng,lat);
+
 
 CREATE TABLE IF NOT EXISTS real_estate_shop (
 government              varchar(16),

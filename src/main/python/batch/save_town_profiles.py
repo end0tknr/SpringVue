@@ -8,10 +8,7 @@ from service.town import TownService
 
 def main():
     town_service = TownService()
-    town_service.init_profiles()
-    pref_city_towns = town_service.get_all()
-    town_service.calc_save_lnglat( pref_city_towns )
-
+    town_service.calc_save_profiles()
 
 if __name__ == '__main__':
     main()

@@ -216,3 +216,53 @@ WHERE ( {9} ) NOT IN ( SELECT {10} FROM UPSERT )
         
         return True
     
+    # bulk update or insert
+    def bulk_update(self, tbl_name, pkeys, atri_keys, rows):
+        logger.info("start "+tbl_name)
+        logger.info(rows[0])
+
+        bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
+        row_groups = self.divide_rows(rows, bulk_insert_size, atri_keys )
+        
+# refer to https://qiita.com/yuuuuukou/items/d7723f45e83deb164d68
+        sql = """
+UPDATE {0}
+SET    {1}
+FROM ( VALUES {2}) AS data_tbl({3})
+WHERE  {4}
+"""
+        set_key_vals = []
+        for atri_key in atri_keys:
+            set_key_vals.append("%s=data_tbl.%s" % (atri_key,atri_key) )
+            
+        where_conds  = []
+        for pkey in pkeys:
+            where_conds.append("%s.%s=data_tbl.%s" % (tbl_name,pkey,pkey))
+
+        set_key_vals_str = ",".join( set_key_vals )
+        atri_key_str     = ",".join( atri_keys )
+        where_conds_str  = " AND ".join(where_conds)
+        
+        sql = sql.format( tbl_name,
+                          set_key_vals_str,
+                          "%s",
+                          atri_key_str,
+                          where_conds_str )
+        # print( sql )
+        
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            for row_group in row_groups:
+                try:
+                    # bulk upsert
+                    extras.execute_values(db_cur,sql, row_group )
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    logger.error(row_group)
+                    return False
+                    
+        db_conn.commit()
+        
+        return True
+    

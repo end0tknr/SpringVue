@@ -94,7 +94,29 @@ UPDATE city set lng=%s, lat=%s where code=%s
                     return False
         return True
             
-        
+    def get_near_cities(self, pref,city):
+        sql = """
+SELECT c.*
+FROM city c
+JOIN near_city nc
+  ON (c.pref=nc.near_pref AND c.city=nc.near_city)
+WHERE nc.pref=%s AND nc.city=%s
+"""
+        sql_args = (pref,city)
+        ret_datas = []
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql,sql_args)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+            
+            for ret_row in  db_cur.fetchall():
+                ret_datas.append( dict( ret_row ))
+            
+        return ret_datas
         
         
     def save_near_cities(self, pref,city, near_cities):
