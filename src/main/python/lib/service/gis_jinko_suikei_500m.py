@@ -67,6 +67,12 @@ LIMIT 1
                         col_key = col_key + "_" + year
                         ret_data[age_group] += ret_row[col_key]
                     ret_data[age_group] = int(ret_data[age_group])
+
+            for age_group in age_groups.keys():
+                col_key_diff = age_group % ( "diff",)
+                col_key_0    = age_group % ( years[0],)
+                col_key_1    = age_group % ( years[1],)
+                ret_data[col_key_diff] = int( ret_data[col_key_1]-ret_data[col_key_0] )
                     
             return ret_data
 

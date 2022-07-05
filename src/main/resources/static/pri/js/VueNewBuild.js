@@ -12,6 +12,7 @@ let vue_newbuild = Vue.createApp({
             town_sales      : [],
             near_city_sales : [],
             city_profile    : {},
+            town_profiles   : [],
             near_city_profiles : [],
             sort_tbl_dirs : {
                 "shop_sales"      : {},
@@ -19,6 +20,7 @@ let vue_newbuild = Vue.createApp({
                 "city_sales"      : {},
                 "price_sales"     : {},
                 "town_sales"      : {},
+                "town_profiles"   : {},
                 "near_city_sales" : {},
                 "near_city_profiles" : {} },
             show_jpn_map: false
@@ -44,6 +46,7 @@ let vue_newbuild = Vue.createApp({
             this.load_near_city_data(this.pref_name,this.city_name);
             this.load_price_data(this.pref_name,this.city_name);
             this.load_city_profile(this.pref_name,this.city_name);
+            this.load_town_profiles(this.pref_name,this.city_name);
             this.load_near_city_profiles(this.pref_name,this.city_name);
         },
         
@@ -92,6 +95,9 @@ let vue_newbuild = Vue.createApp({
         load_near_city_profiles(pref,city){
             newbuild.load_near_city_profiles(pref,city,this);
         },
+        load_town_profiles(pref,city){
+            newbuild.load_town_profiles(pref,city,this);
+        },
         load_town_data(pref,city){
             newbuild.load_town_data(pref,city,this);
         },
@@ -102,10 +108,10 @@ let vue_newbuild = Vue.createApp({
             if(! this.sort_tbl_dirs[tbl_name][sort_key] ){
                 this.sort_tbl_dirs[tbl_name][sort_key] = -1
             }
-	    
+            
             this.sort_tbl_dirs[tbl_name][sort_key] *= -1;
             let sort_dir = this.sort_tbl_dirs[tbl_name][sort_key];
-	    
+            
             this[tbl_name] = newbuild.sort_tbl(this[tbl_name],
                                                sort_key,
                                                sort_dir);
@@ -126,12 +132,12 @@ class NewBuild extends AppBase {
     }
     
     server_api_base(){
-	return app_conf["api_base_url"] + "newbuild/"
+        return app_conf["api_base_url"] + "newbuild/"
     }
     
     async load_shops_data(pref,vue_obj){
         let req_url = this.server_api_base() + "SalesCountByShop/"+
-	    encodeURIComponent(pref);
+            encodeURIComponent(pref);
         
         let res = await fetch(req_url);
         let shop_sales = await res.json();
@@ -141,13 +147,13 @@ class NewBuild extends AppBase {
     
     async load_cities_data(pref,city, vue_obj){
         let req_url = this.server_api_base() +"SalesCountByCity/"+
-	    encodeURIComponent(pref);
+            encodeURIComponent(pref);
         
         let res = await fetch(req_url);
         let city_sales = await res.json();
         city_sales = this.conv_counts_for_disp( city_sales );
         vue_obj.city_sales = city_sales;
-	
+        
         if( city ){
             vue_obj.city_name = city;
         } else {
@@ -160,6 +166,7 @@ class NewBuild extends AppBase {
         vue_obj.load_price_data(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_city_profile(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_near_city_profiles(vue_obj.pref_name,vue_obj.city_name);
+        vue_obj.load_town_profiles(vue_obj.pref_name,vue_obj.city_name);
     }
     
     async load_town_data(pref,city,vue_obj){
@@ -213,18 +220,18 @@ class NewBuild extends AppBase {
             {"key_name" :"person_income", "max":0,
              "atri_keys":['年収_百万円']},
             {"key_name" :"setai_income", "max":0,
-             "atri_keys":['世帯年収_100',	'世帯年収_100～200',
-                          '世帯年収_200～300',	'世帯年収_300～400',
-                          '世帯年収_400～500',	'世帯年収_500～700',
-                          '世帯年収_700～1000',	'世帯年収_1000～1500',
+             "atri_keys":['世帯年収_100',       '世帯年収_100～200',
+                          '世帯年収_200～300',  '世帯年収_300～400',
+                          '世帯年収_400～500',  '世帯年収_500～700',
+                          '世帯年収_700～1000', '世帯年収_1000～1500',
                           '世帯年収_1500']},
             {"key_name" :"old", "max":0,
              "atri_keys":[
-		 '新築_世帯主_年齢_24',		'新築_世帯主_年齢_25_34',
-                 '新築_世帯主_年齢_35_44',	'新築_世帯主_年齢_45_54',
-                 '新築_世帯主_年齢_55_64',	'新築_世帯主_年齢_65']},
+                 '新築_世帯主_年齢_24',         '新築_世帯主_年齢_25_34',
+                 '新築_世帯主_年齢_35_44',      '新築_世帯主_年齢_45_54',
+                 '新築_世帯主_年齢_55_64',      '新築_世帯主_年齢_65']},
         ];
-	return max_sets;
+        return max_sets;
     }
 
     async load_near_city_profiles(pref,city,vue_obj){
@@ -233,13 +240,13 @@ class NewBuild extends AppBase {
         
         let res = await fetch(req_url);
         let city_profiles = await res.json();
-	
+        
         let max_sets = this.near_city_profiles_max_sets();
-	
+        
         let city_profiles_tmp = [];
         for( let city_profile of city_profiles ) {
             city_profile = JSON.parse( city_profile );
-	    
+            
             city_profile["戸建率"] =
                 city_profile["世帯_戸建"] /
                 (city_profile["世帯_戸建"] + city_profile["世帯_集合"]);
@@ -249,7 +256,7 @@ class NewBuild extends AppBase {
                 city_profile["世帯_持家"] /
                 (city_profile["世帯_持家"] + city_profile["世帯_賃貸"]);
             city_profile["持家率"] = Math.round(city_profile["持家率"] *100);
-	    
+            
             //最大値算出
             for( let max_set of max_sets ) {
                 for( let atri_key of max_set.atri_keys ){
@@ -287,9 +294,79 @@ class NewBuild extends AppBase {
                         Number(city_profile[atri_key]).toLocaleString();
                 }
             }
-	    
+            
             vue_obj.near_city_profiles.push( city_profile );
         }
+    }
+    
+    town_profiles_max_sets(){
+        let max_sets = [
+            {"key_name" :"price", "max":0,
+             "atri_keys":['price']},
+            {"key_name" :"from_station", "max":0,
+             "atri_keys":['from_station']},
+            {"key_name" :"pop", "max":0,
+             "atri_keys":[
+                 'pop_2020_20_24','pop_2020_25_59','pop_2020_60']},
+            {"key_name" :"pop_diff", "max":0,
+             "atri_keys":[
+                 'pop_diff_20_24','pop_diff_25_59','pop_diff_60']}
+        ];
+        return max_sets;
+    }
+    
+    async load_town_profiles(pref,city,vue_obj){
+        let req_url = this.server_api_base() +"TownProfiles/"+
+            encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+        
+        let res = await fetch(req_url);
+        let town_profiles = await res.json();
+
+        let max_sets = this.town_profiles_max_sets();
+
+        let town_profiles_tmp = [];
+        for( let town_profile of town_profiles ) {
+            town_profile = JSON.parse( town_profile );
+
+            town_profile["price"] = Math.round(town_profile["price"] / 10000);
+            
+            //最大値算出
+            for( let max_set of max_sets ) {
+                for( let atri_key of max_set.atri_keys ){
+                    if( town_profile[atri_key] <= max_set.max ){
+                        continue
+                    }
+                    max_set.max = town_profile[atri_key];
+                }
+            }
+            town_profiles_tmp.push(town_profile);
+        }
+        
+        vue_obj.town_profiles = [];
+        for( let town_profile of town_profiles_tmp ) {
+            
+            for( let max_set of max_sets ) {
+                if ( max_set.max == 0 ){
+                    continue
+                }
+                
+                for( let atri_key of max_set.atri_keys ){
+                    let graph_bar_key = atri_key + "_px";
+                    
+                    town_profile[graph_bar_key] =
+                        this.calc_graph_bar_px(town_profile[atri_key],
+                                               0,
+                                               max_set.max,
+                                               50 );
+                    //数値の3桁区切り化
+                    town_profile[atri_key] =
+                        Number( town_profile[atri_key] ).toLocaleString();
+                }
+            }
+            vue_obj.town_profiles.push( town_profile );
+        }
+
+        vue_obj.town_profiles = this.sort_tbl(vue_obj.town_profiles, "price", 1);
     }
     
     async load_city_profile(pref,city,vue_obj){
@@ -298,7 +375,7 @@ class NewBuild extends AppBase {
         
         let res = await fetch(req_url);
         let city_profile = await res.json();
-	
+        
         city_profile["戸建率"] =
             city_profile["世帯_戸建"] /
             (city_profile["世帯_戸建"] + city_profile["世帯_集合"]);
@@ -308,14 +385,14 @@ class NewBuild extends AppBase {
             city_profile["世帯_持家"] /
             (city_profile["世帯_持家"] + city_profile["世帯_賃貸"]);
         city_profile["持家率"] = Math.round(city_profile["持家率"] *100);
-	
+        
         let tmp_sum =
             city_profile["入手_分譲"] + city_profile["入手_新築"] + city_profile["入手_建替"];
         
         city_profile["入手_分譲"] = Math.round(city_profile["入手_分譲"] / tmp_sum *100);
         city_profile["入手_新築"] = Math.round(city_profile["入手_新築"] / tmp_sum *100);
         city_profile["入手_建替"] = Math.round(city_profile["入手_建替"] / tmp_sum *100);
-	
+        
         let atri_keys =
             ["人口_20_24歳_万人","人口_25_59歳_万人",,"人口_60歳_万人",
              "総世帯","家族世帯","単身世帯"]
@@ -331,7 +408,7 @@ class NewBuild extends AppBase {
                     "+"+ city_profile[atri_key+"_差"];
             }
         }
-	
+        
         atri_keys = ["総世帯","家族世帯","単身世帯","生産緑地_ha",
                      "用途地域_住居系_ha","用途地域_商業系_ha"]
         for( let atri_key of atri_keys ) {
@@ -343,7 +420,7 @@ class NewBuild extends AppBase {
         }
         city_profile["mapexpert_id"] =
             city_profile["citycode"].substr( 0, city_profile["citycode"].length-1 );
-	
+        
         
         //console.log(city_profile);
         vue_obj.city_profile = city_profile;
@@ -371,17 +448,17 @@ class NewBuild extends AppBase {
             if(a[sort_key]==undefined && b[sort_key]!=undefined ){
                 return -1 * dir;
             }
-	    
+            
             let val_a = a[sort_key];
             let val_b = b[sort_key];
-	    
-	    if (typeof val_a != 'number'){
+            
+            if (typeof val_a != 'number'){
                 val_a = Number( val_a.replace(/,/g,'') );
-	    }
-	    if (typeof val_b != 'number'){
+            }
+            if (typeof val_b != 'number'){
                 val_b = Number( val_b.replace(/,/g,'') );
-	    }
-	    
+            }
+            
             if( isNaN(val_a) ){
                 val_a = a[sort_key];
             }
@@ -408,7 +485,7 @@ class NewBuild extends AppBase {
         for( let atri_key of atri_keys ) {
             atri_sets[atri_key] = new Set();
         }
-	
+        
         for( let sales_count of sales_counts ) {
             // 円→百万円
             for( let atri_key of ["sold_price","on_sale_price"] ) {
@@ -424,7 +501,7 @@ class NewBuild extends AppBase {
         // sort
         sales_counts = sales_counts.sort(function(a, b) {
             return b["sold_count"] - a["sold_count"];
-	    //                return b["on_sale_count"] - a["on_sale_count"];
+            //                return b["on_sale_count"] - a["on_sale_count"];
         });
         
         let atri_min_max = {}
@@ -433,10 +510,10 @@ class NewBuild extends AppBase {
             atri_min_max[atri_key] =
                 [Math.min(...atri_list), Math.max(...atri_list)]
         }
-	
+        
         for( let sales_count of sales_counts ) {
             for( let atri_key of atri_keys ) {
-		
+                
                 let graph_bar_key = atri_key + "_px";
                 sales_count[graph_bar_key] =
                     this.calc_graph_bar_px(sales_count[atri_key],

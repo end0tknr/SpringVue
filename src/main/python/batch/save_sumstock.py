@@ -8,10 +8,10 @@ from service.sumstock import SumStockService
 
 def main():
     sumstock_service = SumStockService()
-    # sumstock_service.calc_save_sales_count_by_shop()
-    # sumstock_service.calc_save_sales_count_by_shop_city()
-    # sumstock_service.calc_save_sales_count_by_city()
-    # sumstock_service.calc_save_sales_count_by_town()
+    sumstock_service.calc_save_sales_count_by_shop()
+    sumstock_service.calc_save_sales_count_by_shop_city()
+    sumstock_service.calc_save_sales_count_by_city()
+    sumstock_service.calc_save_sales_count_by_town()
     sumstock_service.calc_save_sales_count_by_price()
 
 

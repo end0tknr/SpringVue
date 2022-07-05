@@ -90,12 +90,17 @@ WHERE  pref=%s AND city=%s AND town=%s
                             (i, len(towns),
                              town["pref"],town["city"],town["town"]) )
             
-            profile = jinko_suikei_service.find_by_lnglat(town["lng"],
-                                                          town["lat"])
+            profile = town.copy()
+            del profile["summary"]
+            
+            profile_tmp = jinko_suikei_service.find_by_lnglat(town["lng"],
+                                                              town["lat"])
+            profile.update(profile_tmp)
             profile_tmp = chika_koji_service.find_by_lnglat(town["lng"],
                                                             town["lat"],
                                                             "住居系")
             profile.update(profile_tmp)
+            
             profiles.append(
                 {"pref":town["pref"],
                  "city":town["city"],

@@ -12,6 +12,7 @@ let vue_sumstock = Vue.createApp({
             town_sales      : [],
             near_city_sales : [],
             city_profile    : {},
+            town_profiles   : [],
             near_city_profiles : [],
             build_year_profiles: [],
             sort_tbl_dirs : {
@@ -20,6 +21,7 @@ let vue_sumstock = Vue.createApp({
                 "city_sales"      : {},
                 "price_sales"     : {},
                 "town_sales"      : {},
+                "town_profiles"   : {},
                 "near_city_sales" : {},
                 "near_city_profiles" : {},
                 "build_year_profiles": {}
@@ -48,6 +50,7 @@ let vue_sumstock = Vue.createApp({
             this.load_price_data(this.pref_name,this.city_name);
             this.load_city_profile(this.pref_name,this.city_name);
             this.load_near_city_profiles(this.pref_name,this.city_name);
+            this.load_town_profiles(this.pref_name,this.city_name);
             this.load_build_year_profiles(this.pref_name,this.city_name);
         },
         
@@ -101,6 +104,9 @@ let vue_sumstock = Vue.createApp({
         },
         load_town_data(pref,city){
             sumstock.load_town_data(pref,city,this);
+        },
+        load_town_profiles(pref,city){
+            sumstock.load_town_profiles(pref,city,this);
         },
         load_near_city_data(pref,city){
             sumstock.load_near_city_data(pref,city,this);
@@ -156,6 +162,7 @@ class SumStock extends NewBuild {
         vue_obj.load_near_city_data(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_price_data(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_city_profile(vue_obj.pref_name,vue_obj.city_name);
+        vue_obj.load_town_profiles(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_near_city_profiles(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_build_year_profiles(vue_obj.pref_name,vue_obj.city_name);
     }

@@ -51,7 +51,7 @@ class MlitGsiApiService(appbase.AppBase):
 
         ret_data = {}
         ret_data["lng"]  = content[0]["geometry"]["coordinates"][0] #経度
-        ret_data["lat"]  = content[0]["geometry"]["coordinates"][0] #緯度
+        ret_data["lat"]  = content[0]["geometry"]["coordinates"][1] #緯度
         ret_data["title"]= content[0]["properties"]["title"]
         return ret_data
     
