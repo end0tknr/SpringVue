@@ -26,14 +26,27 @@ let vue_sumstock = Vue.createApp({
                 "near_city_profiles" : {},
                 "build_year_profiles": {}
             },
-            show_jpn_map: false
+            show_jpn_map: false,
+            disp_date    : "",
+            disp_date_min: "",
+            disp_date_max: ""
         }
     },
     mounted(){
-        this.load_shops_data(this.pref_name);
-        this.load_cities_data(this.pref_name);
+        this.load_disp_date_range();
     },
     methods : {
+        load_disp_date_range(){
+            sumstock.load_disp_date_range(this);
+            this.load_shops_data(  this.pref_name );
+            this.load_cities_data( this.pref_name );
+        },
+
+        init_page_by_disp_date(){
+            this.load_shops_data(  this.pref_name );
+            this.load_cities_data( this.pref_name );
+        },
+	
         load_city_datas(pref_name, city_name){
             
             if ( this.pref_name != pref_name){
@@ -144,7 +157,7 @@ class SumStock extends NewBuild {
     
     async load_cities_data(pref,city, vue_obj){
         let req_url = this.server_api_base() +"SalesCountByCity/"+
-	    encodeURIComponent(pref);
+	    encodeURIComponent(pref) + "?date=" + vue_obj.disp_date;
         
         let res = await fetch(req_url);
         let city_sales = await res.json();
@@ -183,7 +196,8 @@ class SumStock extends NewBuild {
     
     async load_build_year_profiles( pref,city,vue_obj ){
         let req_url = this.server_api_base() +"CityProfileByYear/"+
-            encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+            encodeURIComponent(pref) +"_"+ encodeURIComponent(city)+
+	    "?date=" + vue_obj.disp_date;
 
         let res = await fetch(req_url);
         let city_profiles = await res.json();

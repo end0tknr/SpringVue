@@ -23,14 +23,27 @@ let vue_newbuild = Vue.createApp({
                 "town_profiles"   : {},
                 "near_city_sales" : {},
                 "near_city_profiles" : {} },
-            show_jpn_map: false
+            show_jpn_map: false,
+            disp_date    : "",
+            disp_date_min: "",
+            disp_date_max: ""
         }
     },
     mounted(){
-        this.load_shops_data(this.pref_name);
-        this.load_cities_data(this.pref_name);
+        this.load_disp_date_range();
     },
     methods : {
+        load_disp_date_range(){
+            newbuild.load_disp_date_range(this);
+            this.load_shops_data(  this.pref_name );
+            this.load_cities_data( this.pref_name );
+        },
+
+        init_page_by_disp_date(){
+            this.load_shops_data(  this.pref_name );
+            this.load_cities_data( this.pref_name );
+        },
+        
         load_city_datas(pref_name, city_name){
             
             if ( this.pref_name != pref_name){
@@ -135,10 +148,24 @@ class NewBuild extends AppBase {
         return app_conf["api_base_url"] + "newbuild/"
     }
     
+    async load_disp_date_range(vue_obj){
+        let req_url = this.server_api_base() + "DispDateRange";
+
+        let res = await fetch(req_url);
+        let disp_dates = await res.json();
+        vue_obj.disp_date_min = disp_dates[0];
+        vue_obj.disp_date_max = disp_dates[1];
+        vue_obj.disp_date     = disp_dates[1];
+
+        vue_obj.load_shops_data(vue_obj.pref_name);
+        vue_obj.load_cities_data(vue_obj.pref_name);
+    }
+    
     async load_shops_data(pref,vue_obj){
         let req_url = this.server_api_base() + "SalesCountByShop/"+
-            encodeURIComponent(pref);
-        
+            encodeURIComponent(pref) + "?date=" + vue_obj.disp_date;
+
+	
         let res = await fetch(req_url);
         let shop_sales = await res.json();
         shop_sales = this.conv_counts_for_disp( shop_sales );
@@ -147,7 +174,7 @@ class NewBuild extends AppBase {
     
     async load_cities_data(pref,city, vue_obj){
         let req_url = this.server_api_base() +"SalesCountByCity/"+
-            encodeURIComponent(pref);
+            encodeURIComponent(pref) + "?date=" + vue_obj.disp_date;
         
         let res = await fetch(req_url);
         let city_sales = await res.json();
@@ -171,7 +198,8 @@ class NewBuild extends AppBase {
     
     async load_town_data(pref,city,vue_obj){
         let req_url = this.server_api_base() +"SalesCountByTown/"+
-            encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+            encodeURIComponent(pref) +"_"+ encodeURIComponent(city)+
+	    "?date=" + vue_obj.disp_date;
         
         let res = await fetch(req_url);
         let town_sales = await res.json();
@@ -181,7 +209,8 @@ class NewBuild extends AppBase {
     
     async load_shop_city_data(pref,city,vue_obj){
         let req_url = this.server_api_base() +"SalesCountByShopCity/"+
-            encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+            encodeURIComponent(pref) +"_"+ encodeURIComponent(city)+
+	    "?date=" + vue_obj.disp_date;
         
         let res = await fetch(req_url);
         let town_sales = await res.json();
@@ -191,7 +220,8 @@ class NewBuild extends AppBase {
     
     async load_price_data(pref,city,vue_obj){
         let req_url = this.server_api_base() +"SalesCountByPrice/"+
-            encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+            encodeURIComponent(pref) +"_"+ encodeURIComponent(city) +
+	    "?date=" + vue_obj.disp_date;
         
         let res = await fetch(req_url);
         let price_sales = await res.json();
@@ -236,7 +266,8 @@ class NewBuild extends AppBase {
 
     async load_near_city_profiles(pref,city,vue_obj){
         let req_url = this.server_api_base() +"NearCityProfiles/"+
-            encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+            encodeURIComponent(pref) +"_"+ encodeURIComponent(city)+
+	    "?date=" + vue_obj.disp_date;
         
         let res = await fetch(req_url);
         let city_profiles = await res.json();
@@ -428,7 +459,8 @@ class NewBuild extends AppBase {
     
     async load_near_city_data(pref,city,vue_obj){
         let req_url = this.server_api_base() +"SalesCountByNearCity/"+
-            encodeURIComponent(pref) +"_"+ encodeURIComponent(city);
+            encodeURIComponent(pref) +"_"+ encodeURIComponent(city)+
+	    "?date=" + vue_obj.disp_date;
         
         let res = await fetch(req_url);
         let city_sales = await res.json();
@@ -501,7 +533,6 @@ class NewBuild extends AppBase {
         // sort
         sales_counts = sales_counts.sort(function(a, b) {
             return b["sold_count"] - a["sold_count"];
-            //                return b["on_sale_count"] - a["on_sale_count"];
         });
         
         let atri_min_max = {}

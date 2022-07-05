@@ -38,7 +38,13 @@
       <h1 id="pref_name">{{pref_name}}</h1>
       <div class="container_title_sub">
         <div>
-          中古戸建 週次速報<!-- <input type="date" name="disp_date_from"> -->
+          中古戸建 週次速報
+          <input type="date"
+                 v-model="disp_date"
+                 :min="disp_date_min"
+                 :max="disp_date_max"
+                 :step="7"
+                 v-on:change="init_page_by_disp_date">
         </div>
         <div class="container_title_sub_right">
           <a class="open_jpn_map_modal" v-on:click="show_jpn_map_modal">
