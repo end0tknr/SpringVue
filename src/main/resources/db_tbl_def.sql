@@ -561,6 +561,7 @@ house_for_sale  int,
 found_date      date,
 show_date       date,
 check_date      date,
+update_time     timestamp,
 primary key ( url )
 );
 

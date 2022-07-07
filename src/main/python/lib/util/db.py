@@ -93,9 +93,7 @@ ORDER BY isc.ORDINAL_POSITION
 
     # bulk insert
     def save_tbl_rows(self, tbl_name, atri_keys, rows):
-        logger.info("start "+tbl_name)
-        logger.info(rows[0])
-
+        
         bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
         row_groups = self.divide_rows(rows, bulk_insert_size, atri_keys )
         
@@ -142,8 +140,6 @@ ORDER BY isc.ORDINAL_POSITION
     
     # bulk update or insert
     def bulk_upsert(self, tbl_name, pkeys, atri_keys, rows):
-        logger.info("start "+tbl_name)
-        logger.info(rows[0])
 
         bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
         row_groups = self.divide_rows(rows, bulk_insert_size, atri_keys )
@@ -218,8 +214,6 @@ WHERE ( {9} ) NOT IN ( SELECT {10} FROM UPSERT )
     
     # bulk update or insert
     def bulk_update(self, tbl_name, pkeys, atri_keys, rows):
-        logger.info("start "+tbl_name)
-        logger.info(rows[0])
 
         bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
         row_groups = self.divide_rows(rows, bulk_insert_size, atri_keys )

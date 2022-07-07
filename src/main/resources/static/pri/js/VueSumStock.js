@@ -38,8 +38,8 @@ let vue_sumstock = Vue.createApp({
     methods : {
         load_disp_date_range(){
             sumstock.load_disp_date_range(this);
-            this.load_shops_data(  this.pref_name );
-            this.load_cities_data( this.pref_name );
+            //this.load_shops_data(  this.pref_name );
+            //this.load_cities_data( this.pref_name );
         },
 
         init_page_by_disp_date(){

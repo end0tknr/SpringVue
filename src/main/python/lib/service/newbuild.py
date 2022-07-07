@@ -123,7 +123,7 @@ class NewBuildService(appbase.AppBase):
                                                           calc_date_from,
                                                           calc_date_to)
         pre_calc_date_from, pre_calc_date_to = \
-            self.get_weekly_period( today - datetime.timedelta(days= 7) )
+            self.get_weekly_period( today - datetime.timedelta(days=6) )
 
         ret_datas_tmp = self.calc_sales_count_by_shop_sub(ret_datas_tmp,
                                                           "sold",
@@ -178,7 +178,7 @@ class NewBuildService(appbase.AppBase):
                                                                calc_date_to)
         
         pre_calc_date_from, pre_calc_date_to = \
-            self.get_weekly_period( today - datetime.timedelta(days= 7) )
+            self.get_weekly_period( today - datetime.timedelta(days=6) )
 
         ret_datas_tmp = self.calc_sales_count_by_shop_city_sub(ret_datas_tmp,
                                                                "sold",
@@ -238,7 +238,7 @@ class NewBuildService(appbase.AppBase):
                                                           calc_date_to)
         
         pre_calc_date_from, pre_calc_date_to = \
-            self.get_weekly_period( today - datetime.timedelta(days= 7) )
+            self.get_weekly_period( today - datetime.timedelta(days=6) )
 
         ret_datas_tmp = self.calc_sales_count_by_city_sub(ret_datas_tmp,
                                                           "sold",
@@ -369,7 +369,7 @@ ORDER BY pref,city,town
                                                           calc_date_to)
         
         pre_calc_date_from, pre_calc_date_to = \
-            self.get_weekly_period( today - datetime.timedelta(days= 7) )
+            self.get_weekly_period( today - datetime.timedelta(days=6) )
 
         ret_datas_tmp = self.calc_sales_count_by_town_sub(ret_datas_tmp,
                                                           "sold",
@@ -468,7 +468,7 @@ ORDER BY pref,city,town
         logger.info("start")
         
         today = datetime.datetime.today().date()
-        #today = datetime.datetime.today().date() - datetime.timedelta(2)
+        # today = datetime.datetime.today().date() - datetime.timedelta(10)
         
         calc_date_from, calc_date_to = self.get_weekly_period(today)
 
@@ -478,7 +478,7 @@ ORDER BY pref,city,town
                                                     calc_date_from,
                                                     calc_date_to)
         pre_calc_date_from, pre_calc_date_to = \
-            self.get_weekly_period( today - datetime.timedelta(days= 7) )
+            self.get_weekly_period( today - datetime.timedelta(days=6) )
 
         ret_datas_tmp = \
             self.calc_sales_count_by_city_price_sub(ret_datas_tmp,
@@ -495,7 +495,7 @@ ORDER BY pref,city,town
             shop_info["price"] = float( shop_info["price"] )
 
             # postgresはdate型の制約が厳しいのですが
-            # pythonが内部的に、datetime.date(2022, 7, 3) のようにcastしれくれます。
+            # pythonが内部的に、datetime.date(2022,7,3) のようにcastしれくれます
             shop_info["calc_date"]  = calc_date_to
 
             for calc_key in ["on_sale","sold"]:
