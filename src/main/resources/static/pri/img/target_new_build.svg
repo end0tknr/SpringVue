@@ -8,7 +8,7 @@
              fill           : none; }
      rect.target { fill     : #e71b24; }
      text.target { font-size: 28px;
-		   fill     : #ffffff;     }
+                   fill     : #ffffff;     }
     </style>
   </defs>
   

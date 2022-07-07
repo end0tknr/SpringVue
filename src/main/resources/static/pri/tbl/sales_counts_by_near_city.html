@@ -1,0 +1,49 @@
+<h2>近隣 市区町村</h2>
+<div class="scroll_tbl2">
+  
+  <table>
+    <tr>
+      <th></th>
+      <th colspan="3">販売済</th>
+      <th colspan="3">販売中</th>
+      <th></th>
+    </tr>
+    <tr class="sort_keys">
+      <th v-on:click="sort_tbl('near_city_sales','city')">市区町村</th>
+      <th v-on:click="sort_tbl('near_city_sales','sold_count')">数</th>
+      <th v-on:click="sort_tbl('near_city_sales','sold_price')">百万円</th>
+      <th v-on:click="sort_tbl('near_city_sales','sold_days')">販売日数</th>
+      <th v-on:click="sort_tbl('near_city_sales','on_sale_count')">数</th>
+      <th v-on:click="sort_tbl('near_city_sales','on_sale_price')">百万円</th>
+      <th v-on:click="sort_tbl('near_city_sales','on_sale_days')">販売日数</th>
+    </tr>
+    
+    <tr v-for="city_data in near_city_sales">
+      <th>
+        <div class="col_key"
+             v-on:click="load_city_datas(city_data.pref,city_data.city )">
+          {{ city_data.city }}
+        </div>
+      </th>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.sold_count_px+'px 3px'}">
+        {{ city_data.sold_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.sold_price_px+'px 3px'}">
+        {{ city_data.sold_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.sold_days+'px 3px'}">
+        {{ city_data.sold_days }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.on_sale_count_px+'px 3px'}">
+        {{ city_data.on_sale_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.on_sale_price_px+'px 3px'}">
+        {{ city_data.on_sale_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.on_sale_days+'px 3px'}">
+        {{ city_data.on_sale_days }}</td>
+    </tr>
+  </table>
+  
+</div><!--.scroll_tbl2-->
