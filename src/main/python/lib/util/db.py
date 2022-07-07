@@ -139,7 +139,73 @@ ORDER BY isc.ORDINAL_POSITION
     
     
     # bulk update or insert
-    def bulk_upsert(self, tbl_name, pkeys, atri_keys, rows):
+    def bulk_upsert(self, tbl_name, pkeys, all_keys, update_keys, rows):
+
+        bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
+        row_groups = self.divide_rows(rows, bulk_insert_size, insert_keys )
+
+        all_keys_str     = ",".join( all_keys )
+        
+        set_key_vals = [] # UPDATE SQLのSET用
+        for atri_key in update_keys:
+            set_key_vals.append("%s=tmp.%s" % (atri_key,atri_key) )
+        set_key_vals_str = ",".join( set_key_vals)
+        
+        where_pkeys  = []
+        return_pkeys = []
+        tmp_pkeys = []
+        for pkey in pkeys:
+            where_pkeys.append( "tbl_update.%s=tmp.%s"% (pkey,pkey) )
+            return_pkeys.append("tbl_update.%s" % (pkey,) )
+            tmp_pkeys.append(   "tmp.%s"  % (pkey,) )
+            
+        where_pkeys_str  = " AND ".join( where_pkeys )
+        return_pkeys_str = ",".join( return_pkeys )
+        tmp_pkeys_str    = ",".join( tmp_pkeys )
+        pkeys_str        = ",".join( pkeys     )
+
+        
+# refer to https://qiita.com/yuuuuukou/items/d7723f45e83deb164d68
+        sql = """
+WITH
+tmp( {0} )
+AS ( values {1}),
+upsert AS ( UPDATE {2} tbl_update
+            SET {3}
+            FROM tmp
+            WHERE {4}
+            RETURNING {5} )
+INSERT INTO {6} ( {7} )
+SELECT {8}
+FROM tmp
+WHERE ( {9} ) NOT IN ( SELECT {10} FROM UPSERT )
+"""
+        sql = sql.format(
+            all_keys_str,      "%s",            tbl_name,
+            set_key_vals_str,   where_pkeys_str,return_pkeys_str,
+            tbl_name,           all_keys_str,   all_keys_str,
+            tmp_pkeys_str,      pkeys_str )
+        # print( sql )
+        
+        
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            for row_group in row_groups:
+                try:
+                    # bulk upsert
+                    extras.execute_values(db_cur,sql, row_group )
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    logger.error(row_group)
+                    return False
+                    
+        db_conn.commit()
+        
+        return True
+    
+    # bulk update or insert
+    def bulk_upsert_bak(self, tbl_name, pkeys, atri_keys, rows):
 
         bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
         row_groups = self.divide_rows(rows, bulk_insert_size, atri_keys )
@@ -152,9 +218,9 @@ ORDER BY isc.ORDINAL_POSITION
             atri_keys_1.append("tmp.%s"    % (atri_key,) )
             atri_keys_2.append("%s"              % (atri_key,) )
 
-        atri_key_vals_str = ",".join( atri_key_vals )
-        atri_keys_1_str   = ",".join( atri_keys_1 )
-        atri_keys_2_str   = ",".join( atri_keys_2 )
+        set_key_vals_str = ",".join( atri_key_vals )
+        atri_keys_1_str  = ",".join( atri_keys_1 )
+        atri_keys_2_str  = ",".join( atri_keys_2 )
         atri_keys_str = ",".join(atri_keys)
         
         where_pkeys = []

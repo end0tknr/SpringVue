@@ -1,24 +1,24 @@
-<h2>地区別プロファイル</h2>
+<h2>地区別</h2>
           
 <div class="scroll_tbl2">
   <table>
     <tr>
       <th></th>
       <th>地価</th>
-      <th colspan="6">年齢別人口<span class="sub">人/500㎡</span></th>
       <th colspan="2">最寄駅</th>
+      <th colspan="6">年齢別人口<span class="sub">人/500mﾒｯｼｭ</span></th>
     </tr>
     <tr class="sort_keys">
       <th v-on:click="sort_tbl('town_profiles','town')">地区</th>
       <th v-on:click="sort_tbl('town_profiles','price')">万/㎡</th>
-      <th v-on:click="sort_tbl('town_profiles','pop_2020_20_24')">20～54</th>
+      <th v-on:click="sort_tbl('town_profiles','station')">駅</th>
+      <th v-on:click="sort_tbl('town_profiles','from_station')">km</th>
+      <th v-on:click="sort_tbl('town_profiles','pop_2020_20_24')">20～24</th>
       <th v-on:click="sort_tbl('town_profiles','pop_diff_20_24')"><span class="sub">2030</span></th>
       <th v-on:click="sort_tbl('town_profiles','pop_2020_25_59')">25～59</th>
       <th v-on:click="sort_tbl('town_profiles','pop_diff_25_59')"><span class="sub">2030</span></th>
       <th v-on:click="sort_tbl('town_profiles','pop_2020_60')">60～</th>
       <th v-on:click="sort_tbl('town_profiles','pop_diff_60')"><span class="sub">2030</span></th>
-      <th v-on:click="sort_tbl('town_profiles','station')">駅</th>
-      <th v-on:click="sort_tbl('town_profiles','from_station')">m</th>
     </tr>
     
     <tr v-for="town_profile in town_profiles">
@@ -26,6 +26,10 @@
       <td class="graph_bar"
           v-bind:style="{backgroundSize:town_profile.price_px+'px 3px'}">
         {{ town_profile.price }}</td>
+      <td class="station"><div>{{ town_profile.station }}<div></td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_profile.from_station_px+'px 3px'}">
+        {{ town_profile.from_station }}</td>
       <td class="graph_bar"
           v-bind:style="{backgroundSize:town_profile.pop_2020_20_24_px+'px 3px'}">
         {{ town_profile.pop_2020_20_24 }}</td>
@@ -44,10 +48,6 @@
       <td class="graph_bar"
           v-bind:style="{backgroundSize:town_profile.pop_diff_60_px+'px 3px'}">
         <span v-if="town_profile.pop_diff_60>0">+</span>{{ town_profile.pop_diff_60 }}</td>
-      <td style="white-space:nowrap;">{{ town_profile.station }}</td>
-      <td class="graph_bar"
-          v-bind:style="{backgroundSize:town_profile.from_station_px+'px 3px'}">
-        {{ town_profile.from_station }}</td>
     </tr>
   </table>
 </div><!--.scroll_tbl2-->

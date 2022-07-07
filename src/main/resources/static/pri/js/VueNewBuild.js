@@ -360,6 +360,8 @@ class NewBuild extends AppBase {
             town_profile = JSON.parse( town_profile );
 
             town_profile["price"] = Math.round(town_profile["price"] / 10000);
+            town_profile["from_station"] =
+		Math.round( town_profile["from_station"] / 100 ) / 10;
             
             //最大値算出
             for( let max_set of max_sets ) {

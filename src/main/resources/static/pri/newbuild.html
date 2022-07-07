@@ -25,6 +25,12 @@
     .city_profile tr:nth-child(1) th { width: 100px; }
     .city_profile td.caption {text-align:right;}
     .city_profile td      {white-space:nowrap;}
+    
+    .scroll_tbl2 .station div  { width: 50px;
+				 overflow: hidden;
+				 text-overflow: ellipsis;
+				 white-space: nowrap; }
+    
   </style>
 </head>
 <body>
@@ -53,6 +59,10 @@
           <a class="open_jpn_map_modal" v-on:click="show_jpn_map_modal">
             都道府県選択</a>
         </div>
+      </div>
+      <div>
+	ｲﾝﾀｰﾈｯﾄにある不動産情報の集計。
+	販売済=公開終了で、販売済=売約済とは限りません
       </div>
     </div><!--.container_title-->
     
@@ -104,14 +114,6 @@
           <!--# include file="./tbl/sales_counts_by_town.html" -->
         </div><!--.column_right-->
         
-        <div class="column_left">
-          <!--# include file="./tbl/city_profile.html" -->
-        </div><!--.column_left-->
-
-        <div class="column_right">
-          <!--# include file="./tbl/town_profiles.html" -->
-        </div><!--.column_right-->
-
       </div><!--.two_cols_layout-->
 
     </div><!--.page_middle_container-->
@@ -119,14 +121,32 @@
 
   <div class="container_title">
     <div class="container_title_sub">
-      <div>プロファイル比較</div>
+      <div>人口や世帯数等の長期トレンド</div>
       <div class="container_title_sub_right"></div>
     </div>
   </div><!--.container_title-->
 
   <div class="page_bottom">
+    <div class="two_cols_layout">
+      <div class="column_left">
+        <!--# include file="./tbl/city_profile.html" -->
+      </div><!--.column_left-->
+
+      <div class="column_right">
+        <!--# include file="./tbl/town_profiles.html" -->
+      </div><!--.column_right-->
+    </div><!--.two_cols_layout-->
     
     <!--# include file="./tbl/city_profiles.html" -->
+    
+    <div class="two_cols_layout">
+      <div class="column_left">
+      </div><!--.column_left-->
+
+      <div class="column_right" style="text-align:center;">
+	<img src="img/target_new_build.svg" />
+      </div><!--.column_right-->
+    </div><!--.two_cols_layout-->
     
     <div>&nbsp;</div>
   </div>

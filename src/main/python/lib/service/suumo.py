@@ -172,7 +172,6 @@ SELECT * FROM suumo_bukken where pref =''
             bukken_infos = self.parse_bukken_infos(result_list_url)
             bukken_infos = self.conv_bukken_infos_for_upsert(build_type,
                                                              bukken_infos )
-                
             util_db = Db()
             util_db.bulk_upsert(
                 "suumo_bukken",
@@ -182,6 +181,11 @@ SELECT * FROM suumo_bukken where pref =''
                  "build_area_org","land_area_m2","land_area_org",
                  "build_year","shop_org",
                  "found_date","check_date","update_time"],
+                ["build_type","bukken_name","price","price_org",
+                 "pref","city","address","plan","build_area_m2",
+                 "build_area_org","land_area_m2","land_area_org",
+                 "build_year","shop_org",
+                 "check_date","update_time"],
                 bukken_infos )
 
 
