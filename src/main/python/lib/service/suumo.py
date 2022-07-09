@@ -55,7 +55,6 @@ base_urls = [
     #[base_host+"/ms/shinchiku/",  "新築マンション"]
 ]
 
-http_conf = {"retry_limit":5, "retry_sleep":5 }
 re_compile_licenses = [
     re.compile("会社概要.+?((国土交通大臣).{0,6}第(\d\d+)号)"),
     # refer to https://techacademy.jp/magazine/20932
@@ -69,14 +68,12 @@ re_compile_show_date = re.compile("情報提供日.{0,10}(20\d+)年(\d+)月(\d+)
 parallel_size = 4  # 並列処理用
 
 check_date_diff = -1
-logger = None
+logger = appbase.AppBase().get_logger()
 
 class SuumoService(appbase.AppBase):
     
     def __init__(self):
-        global logger
-        logger = self.get_logger()
-
+        pass
 
     def modify_pref_city(self,address_org,pref,city,other):
         sql = """
@@ -330,24 +327,6 @@ SELECT * FROM suumo_bukken where pref =''
         browser.close()
         return ret_urls
     
-
-    def get_http_requests(self, result_url):
-        i = 0
-        while i < http_conf["retry_limit"]:
-            try:
-                html_content = urllib.request.urlopen(result_url).read()
-                return html_content
-            except Exception as e:
-                if "404: Not Found" in str(e):
-                    return None
-                
-                logger.warning(e)
-                logger.warning("retry " + result_url)
-                time.sleep(http_conf["retry_sleep"])
-            i += 1
-
-        logger.error("requests.get() " + result_url)
-        return None
     
     def parse_bukken_infos(self, result_list_url):
 

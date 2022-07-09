@@ -7,6 +7,9 @@ import os
 import psycopg2
 import psycopg2.extras
 import sys
+import time
+import urllib.parse
+import urllib.request
 
 from selenium import webdriver # ex. pip install selenium==4.0.0a7
 from selenium.webdriver.chrome.options import Options
@@ -16,6 +19,7 @@ conf_src = \
     os.path.join(os.path.dirname(__file__),
                  '../../resources/app_py_conf.json')
 conf = json.load( open(conf_src) )
+http_conf = {"retry_limit":5, "retry_sleep":5 }
 
 logging.config.dictConfig( conf["logging"] )
 logger = logging.getLogger()
@@ -62,4 +66,35 @@ class AppBase():
                                  options = browser_opts )
         # 要素が見つかるまで、最大 ?秒 待つ
         browser.implicitly_wait( selenium_conf["implicitly_wait"] )
+
+        # refer to https://qiita.com/memakura/items/f80d2e2c59514cfc14c9
+        browser.command_executor._commands["send_command"] = (
+            "POST",
+            '/session/$sessionId/chromium/send_command' )
+        params = {'cmd': 'Page.setDownloadBehavior',
+                  'params': {'behavior': 'allow',
+                             'downloadPath': '/tmp' } }
+        browser.execute("send_command", params=params)
+        
         return browser
+
+
+    def get_http_requests(self, req_url):
+        i = 0
+        while i < http_conf["retry_limit"]:
+            try:
+                http_res = urllib.request.urlopen(req_url)
+                html_content = http_res.read()
+                return html_content
+            
+            except Exception as e:
+                if "404: Not Found" in str(e):
+                    return None
+                
+                logger.warning(e)
+                logger.warning("retry " + req_url)
+                time.sleep(http_conf["retry_sleep"])
+            i += 1
+
+        logger.error("requests.get() " + req_url)
+        return None
