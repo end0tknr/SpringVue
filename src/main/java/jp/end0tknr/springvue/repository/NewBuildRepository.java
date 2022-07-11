@@ -5,47 +5,53 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByCity;
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByPrice;
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByShop;
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCity;
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByTown;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByCityEntity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByPriceEntity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCityEntity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopEntity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByTownEntity;
 
 @Mapper
 public interface NewBuildRepository {
 	String limit = "LIMIT 5000";
 
+    @Select("SELECT min(calc_date) FROM newbuild_sales_count_by_city")
+    String getDispDateMin();
+
+    @Select("SELECT max(calc_date) FROM newbuild_sales_count_by_city")
+    String getDispDateMax();
+
     @Select("SELECT * FROM newbuild_sales_count_by_shop "+
     		"WHERE pref='${prefName}' AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
     		limit )
-    List<NewBuildSalesCountByShop> getSalesCountByShop(
+    List<NewBuildSalesCountByShopEntity> getSalesCountByShop(
     		String prefName,String dateFrom,String dateTo);
 
     @Select("SELECT * FROM newbuild_sales_count_by_shop_city "+
     		" WHERE pref='${prefName}' AND city='${cityName}' "+
     		 "AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
     		 limit )
-    List<NewBuildSalesCountByShopCity> getSalesCountByShopCity(
+    List<NewBuildSalesCountByShopCityEntity> getSalesCountByShopCity(
     		String prefName,String cityName,String dateFrom,String dateTo);
 
     @Select("SELECT * FROM newbuild_sales_count_by_city "+
     "WHERE pref='${prefName}' AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
     limit)
-    List<NewBuildSalesCountByCity> getSalesCountByCity(
+    List<NewBuildSalesCountByCityEntity> getSalesCountByCity(
     		String prefName,String dateFrom,String dateTo);
 
     @Select("SELECT * FROM newbuild_sales_count_by_town "+
     		"WHERE pref='${prefName}' AND city='${cityName}' "+
     		"AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
     		limit)
-    List<NewBuildSalesCountByTown> getSalesCountByTown(
+    List<NewBuildSalesCountByTownEntity> getSalesCountByTown(
     		String prefName,String cityName,String dateFrom,String dateTo);
 
     @Select("SELECT * FROM newbuild_sales_count_by_city_price "+
     		"WHERE pref='${prefName}' AND city='${cityName}' "+
     		"AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
     		limit)
-    List<NewBuildSalesCountByPrice> getSalesCountByPrice(
+    List<NewBuildSalesCountByPriceEntity> getSalesCountByPrice(
     		String prefName,String cityName,String dateFrom,String dateTo);
 
    @Select(" SELECT tbl1.* FROM newbuild_sales_count_by_city tbl1 "+
@@ -54,7 +60,7 @@ public interface NewBuildRepository {
 		   " WHERE tbl2.pref='${prefName}' AND tbl2.city='${cityName}' "+
 		   " AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
 		   limit)
-    List<NewBuildSalesCountByCity> getSalesCountByNearCity(
+    List<NewBuildSalesCountByCityEntity> getSalesCountByNearCity(
     		String prefName,String cityName,String dateFrom,String dateTo);
 
 }

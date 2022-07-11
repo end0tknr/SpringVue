@@ -1,6 +1,6 @@
 package jp.end0tknr.springvue.entity;
 
-public class CityProfile {
+public class CityProfileEntity {
 	private String pref;
     private String city;
     private String summary;

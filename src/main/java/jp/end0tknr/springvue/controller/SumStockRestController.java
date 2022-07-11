@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jp.end0tknr.springvue.entity.SumStockSalesCountByCity;
-import jp.end0tknr.springvue.entity.SumStockSalesCountByPrice;
-import jp.end0tknr.springvue.entity.SumStockSalesCountByShop;
-import jp.end0tknr.springvue.entity.SumStockSalesCountByShopCity;
-import jp.end0tknr.springvue.entity.SumStockSalesCountByTown;
+import jp.end0tknr.springvue.entity.SumStockSalesCountByCityEntity;
+import jp.end0tknr.springvue.entity.SumStockSalesCountByPriceEntity;
+import jp.end0tknr.springvue.entity.SumStockSalesCountByShopCityEntity;
+import jp.end0tknr.springvue.entity.SumStockSalesCountByShopEntity;
+import jp.end0tknr.springvue.entity.SumStockSalesCountByTownEntity;
 import jp.end0tknr.springvue.service.CityProfileService;
 import jp.end0tknr.springvue.service.SumStockService;
 
@@ -35,27 +35,35 @@ public class SumStockRestController {
 
     List<String> convStr2CalcDate(String dateStr) {
         SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date dateFrom = new Date();
+        Date dateTo = new Date();
 		try {
 	    	if(dateStr != null) {
-	    		dateFrom = sdFormat.parse(dateStr);
+	    		dateTo= sdFormat.parse(dateStr);
 	    	}
 		} catch (ParseException e) {
 			//e.printStackTrace();
 		}
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(dateFrom);
-        calendar.add(Calendar.DAY_OF_MONTH, 6);
-        Date dateTo = calendar.getTime();
+        calendar.setTime(dateTo);
+        calendar.add(Calendar.DAY_OF_MONTH, -6);
+        Date dateFrom = calendar.getTime();
 
         return Arrays.asList(
         		sdFormat.format(dateFrom),
         		sdFormat.format(dateTo) );
     }
 
+    @RequestMapping("/api/sumstock/DispDateRange")
+    public String[] dispDateRange(){
+    	String dateRange[] = new String[2];
+    	dateRange[0] = sumStockService.getDispDateMin();
+    	dateRange[1] = sumStockService.getDispDateMax();
+    	return dateRange;
+    }
+
     @RequestMapping("/api/sumstock/SalesCountByShop/{prefName}")
-    public List<SumStockSalesCountByShop> salesCountByShop(
+    public List<SumStockSalesCountByShopEntity> salesCountByShop(
     		@PathVariable("prefName") String prefName,
     		@RequestParam(value="date", required=false) String calcDateStr ){
 
@@ -72,7 +80,7 @@ public class SumStockRestController {
     }
 
     @RequestMapping("/api/sumstock/SalesCountByShopCity/{prefCityName}")
-    public List<SumStockSalesCountByShopCity> salesCountByShopCity(
+    public List<SumStockSalesCountByShopCityEntity> salesCountByShopCity(
     		@PathVariable("prefCityName") String prefCityName,
     		@RequestParam(value="date", required=false) String calcDateStr  ){
 
@@ -89,7 +97,7 @@ public class SumStockRestController {
     }
 
     @RequestMapping("/api/sumstock/SalesCountByCity/{prefName}")
-    public List<SumStockSalesCountByCity> salesCountByCity(
+    public List<SumStockSalesCountByCityEntity> salesCountByCity(
     		@PathVariable("prefName") String prefName,
     		@RequestParam(value="date", required=false) String calcDateStr  ){
 
@@ -105,7 +113,7 @@ public class SumStockRestController {
     }
 
     @RequestMapping("/api/sumstock/SalesCountByNearCity/{prefCityName}")
-    public List<SumStockSalesCountByCity> salesCountByNearCity(
+    public List<SumStockSalesCountByCityEntity> salesCountByNearCity(
     		@PathVariable("prefCityName") String prefCityName,
     		@RequestParam(value="date", required=false) String calcDateStr  ){
 
@@ -122,7 +130,7 @@ public class SumStockRestController {
     }
 
     @RequestMapping("/api/sumstock/SalesCountByTown/{prefCityName}")
-    public List<SumStockSalesCountByTown> salesCountByTown(
+    public List<SumStockSalesCountByTownEntity> salesCountByTown(
     		@PathVariable("prefCityName") String prefCityName,
     		@RequestParam(value="date", required=false) String calcDateStr  ){
 
@@ -140,7 +148,7 @@ public class SumStockRestController {
     }
 
     @RequestMapping("/api/sumstock/SalesCountByPrice/{prefCityName}")
-    public List<SumStockSalesCountByPrice> salesCountByPrice(
+    public List<SumStockSalesCountByPriceEntity> salesCountByPrice(
     		@PathVariable("prefCityName") String prefCityName,
     		@RequestParam(value="date", required=false) String calcDateStr ){
 
@@ -187,6 +195,22 @@ public class SumStockRestController {
     	List<String> cityProfile =
     			cityProfileService.getNearCityProfiles(names[0],names[1]);
     	return cityProfile;
+    }
+
+    @RequestMapping("/api/sumstock/TownProfiles/{prefCityName}")
+    public List<String> townProfiles (
+    		@PathVariable("prefCityName") String prefCityName ){
+
+    	try {
+			prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	String[] names = prefCityName.split("_");
+
+    	List<String> townProfile =
+    			cityProfileService.getTownProfiles(names[0],names[1] );
+    	return townProfile;
     }
 
 }
