@@ -5,11 +5,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByCity;
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByPrice;
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByShop;
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCity;
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByTown;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByCityEntity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByPriceEntity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCityEntity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopEntity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByTownEntity;
 import jp.end0tknr.springvue.repository.NewBuildRepository;
 
 @Service
@@ -18,38 +18,46 @@ public class NewBuildService {
     @Autowired
     NewBuildRepository newBuildRepository;
 
-    public  List<NewBuildSalesCountByShop>
+    public String getDispDateMin() {
+    	return newBuildRepository.getDispDateMin();
+    }
+    public String getDispDateMax() {
+    	return newBuildRepository.getDispDateMax();
+    }
+
+    public  List<NewBuildSalesCountByShopEntity>
     getSalesCountByShop(
     		String prefName, String dateFrom, String dateTo) {
     	return newBuildRepository.getSalesCountByShop(prefName, dateFrom, dateTo );
     }
-    public  List<NewBuildSalesCountByShopCity>
+
+    public  List<NewBuildSalesCountByShopCityEntity>
     getSalesCountByShopCity(
     		String prefName, String cityName, String dateFrom, String dateTo) {
     	return newBuildRepository.getSalesCountByShopCity(
     			prefName,cityName, dateFrom, dateTo );
     }
 
-    public  List<NewBuildSalesCountByCity>
+    public  List<NewBuildSalesCountByCityEntity>
     getSalesCountByCity(String prefName, String dateFrom, String dateTo) {
     	return newBuildRepository.getSalesCountByCity(prefName, dateFrom, dateTo );
     }
 
-    public  List<NewBuildSalesCountByTown>
+    public  List<NewBuildSalesCountByTownEntity>
     getSalesCountByTown(
     		String prefName,String cityName, String dateFrom, String dateTo) {
     	return newBuildRepository.getSalesCountByTown(
     			prefName,cityName, dateFrom, dateTo );
     }
 
-    public  List<NewBuildSalesCountByPrice>
+    public  List<NewBuildSalesCountByPriceEntity>
     getSalesCountByPrice(
     		String prefName,String cityName, String dateFrom, String dateTo) {
     	return newBuildRepository.getSalesCountByPrice(
     			prefName,cityName, dateFrom, dateTo );
     }
 
-    public  List<NewBuildSalesCountByCity>
+    public  List<NewBuildSalesCountByCityEntity>
     getSalesCountByNearCity(
     		String prefName,String cityName, String dateFrom, String dateTo) {
     	return newBuildRepository.getSalesCountByNearCity(

@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByCity;
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByPrice;
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByShop;
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCity;
-import jp.end0tknr.springvue.entity.NewBuildSalesCountByTown;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByCityEntity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByPriceEntity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCityEntity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopEntity;
+import jp.end0tknr.springvue.entity.NewBuildSalesCountByTownEntity;
 import jp.end0tknr.springvue.service.CityProfileService;
 import jp.end0tknr.springvue.service.NewBuildService;
 
@@ -35,27 +35,35 @@ public class NewBuildRestController {
 
     List<String> convStr2CalcDate(String dateStr) {
         SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date dateFrom = new Date();
+        Date dateTo = new Date();
 		try {
 	    	if(dateStr != null) {
-	    		dateFrom = sdFormat.parse(dateStr);
+	    		dateTo= sdFormat.parse(dateStr);
 	    	}
 		} catch (ParseException e) {
 			//e.printStackTrace();
 		}
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(dateFrom);
-        calendar.add(Calendar.DAY_OF_MONTH, 6);
-        Date dateTo = calendar.getTime();
+        calendar.setTime(dateTo);
+        calendar.add(Calendar.DAY_OF_MONTH, -6);
+        Date dateFrom = calendar.getTime();
 
         return Arrays.asList(
         		sdFormat.format(dateFrom),
         		sdFormat.format(dateTo) );
     }
 
+    @RequestMapping("/api/newbuild/DispDateRange")
+    public String[] dispDateRange(){
+    	String dateRange[] = new String[2];
+    	dateRange[0] = newBuildService.getDispDateMin();
+    	dateRange[1] = newBuildService.getDispDateMax();
+    	return dateRange;
+    }
+
     @RequestMapping("/api/newbuild/SalesCountByShop/{prefName}")
-    public List<NewBuildSalesCountByShop> salesCountByShop(
+    public List<NewBuildSalesCountByShopEntity> salesCountByShop(
     		@PathVariable("prefName") String prefName,
     		@RequestParam(value="date", required=false) String calcDateStr ){
 
@@ -71,7 +79,7 @@ public class NewBuildRestController {
     }
 
     @RequestMapping("/api/newbuild/SalesCountByShopCity/{prefCityName}")
-    public List<NewBuildSalesCountByShopCity> salesCountByShopCity(
+    public List<NewBuildSalesCountByShopCityEntity> salesCountByShopCity(
     		@PathVariable("prefCityName") String prefCityName,
     		@RequestParam(value="date", required=false) String calcDateStr  ){
 
@@ -88,7 +96,7 @@ public class NewBuildRestController {
     }
 
     @RequestMapping("/api/newbuild/SalesCountByCity/{prefName}")
-    public List<NewBuildSalesCountByCity> salesCountByCity(
+    public List<NewBuildSalesCountByCityEntity> salesCountByCity(
     		@PathVariable("prefName") String prefName,
     		@RequestParam(value="date", required=false) String calcDateStr  ){
 
@@ -104,7 +112,7 @@ public class NewBuildRestController {
     }
 
     @RequestMapping("/api/newbuild/SalesCountByNearCity/{prefCityName}")
-    public List<NewBuildSalesCountByCity> salesCountByNearCity(
+    public List<NewBuildSalesCountByCityEntity> salesCountByNearCity(
     		@PathVariable("prefCityName") String prefCityName,
     		@RequestParam(value="date", required=false) String calcDateStr ){
 
@@ -121,7 +129,7 @@ public class NewBuildRestController {
     }
 
     @RequestMapping("/api/newbuild/SalesCountByTown/{prefCityName}")
-    public List<NewBuildSalesCountByTown> salesCountByTown(
+    public List<NewBuildSalesCountByTownEntity> salesCountByTown(
     		@PathVariable("prefCityName") String prefCityName,
     		@RequestParam(value="date", required=false) String calcDateStr ){
 
@@ -139,7 +147,7 @@ public class NewBuildRestController {
     }
 
     @RequestMapping("/api/newbuild/SalesCountByPrice/{prefCityName}")
-    public List<NewBuildSalesCountByPrice> salesCountByPrice(
+    public List<NewBuildSalesCountByPriceEntity> salesCountByPrice(
     		@PathVariable("prefCityName") String prefCityName,
     		@RequestParam(value="date", required=false) String calcDateStr ){
 
@@ -184,10 +192,25 @@ public class NewBuildRestController {
     	String[] names = prefCityName.split("_");
 
     	List<String> cityProfile =
-    			cityProfileService.getNearCityProfiles(
-    					names[0],names[1] );
+    			cityProfileService.getNearCityProfiles(names[0],names[1]);
     	return cityProfile;
     }
 
+
+    @RequestMapping("/api/newbuild/TownProfiles/{prefCityName}")
+    public List<String> townProfiles (
+    		@PathVariable("prefCityName") String prefCityName ){
+
+    	try {
+			prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	String[] names = prefCityName.split("_");
+
+    	List<String> townProfile =
+    			cityProfileService.getTownProfiles(names[0],names[1] );
+    	return townProfile;
+    }
 
 }
