@@ -165,7 +165,7 @@ class NewBuild extends AppBase {
         let req_url = this.server_api_base() + "SalesCountByShop/"+
             encodeURIComponent(pref) + "?date=" + vue_obj.disp_date;
 
-	
+        
         let res = await fetch(req_url);
         let shop_sales = await res.json();
         shop_sales = this.conv_counts_for_disp( shop_sales );
@@ -199,7 +199,7 @@ class NewBuild extends AppBase {
     async load_town_data(pref,city,vue_obj){
         let req_url = this.server_api_base() +"SalesCountByTown/"+
             encodeURIComponent(pref) +"_"+ encodeURIComponent(city)+
-	    "?date=" + vue_obj.disp_date;
+            "?date=" + vue_obj.disp_date;
         
         let res = await fetch(req_url);
         let town_sales = await res.json();
@@ -210,7 +210,7 @@ class NewBuild extends AppBase {
     async load_shop_city_data(pref,city,vue_obj){
         let req_url = this.server_api_base() +"SalesCountByShopCity/"+
             encodeURIComponent(pref) +"_"+ encodeURIComponent(city)+
-	    "?date=" + vue_obj.disp_date;
+            "?date=" + vue_obj.disp_date;
         
         let res = await fetch(req_url);
         let town_sales = await res.json();
@@ -221,7 +221,7 @@ class NewBuild extends AppBase {
     async load_price_data(pref,city,vue_obj){
         let req_url = this.server_api_base() +"SalesCountByPrice/"+
             encodeURIComponent(pref) +"_"+ encodeURIComponent(city) +
-	    "?date=" + vue_obj.disp_date;
+            "?date=" + vue_obj.disp_date;
         
         let res = await fetch(req_url);
         let price_sales = await res.json();
@@ -267,7 +267,7 @@ class NewBuild extends AppBase {
     async load_near_city_profiles(pref,city,vue_obj){
         let req_url = this.server_api_base() +"NearCityProfiles/"+
             encodeURIComponent(pref) +"_"+ encodeURIComponent(city)+
-	    "?date=" + vue_obj.disp_date;
+            "?date=" + vue_obj.disp_date;
         
         let res = await fetch(req_url);
         let city_profiles = await res.json();
@@ -361,7 +361,7 @@ class NewBuild extends AppBase {
 
             town_profile["price"] = Math.round(town_profile["price"] / 10000);
             town_profile["from_station"] =
-		Math.round( town_profile["from_station"] / 100 ) / 10;
+                Math.round( town_profile["from_station"] / 100 ) / 10;
             
             //最大値算出
             for( let max_set of max_sets ) {
@@ -462,7 +462,7 @@ class NewBuild extends AppBase {
     async load_near_city_data(pref,city,vue_obj){
         let req_url = this.server_api_base() +"SalesCountByNearCity/"+
             encodeURIComponent(pref) +"_"+ encodeURIComponent(city)+
-	    "?date=" + vue_obj.disp_date;
+            "?date=" + vue_obj.disp_date;
         
         let res = await fetch(req_url);
         let city_sales = await res.json();
@@ -513,8 +513,9 @@ class NewBuild extends AppBase {
     conv_counts_for_disp( sales_counts ){
         // 最大/最小値を算出する為の準備
         let atri_sets = {}
-        const atri_keys = ["sold_count",   "sold_price",   "sold_days",
-                           "on_sale_count","on_sale_price","on_sale_days"]
+        const atri_keys = ["onsale_count", "onsale_price",  "onsale_days",
+                           "discuss_count","discuss_price", "discuss_days",
+                           "sold_count",   "sold_price" ]
         
         for( let atri_key of atri_keys ) {
             atri_sets[atri_key] = new Set();
@@ -522,7 +523,7 @@ class NewBuild extends AppBase {
         
         for( let sales_count of sales_counts ) {
             // 円→百万円
-            for( let atri_key of ["sold_price","on_sale_price"] ) {
+            for( let atri_key of ["discuss_price","onsale_price","sold_price"] ) {
                 sales_count[atri_key] =
                     Math.round(sales_count[atri_key] /1000000)
             }
@@ -534,7 +535,7 @@ class NewBuild extends AppBase {
         
         // sort
         sales_counts = sales_counts.sort(function(a, b) {
-            return b["sold_count"] - a["sold_count"];
+            return b["discuss_count"] - a["discuss_count"];
         });
         
         let atri_min_max = {}

@@ -3,6 +3,7 @@
 
 from psycopg2  import extras # for bulk insert
 import appbase
+import sys
 
 logger = appbase.AppBase().get_logger()
 
@@ -140,9 +141,9 @@ ORDER BY isc.ORDINAL_POSITION
     
     # bulk update or insert
     def bulk_upsert(self, tbl_name, pkeys, all_keys, update_keys, rows):
-
+        
         bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
-        row_groups = self.divide_rows(rows, bulk_insert_size, insert_keys )
+        row_groups = self.divide_rows(rows, bulk_insert_size, all_keys )
 
         all_keys_str     = ",".join( all_keys )
         
@@ -185,21 +186,18 @@ WHERE ( {9} ) NOT IN ( SELECT {10} FROM UPSERT )
             set_key_vals_str,   where_pkeys_str,return_pkeys_str,
             tbl_name,           all_keys_str,   all_keys_str,
             tmp_pkeys_str,      pkeys_str )
-        # print( sql )
-        
         
         db_conn = self.db_connect()
         with self.db_cursor(db_conn) as db_cur:
             for row_group in row_groups:
                 try:
-                    # bulk upsert
-                    extras.execute_values(db_cur,sql, row_group )
+                    extras.execute_values(db_cur, sql, row_group )
                 except Exception as e:
                     logger.error(e)
                     logger.error(sql)
                     logger.error(row_group)
                     return False
-                    
+                
         db_conn.commit()
         
         return True
@@ -259,8 +257,6 @@ WHERE ( {9} ) NOT IN ( SELECT {10} FROM UPSERT )
             atri_key_vals_str,  where_pkeys_str,return_pkeys_str,
             tbl_name,           atri_keys_2_str,atri_keys_str,
             tmp_pkeys_str,      raw_pkeys_str )
-        # print( sql )
-        
         
         db_conn = self.db_connect()
         with self.db_cursor(db_conn) as db_cur:
@@ -308,7 +304,6 @@ WHERE  {4}
                           "%s",
                           atri_key_str,
                           where_conds_str )
-        # print( sql )
         
         db_conn = self.db_connect()
         with self.db_cursor(db_conn) as db_cur:
