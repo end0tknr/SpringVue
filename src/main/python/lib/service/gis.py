@@ -26,34 +26,34 @@ default_geodetic    = '世界測地系'
 
 src_host = "https://nlftp.mlit.go.jp"
 src_path = {
-    "gis_gyosei_kuiki" :
-    {"index_page": "/ksj/gml/datalist/KsjTmplt-N03-v3_0.html",
-     "select_cond": default_select_cond},
-    "gis_chika_koji" :
-    {"index_page": "/ksj/gml/datalist/KsjTmplt-L01-v3_0.html",
-     "select_cond": default_select_cond},
-    "gis_chika" :
-    {"index_page" : "/ksj/gml/datalist/KsjTmplt-L02-v3_0.html",
-     "select_cond": default_select_cond},
-    "gis_youto_chiiki" :
-    {"index_page": "/ksj/gml/datalist/KsjTmplt-A29-v2_1.html",
-     "select_cond": {}},
-    # 土地利用や土地利用細分はtableのcolumnが日本語の為、使用しない
-    #"gis_tochi_riyo" :
-    #{"index_page": "/ksj/gml/datalist/KsjTmplt-L03-a.html",
-    # "select_cond": {}},
-    #"gis_tochi_riyo_saibun" :
-    #{"index_page": "/ksj/gml/datalist/KsjTmplt-L03-b.html",
-    # "select_cond": {}},
-    "gis_tochi_riyo_shousai" :
-    {"index_page": "/ksj/gml/datalist/KsjTmplt-L03-b-c.html",
-     "select_cond": {}},
-    "gis_jinko_shuchu" :
-    {"index_page": "/ksj/gml/datalist/KsjTmplt-A16-v2_3.html",
-     "select_cond": default_select_cond},
-    "gis_jinko_suikei_1km" :
-    {"index_page": "/ksj/gml/datalist/KsjTmplt-mesh1000h30.html",
-     "select_cond": {}},
+    # "gis_gyosei_kuiki" :
+    # {"index_page": "/ksj/gml/datalist/KsjTmplt-N03-v3_0.html",
+    #  "select_cond": default_select_cond},
+    # "gis_chika_koji" :
+    # {"index_page": "/ksj/gml/datalist/KsjTmplt-L01-v3_0.html",
+    #  "select_cond": default_select_cond},
+    # "gis_chika" :
+    # {"index_page" : "/ksj/gml/datalist/KsjTmplt-L02-v3_0.html",
+    #  "select_cond": default_select_cond},
+    # "gis_youto_chiiki" :
+    # {"index_page": "/ksj/gml/datalist/KsjTmplt-A29-v2_1.html",
+    #  "select_cond": {}},
+    # # 土地利用や土地利用細分はtableのcolumnが日本語の為、使用しない
+    # #"gis_tochi_riyo" :
+    # #{"index_page": "/ksj/gml/datalist/KsjTmplt-L03-a.html",
+    # # "select_cond": {}},
+    # #"gis_tochi_riyo_saibun" :
+    # #{"index_page": "/ksj/gml/datalist/KsjTmplt-L03-b.html",
+    # # "select_cond": {}},
+    # "gis_tochi_riyo_shousai" :
+    # {"index_page": "/ksj/gml/datalist/KsjTmplt-L03-b-c.html",
+    #  "select_cond": {}},
+    # "gis_jinko_shuchu" :
+    # {"index_page": "/ksj/gml/datalist/KsjTmplt-A16-v2_3.html",
+    #  "select_cond": default_select_cond},
+    # "gis_jinko_suikei_1km" :
+    # {"index_page": "/ksj/gml/datalist/KsjTmplt-mesh1000h30.html",
+    #  "select_cond": {}},
     "gis_jinko_suikei_500m" :
     {"index_page": "/ksj/gml/datalist/KsjTmplt-mesh500h30.html",
      "select_cond": {}},

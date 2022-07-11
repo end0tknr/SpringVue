@@ -41,7 +41,7 @@ WHERE gid=%s
         return True
 
             
-    def get_pref_cities_for_modiry(self):
+    def get_pref_cities_for_modify(self):
 
         sql = """
 SELECT

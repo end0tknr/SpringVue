@@ -1,0 +1,55 @@
+<h2>建築年別 リフォーム実績</h2>
+
+<div class="scroll_tbl2">
+  <table>
+    <tr class="city_profile">
+      <th></th>
+      <th colspan="2">腐朽 破損</th>
+      <th colspan="7">リフォーム実績<span class="sub">2014～実施件数</span></th>
+      <th></th>
+    </tr>
+    <tr class="sort_keys">
+      <th v-on:click="sort_tbl('build_year_profiles','city')">建築年</th>
+      <th v-on:click="sort_tbl('build_year_profiles','腐朽・破損あり')">あり</th>
+      <th v-on:click="sort_tbl('build_year_profiles','腐朽・破損なし')">なし</th>
+      <th v-on:click="sort_tbl('build_year_profiles','rebuild')">建替</th>
+      <th v-on:click="sort_tbl('build_year_profiles','reform_plan')">増築</th>
+      <th v-on:click="sort_tbl('build_year_profiles','reform_kitchen_bath')">水回り</th>
+      <th v-on:click="sort_tbl('build_year_profiles','reform_roof_outer_wall')">屋根 外壁</th>
+      <th v-on:click="sort_tbl('build_year_profiles','reform_floor_inner_wall')">内装</th>
+      <th v-on:click="sort_tbl('build_year_profiles','reform_pillar_basic')">壁 柱 基礎</th>
+      <th v-on:click="sort_tbl('build_year_profiles','reform_insulation')">窓他 断熱</th>
+    </tr>
+    <tr v-for="city_profile in build_year_profiles">
+      <th>～{{ city_profile.build_year_to }}</th>
+      
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_profile['腐朽・破損あり_px']+'px 3px'}">
+        {{ city_profile["腐朽・破損あり"]}}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_profile['腐朽・破損なし_px']+'px 3px'}">
+        {{ city_profile["腐朽・破損なし"]}}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_profile['rebuild_px']+'px 3px'}">
+        {{ city_profile.rebuild    }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_profile['reform_plan_px']+'px 3px'}">
+        {{ city_profile.reform_plan}}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_profile['reform_kitchen_bath_px']+'px 3px'}">
+        {{ city_profile.reform_kitchen_bath }}   </td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_profile['reform_roof_outer_wall_px']+'px 3px'}">
+        {{ city_profile.reform_roof_outer_wall}} </td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_profile['reform_floor_inner_wall_px']+'px 3px'}">
+        {{ city_profile.reform_floor_inner_wall}}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_profile['reform_pillar_basic_px']+'px 3px'}">
+        {{ city_profile.reform_pillar_basic }}   </td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_profile['reform_insulation_px']+'px 3px'}">
+        {{ city_profile.reform_insulation }}     </td>
+    </tr>
+  </table>
+</div><!--.scroll_tbl2-->

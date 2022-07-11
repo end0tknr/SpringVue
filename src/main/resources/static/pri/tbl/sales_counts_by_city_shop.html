@@ -1,0 +1,43 @@
+<h2>会社別</h2>
+          
+<div class="scroll_tbl2">
+  <table>
+    <tr>
+      <th></th>
+      <th colspan="3">販売済</th>
+      <th colspan="3">販売中</th>
+      <th></th>
+    </tr>
+    <tr class="sort_keys">
+      <th v-on:click="sort_tbl('shop_city_sales','shop')">会社</th>
+      <th v-on:click="sort_tbl('shop_city_sales','sold_count')">数</th>
+      <th v-on:click="sort_tbl('shop_city_sales','sold_price')">百万円</th>
+      <th v-on:click="sort_tbl('shop_city_sales','sold_days')">販売日数</th>
+      <th v-on:click="sort_tbl('shop_city_sales','on_sale_count')">数</th>
+      <th v-on:click="sort_tbl('shop_city_sales','on_sale_price')">百万円</th>
+      <th v-on:click="sort_tbl('shop_city_sales','on_sale_days')">販売日数</th>
+    </tr>
+    
+    <tr v-for="shop_data in shop_city_sales">
+      <th><div>{{ shop_data.shop }}</div></th>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.sold_count_px+'px 3px'}">
+        {{ shop_data.sold_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.sold_price_px+'px 3px'}">
+        {{ shop_data.sold_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.sold_days+'px 3px'}">
+        {{ shop_data.sold_days }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.on_sale_count_px+'px 3px'}">
+        {{ shop_data.on_sale_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.on_sale_price_px+'px 3px'}">
+        {{ shop_data.on_sale_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.on_sale_days+'px 3px'}">
+        {{ shop_data.on_sale_days }}</td>
+    </tr>
+  </table>
+</div><!--.scroll_tbl2-->

@@ -22,16 +22,16 @@ class GoogleMapService(appbase.AppBase):
         sql = "select * from gmap_latlng_addr where lng=%s and lat=%s"
         sql = sql % (lng,lat)
         
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-                db_cur.execute(sql)
-                rows = db_cur.fetchall()
-                db_cur.close()
-
-                if len(rows)==0:
-                    return None
-
-                return dict( rows[0] )
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            db_cur.execute(sql)
+            rows = db_cur.fetchall()
+            db_cur.close()
+            
+            if len(rows)==0:
+                return None
+            
+            return dict( rows[0] )
         return None
         
     def save_addr_info(self, addr_info):

@@ -1,22 +1,29 @@
-
 CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki (
-id              serial,
-shurui          varchar(16),
-chiiki          varchar(16),
-pref            varchar(4),
-city            varchar(16),
-street          varchar(16),
-price           bigint,
-area_m2         int,
-build_year      int,
-trade_year      int,
+id                      serial,
+trade_year_q            int,
+shurui                  varchar(16),
+chiiki                  varchar(16),
+pref                    varchar(4),
+city                    varchar(16),
+town                    varchar(64),
+station                 varchar(32),
+from_station_min        int,
+price                   bigint,
+plan                    varchar(16),
+floor_area_m2           int,
+land_area_m2            int,
+build_year              int,
+structure               varchar(16),
+new_usage               varchar(16),
+youto_chiiki            varchar(32),
 primary key(id) );
 COMMENT ON TABLE mlit_fudousantorihiki IS
 'https://www.land.mlit.go.jp/webland/download.html';
+COMMENT ON COLUMN mlit_fudousantorihiki.trade_year_q
+     IS '年度と四半期';
 COMMENT ON COLUMN mlit_fudousantorihiki.shurui
      IS '宅地(土地と建物), 宅地(土地), 中古マンション等市町村code';
 COMMENT ON COLUMN mlit_fudousantorihiki.chiiki IS '住宅地, 宅地見込地';
-COMMENT ON COLUMN mlit_fudousantorihiki.street IS '地区名';
 
 
 CREATE TABLE IF NOT EXISTS gmap_latlng_addr (
@@ -49,6 +56,14 @@ near_pref       varchar(4),
 near_city       varchar(8),
 primary key(pref,city,near_pref,near_city));
 
+CREATE TABLE IF NOT EXISTS town_profile (
+pref            varchar(4),
+city            varchar(16),
+town            varchar(64),
+lng             double precision,
+lat             double precision,
+summary         varchar(4096),
+primary key(pref,city,town) );
 
 -- 2015年の古いデータの為、対象外
 -- CREATE TABLE IF NOT EXISTS estat_jutakutochi (
@@ -553,6 +568,7 @@ house_for_sale  int,
 found_date      date,
 show_date       date,
 check_date      date,
+update_time     timestamp,
 primary key ( url )
 );
 
@@ -641,6 +657,10 @@ ALTER TABLE gis_chika_koji ADD COLUMN pref varchar(4);
 ALTER TABLE gis_chika_koji ADD COLUMN city varchar(8);
 ALTER TABLE gis_chika      ADD COLUMN pref varchar(4);
 ALTER TABLE gis_chika      ADD COLUMN city varchar(8);
+
+CREATE INDEX gis_jinko_suikei_500m_lng_lat ON gis_jinko_suikei_500m (lng,lat);
+CREATE INDEX gis_chika_koji_lng_lat        ON gis_chika_koji        (lng,lat);
+CREATE INDEX gis_chika_lng_lat             ON gis_chika_koji        (lng,lat);
 
 
 CREATE TABLE IF NOT EXISTS real_estate_shop (

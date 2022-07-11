@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300">
+  <defs>
+    <style>
+      rect { stroke         : #999;
+             stroke-width   : 2;
+             stroke-linecap : round;
+             fill           : none; }
+     rect.target { fill     : #e71b24; }
+     text.target { font-size: 24px;
+                   fill     : #ffffff;     }
+     text.target_small {fill: #ffffff;     }
+    </style>
+  </defs>
+  
+  <rect x="100" y="120" width="80" height="40" class="target"/>
+  <rect x="100" y="160" width="80" height="40"/>
+  
+  <rect x="40"  y="120" width="60" height="80"/>
+  <rect x="40"  y="200" width="60" height="60"/>
+  <rect x="100" y="200" width="80" height="60"/>
+
+  <rect x="160" y="40"  width="60" height="40" transform="skewX(-45)"/>
+  <rect x="160" y="80"  width="60" height="40" transform="skewX(-45)"/>
+  <rect x="220" y="40"  width="80" height="40" transform="skewX(-45)"/>
+  <rect x="220" y="80"  width="80" height="20" transform="skewX(-45)"/>
+  <rect x="220" y="100" width="80" height="20" transform="skewX(-45)"
+        class="target"/>
+  
+  <rect x="180" y="380" width="40" height="60" transform="skewY(-45)"/>
+  <rect x="220" y="380" width="40" height="60" transform="skewY(-45)"/>
+  <rect x="220" y="300" width="40" height="80" transform="skewY(-45)"/>
+
+  <rect x="180" y="300" width="20" height="40" transform="skewY(-45)"
+        class="target"/>
+  <rect x="200" y="300" width="20" height="40" transform="skewY(-45)"/>
+
+  <text x="130" y="35">賃貸</text>
+  <text x="200" y="35">持家</text>
+  
+  <text x="50" y="52">単身</text>
+  <text x="50" y="70">世帯</text>
+  <text x="15" y="92">家族</text>
+  <text x="15" y="110">世帯</text>
+  
+  <text x="15" y="155">戸</text>
+  <text x="15" y="175">建</text>
+  <text x="15" y="225">集</text>
+  <text x="15" y="245">合</text>
+
+  <text x="140" y="97">中古購入</text>
+  <text x="125" y="116" class="target_small">分譲含</text>
+  <text x="115" y="148" class="target">新築</text>
+  <text x="125" y="185">既築</text>
+  
+</svg>

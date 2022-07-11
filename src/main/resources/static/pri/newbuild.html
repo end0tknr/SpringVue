@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/site_logo.svg" type="image/svg+xml">
+  <title>15DB</title>
+  <link rel="stylesheet" href="/pri/css/common.css">
+  <link rel="stylesheet" href="/pri/css/newbuild.css">
+  <style>
+    .scroll_tbl2 .sort_keys th       {cursor: pointer;           }
+    .scroll_tbl2 .sort_keys th:hover {text-decoration: underline;}
+    .scroll_tbl2 .col_key            {cursor: pointer;           }
+    .scroll_tbl2 .col_key:hover      {text-decoration: underline;}
+    .scroll_tbl2 td                  {white-space:nowrap;        }
+
+    .open_jpn_map_modal              {cursor: pointer;           }
+    .scroll_tbl2 .sort_keys th       {cursor: pointer;
+                                      width: 65px;}
+    .scroll_tbl2 tr td    {text-align: right; white-space:nowrap;}
+    
+    .city_profile th      {font-weight:bold;}
+    .city_profile th .sub {font-weight:normal;}
+    .city_profile tr:nth-child(1) th { width: 100px; }
+    .city_profile td.caption {text-align:right;}
+    .city_profile td      {white-space:nowrap;}
+    
+    .scroll_tbl2 .station div  { width: 50px;
+				 overflow: hidden;
+				 text-overflow: ellipsis;
+				 white-space: nowrap; }
+    
+  </style>
+</head>
+<body>
+
+  <div class="header_container">
+  </div><!--.header_container-->
+  
+  <div class="page_top">
+  </div><!--.page_top-->
+
+  <div id="vueapp">
+    
+    <div class="container_title">
+      <h1 id="pref_name">{{pref_name}}</h1>
+      <div class="container_title_sub">
+        <div>
+          戸建分譲 週次速報
+          <input type="date"
+                 v-model="disp_date"
+                 :min="disp_date_min"
+                 :max="disp_date_max"
+                 :step="7"
+                 v-on:change="init_page_by_disp_date">
+        </div>
+        <div class="container_title_sub_right">
+          <a class="open_jpn_map_modal" v-on:click="show_jpn_map_modal">
+            都道府県選択</a>
+        </div>
+      </div>
+      <div>
+	ｲﾝﾀｰﾈｯﾄにある不動産情報の集計。
+	販売済=公開終了で、販売済=売約済とは限りません
+      </div>
+    </div><!--.container_title-->
+    
+
+  <div class="page_middle">
+    <div class="page_middle_container">
+
+      <div class="two_cols_layout">
+        <div class="column_left">
+          <!--# include file="./tbl/sales_counts_by_shop.html" -->
+        </div><!-- .column_left -->
+        
+        <div class="column_right">
+          <!--# include file="./tbl/sales_counts_by_city.html" -->
+        </div><!-- .column_right -->
+      </div><!--.two_cols_layout-->
+      
+    </div><!--.page_middle_container-->
+  </div><!--.page_middle-->
+  
+  <div class="container_title">
+    <h1 id="pref_name">{{city_name}}</h1>
+    <div class="container_title_sub">
+      <div>
+        戸建分譲 週次速報
+      </div>
+      <div class="container_title_sub_right">
+      </div>
+    </div>
+  </div><!--.container_title-->
+    
+  <div class="page_middle">
+    <div class="page_middle_container">
+
+      <div class="two_cols_layout">
+        <div class="column_left">
+          <!--# include file="./tbl/sales_counts_by_city_shop.html" -->
+        </div><!--.column_left-->
+        
+        <div class="wcolumn_right">
+          <!--# include file="./tbl/sales_counts_by_city_price.html" -->
+        </div><!--.column_right-->
+
+        <div class="column_left">
+          <!--# include file="./tbl/sales_counts_by_near_city.html" -->
+        </div><!--.column_left-->
+        
+        <div class="column_right">
+          <!--# include file="./tbl/sales_counts_by_town.html" -->
+        </div><!--.column_right-->
+        
+      </div><!--.two_cols_layout-->
+
+    </div><!--.page_middle_container-->
+  </div><!--.page_middle-->
+
+  <div class="container_title">
+    <div class="container_title_sub">
+      <div>人口や世帯数等の長期トレンド</div>
+      <div class="container_title_sub_right"></div>
+    </div>
+  </div><!--.container_title-->
+
+  <div class="page_bottom">
+    <div class="two_cols_layout">
+      <div class="column_left">
+        <!--# include file="./tbl/city_profile.html" -->
+      </div><!--.column_left-->
+
+      <div class="column_right">
+        <!--# include file="./tbl/town_profiles.html" -->
+      </div><!--.column_right-->
+    </div><!--.two_cols_layout-->
+    
+    <!--# include file="./tbl/city_profiles.html" -->
+    
+    <div class="two_cols_layout">
+      <div class="column_left">
+      </div><!--.column_left-->
+
+      <div class="column_right" style="text-align:center;">
+	<img src="img/target_new_build.svg" />
+      </div><!--.column_right-->
+    </div><!--.two_cols_layout-->
+    
+    <div>&nbsp;</div>
+  </div>
+
+  <footer>
+    &copy; <span class="copyright_year"></span>
+    end0tknr
+  </footer>
+  
+  <!--#include file="./map/japan_modal.html" -->
+
+  </div><!-- id=vueapp-->
+  
+  <script src="/pri/js/Common.js"></script>
+  <script src="/pri/js/AppBase.js"></script>
+  <script src="https://unpkg.com/vue@next"></script>
+  <script src="/pri/js/app_conf.js"></script>
+  <script src="/pri/js/VueNewBuild.js"></script>
+  <script>
+    window.newbuild = new NewBuild();
+    newbuild.init_page();
+  </script>
+</body>
+</html>

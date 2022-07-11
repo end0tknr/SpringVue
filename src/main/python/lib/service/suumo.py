@@ -55,7 +55,6 @@ base_urls = [
     #[base_host+"/ms/shinchiku/",  "新築マンション"]
 ]
 
-http_conf = {"retry_limit":5, "retry_sleep":5 }
 re_compile_licenses = [
     re.compile("会社概要.+?((国土交通大臣).{0,6}第(\d\d+)号)"),
     # refer to https://techacademy.jp/magazine/20932
@@ -69,14 +68,12 @@ re_compile_show_date = re.compile("情報提供日.{0,10}(20\d+)年(\d+)月(\d+)
 parallel_size = 4  # 並列処理用
 
 check_date_diff = -1
-logger = None
+logger = appbase.AppBase().get_logger()
 
 class SuumoService(appbase.AppBase):
     
     def __init__(self):
-        global logger
-        logger = self.get_logger()
-
+        pass
 
     def modify_pref_city(self,address_org,pref,city,other):
         sql = """
@@ -170,170 +167,46 @@ SELECT * FROM suumo_bukken where pref =''
                                              result_list_url ))
             
             bukken_infos = self.parse_bukken_infos(result_list_url)
-            self.save_bukken_infos(build_type,bukken_infos)
+            bukken_infos = self.conv_bukken_infos_for_upsert(build_type,
+                                                             bukken_infos )
+            util_db = Db()
+            util_db.bulk_upsert(
+                "suumo_bukken",
+                ["url"],
+                ["url","build_type","bukken_name","price","price_org",
+                 "pref","city","address","plan","build_area_m2",
+                 "build_area_org","land_area_m2","land_area_org",
+                 "build_year","shop_org",
+                 "found_date","check_date","update_time"],
+                ["build_type","bukken_name","price","price_org",
+                 "pref","city","address","plan","build_area_m2",
+                 "build_area_org","land_area_m2","land_area_org",
+                 "build_year","shop_org",
+                 "check_date","update_time"],
+                bukken_infos )
 
-        
-    def save_bukken_infos(self, build_type, bukken_infos):
 
-        bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
-        date_str = datetime.datetime.now()
-        #date_str = datetime.datetime.now().strftime('%Y-%m-%d')
-        row_groups = self.divide_rows_info(build_type,
-                                           bukken_infos,
-                                           bulk_insert_size,
-                                           date_str )
-        
-# refer to https://qiita.com/yuuuuukou/items/d7723f45e83deb164d68
-        sql = """
-WITH
-tmp(url,build_type,bukken_name,price,price_org,pref,city,address,
-    plan,build_area_m2,build_area_org,land_area_m2,land_area_org,
-    build_year,shop_org,found_date,check_date)
-AS ( values %s ),
--- updateを実施
-upsert AS (
-  UPDATE suumo_bukken sb
-  SET bukken_name    = tmp.bukken_name,
-      price          = tmp.price,
-      price_org      = tmp.price_org,
-      address        = tmp.address,
-      plan           = tmp.plan,
-      build_area_m2  = tmp.build_area_m2,
-      build_area_org = tmp.build_area_org,
-      land_area_m2   = tmp.land_area_m2,
-      land_area_org  = tmp.land_area_org,
-      shop_org       = tmp.shop_org,
-      check_date     = tmp.check_date
-  FROM tmp
-  WHERE sb.url = tmp.url
-  RETURNING sb.url
-)
--- update対象が無ければinsert
-INSERT INTO suumo_bukken
-   (url,build_type,bukken_name,price,price_org,pref,city,address,
-    plan,build_area_m2,build_area_org,land_area_m2,land_area_org,
-    build_year,shop_org,found_date,check_date)
-SELECT
-  tmp.url,         tmp.build_type,   tmp.bukken_name,
-  tmp.price,       tmp.price_org,    tmp.pref, tmp.city, tmp.address,
-  tmp.plan,        tmp.build_area_m2,tmp.build_area_org,
-  tmp.land_area_m2,tmp.land_area_org,
-  tmp.build_year,  tmp.shop_org,     tmp.found_date, tmp.check_date
-FROM tmp
-WHERE tmp.url NOT IN ( SELECT url FROM UPSERT )
-"""
-        # sql = sql % ("%s", date_str)
-        
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-
-                for row_group in row_groups:
-                    try:
-                        # bulk upsert
-                        extras.execute_values(db_cur,sql, row_group )
-                    except Exception as e:
-                        logger.error(e)
-                        logger.error(sql)
-                        logger.error(row_group)
-                        return False
+    def conv_bukken_infos_for_upsert(self, build_type, bukken_infos ):
+        datetime_now = datetime.datetime.now()
+            
+        for bukken_info in bukken_infos:
+            bukken_info["build_type"] = build_type
+            
+            for atri_key in ['price','build_year']:
+                if not bukken_info[atri_key]:
+                    bukken_info[atri_key] = "0"
+                bukken_info[atri_key] = int( bukken_info[atri_key] )
                     
-            db_conn.commit()
-        return True
+                for atri_key in ['build_area_m2','land_area_m2']:
+                    if not bukken_info[atri_key]:
+                        bukken_info[atri_key] = "0"
+                    bukken_info[atri_key] = float( bukken_info[atri_key] )
+                        
+                bukken_info["found_date"] = datetime_now
+                bukken_info["check_date"] = datetime_now
+                bukken_info["update_time"]= datetime_now
+        return bukken_infos
     
-        
-#     def save_bukken_infos(self, build_type, bukken_infos):
-
-#         bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
-#         date_str = datetime.datetime.now().strftime('%Y-%m-%d')
-#         row_groups = self.divide_rows_info(build_type,
-#                                            bukken_infos,
-#                                            bulk_insert_size,
-#                                            date_str )
-
-#         sql = """
-# INSERT INTO suumo_bukken
-#   (build_type,bukken_name,price,price_org,pref,city,address,
-#    plan,build_area_m2,build_area_org,land_area_m2,land_area_org,
-#    build_year,shop_org,url,found_date,check_date)
-#   VALUES %s
-# ON CONFLICT ON CONSTRAINT suumo_bukken_pkey
-#   DO UPDATE SET check_date='%s'
-# """
-#         sql = sql % ("%s", date_str)
-        
-#         with self.db_connect() as db_conn:
-#             with self.db_cursor(db_conn) as db_cur:
-
-#                 for row_group in row_groups:
-#                     try:
-#                         # bulk insert
-#                         extras.execute_values(db_cur,sql, row_group )
-#                     except Exception as e:
-#                         logger.error(e)
-#                         logger.error(sql)
-#                         logger.error(row_group)
-#                         return False
-                    
-#             db_conn.commit()
-#         return True
-
-    
-    def make_tuple_for_insert(self, build_type, org_row, date_str):
-
-        for atri_key in ['price','build_area_m2','land_area_m2','build_year']:
-            if not org_row[atri_key]:
-                org_row[atri_key] = "0"
-                
-        ret_tuple = ( org_row['url'],
-                      build_type,
-                      org_row['bukken_name'],
-                      int(org_row['price']),
-                      org_row['price_org'],
-                      org_row['pref'],
-                      org_row['city'],
-                      org_row['address'],
-                      org_row['plan'],
-                      float( org_row['build_area_m2'] ),
-                      org_row['build_area_org'],
-                      float( org_row['land_area_m2'] ),
-                      org_row['land_area_org'],
-                      int( org_row['build_year'] ),
-                      org_row['shop_org'],
-                      date_str,
-                      date_str )
-            
-        tuple_key = org_row['url']
-        return ret_tuple, tuple_key
-
-        
-    def divide_rows_info(self, build_type, org_rows, chunk_size,date_str):
-        i = 0
-        chunk = []
-        ret_rows = []
-        tuple_keys = {}
-        for org_row in org_rows:
-            
-            org_tuple, tuple_key = self.make_tuple_for_insert(build_type,
-                                                              org_row,
-                                                              date_str)
-
-            if tuple_key in tuple_keys:
-                logger.warning("duplicate bukken "+ tuple_key)
-                continue
-            
-            tuple_keys[tuple_key] = 1
-            
-            chunk.append( org_tuple )
-            
-            if len(chunk) >= chunk_size:
-                ret_rows.append(chunk)
-                chunk = []
-            i += 1
-
-        if len(chunk) > 0:
-            ret_rows.append(chunk)
-
-        return ret_rows
     
     def del_search_result_list_urls(self):
         logger.info("start")
@@ -454,24 +327,6 @@ WHERE tmp.url NOT IN ( SELECT url FROM UPSERT )
         browser.close()
         return ret_urls
     
-
-    def get_http_requests(self, result_url):
-        i = 0
-        while i < http_conf["retry_limit"]:
-            try:
-                html_content = urllib.request.urlopen(result_url).read()
-                return html_content
-            except Exception as e:
-                if "404: Not Found" in str(e):
-                    return None
-                
-                logger.warning(e)
-                logger.warning("retry " + result_url)
-                time.sleep(http_conf["retry_sleep"])
-            i += 1
-
-        logger.error("requests.get() " + result_url)
-        return None
     
     def parse_bukken_infos(self, result_list_url):
 
@@ -544,36 +399,6 @@ WHERE tmp.url NOT IN ( SELECT url FROM UPSERT )
             return shop_org
 
         return None
-
-        # html_content = self.get_http_requests(bukken_url)
-        # if not html_content:
-        #     return None
-
-        # soup = BeautifulSoup(html_content, 'html.parser')
-        # contact_tos = soup.select("td.bdGrayB")
-        # contact_to_str = contact_tos[0].text.strip()
-        # shop_name_org = contact_to_str.split("\n")[0]
-        # shop_name = self.parse_shop_name( shop_name_org )
-        # return shop_name
-        
-    # def find_shop_name(self, bukken_div, bukken_url ):
-
-    #     divs = bukken_div.select("div.shopmore-title")
-    #     shop_org = self.parse_shop_name( divs[0].text.strip() )
-    #     if shop_org:
-    #         return shop_org
-
-    #     html_content = self.get_http_requests(bukken_url)
-    #     if not html_content:
-    #         return None
-
-    #     soup = BeautifulSoup(html_content, 'html.parser')
-    #     contact_tos = soup.select("td.bdGrayB")
-    #     contact_to_str = contact_tos[0].text.strip()
-    #     shop_name_org = contact_to_str.split("\n")[0]
-    #     shop_name = self.parse_shop_name( shop_name_org )
-    #     return shop_name
-        
 
     def parse_shop_name(self, org_shop_name):
         kabu_re_exp = "(?:株式会社|有限会社|\(株\)|\（株\）|\(有\)|\（有\）)"
@@ -789,31 +614,47 @@ limit 1
         org_bukkens = self.get_bukkens_for_detail(build_type,other_where)
         org_size = len(org_bukkens)
 
+        new_bukkens = []
+        bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
+        
         while len(org_bukkens) >= parallel_size:
             parallels = []
             i = 0
             while i < parallel_size:
 
-                calced = org_size - len(org_bukkens) 
+                calced = org_size - len(org_bukkens)
                 if calced % 100 == 0:
                     logger.info("%s %d/%d" % (build_type,calced,org_size))
 
                 # refer to https://pystyle.info/python-concurrent-futures/
-                
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                 # with concurrent.futures.ProcessPoolExecutor() as executor:
                     future = executor.submit(self.parse_bukken_detail,
                                              org_bukkens.pop() )
                     parallels.append(future)
                     i += 1
+
+            datetime_now = datetime.datetime.now()
             
             for parallel in parallels:
                 bukken_detail = parallel.result()
                 if not bukken_detail:
                     continue
-                self.save_bukken_detail(bukken_detail["url"], bukken_detail)
+
+                bukken_detail["update_time"] = datetime_now
+                new_bukkens.append( bukken_detail )
+
+            if len(new_bukkens) >= bulk_insert_size:
+                util_db = Db()
+                util_db.bulk_update(
+                    "suumo_bukken",
+                    ["url"],
+                    ["url","shop","total_house","house_for_sale",
+                     "show_date","update_time"],
+                    new_bukkens )
+                new_bukkens = []
                 
-        parallels = []
+
         if len(org_bukkens):
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 future = executor.submit(self.parse_bukken_detail,
@@ -821,59 +662,26 @@ limit 1
                 parallels.append(future)
             i += 1
 
+        datetime_now = datetime.datetime.now()
+        
         for parallel in parallels:
             bukken_detail = parallel.result()
             if not bukken_detail:
                 continue
-            print(bukken_detail)
-            self.save_bukken_detail(bukken_detail["url"], bukken_detail)
+
+            bukken_detail["update_time"] = datetime_now
+            new_bukkens.append( bukken_detail )
+            
+        if len(new_bukkens):
+            util_db = Db()
+            util_db.bulk_update(
+                "suumo_bukken",
+                ["url"],
+                ["url","shop","total_house","house_for_sale",
+                 "show_date","update_time"],
+                new_bukkens )
             
     
-    # def save_bukken_details(self,build_type):
-    #     org_bukkens = self.get_bukkens_for_detail(build_type)
-
-    #     i = 0
-    #     for org_bukken in org_bukkens:
-    #         i += 1
-    #         if i % 100 == 0:
-    #             logger.info("%s %d/%d" % (build_type,i,len(org_bukkens)))
-
-    #         if not org_bukken["url"]:
-    #             continue
-
-    #         bukken_detail = self.parse_bukken_detail( org_bukken )
-    #         if not bukken_detail:
-    #             continue
-            
-    #         self.save_bukken_detail(org_bukken["url"], bukken_detail)
-
-    def save_bukken_detail(self, url,bukken_detail):
-        
-        sql = """
-UPDATE suumo_bukken
-SET shop=%s, total_house=%s, house_for_sale=%s, show_date=%s
-WHERE url=%s
-"""
-        sql_args = (bukken_detail["shop"],
-                    bukken_detail["total_house"],
-                    bukken_detail["house_for_sale"],
-                    bukken_detail["show_date"],
-                    url)
-        #print(sql_args)
-
-        db_conn = self.db_connect()
-        with self.db_cursor(db_conn) as db_cur:
-            try:
-                result = db_cur.execute(sql,sql_args)
-                db_conn.commit()
-            except Exception as e:
-                logger.error(e)
-                logger.error(sql)
-                logger.error(url)
-                return False
-        return True
-        
-        
     def parse_bukken_detail(self, org_bukken):
         if not "url" in org_bukken or not org_bukken["url"]:
             logger.error( "no url" )
@@ -914,17 +722,18 @@ WHERE url=%s
             # なぜか全角文字が紛れ込むようですので NFKC
             ret_data["house_for_sale"] = \
                 unicodedata.normalize("NFKC",re_result.group(1))
+            ret_data["house_for_sale"] = int( ret_data["house_for_sale"] )
         else:
-            ret_data["house_for_sale"] = None
+            ret_data["house_for_sale"] = 0
             
         re_result = re_compile_house_count_2.search(all_text)
         if re_result:
             # なぜか全角文字が紛れ込むようですので NFKC
             ret_data["total_house"] = \
                 unicodedata.normalize("NFKC",re_result.group(1))
-
+            ret_data["total_house"] = int( ret_data["total_house"] )
         else:
-            ret_data["total_house"] = None
+            ret_data["total_house"] = 0
             
         return ret_data
     
@@ -937,10 +746,10 @@ WHERE url=%s
         show_date = "%s-%s-%s" % (re_result.group(1),
                                   re_result.group(2),
                                   re_result.group(3))
-        ret_date = unicodedata.normalize("NFKC",show_date) #全角→半角
-            
+        ret_date_str = unicodedata.normalize("NFKC",show_date) #全角→半角
+        ret_date = datetime.datetime.strptime(ret_date_str, '%Y-%m-%d')
+
         return ret_date
-    
         
     def parse_bukken_shop(self, soup):
         all_text = soup.text.strip().replace("\n"," ")
@@ -1047,4 +856,3 @@ WHERE build_type=%s and check_date >= %s
             ret_datas.append( ret_row )
         return ret_rows
         
-    

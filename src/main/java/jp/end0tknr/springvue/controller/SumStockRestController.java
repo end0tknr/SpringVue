@@ -181,23 +181,6 @@ public class SumStockRestController {
     	return cityProfile;
     }
 
-    @RequestMapping("/api/sumstock/CityProfileByYear/{prefCityName}")
-    public String cityProfileByYear(
-    		@PathVariable("prefCityName") String prefCityName ){
-
-    	try {
-			prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-    	String[] names = prefCityName.split("_");
-
-    	String cityProfile =
-    			cityProfileService.getCityProfileByYear(names[0],names[1]);
-
-    	return cityProfile;
-    }
-
     @RequestMapping("/api/sumstock/NearCityProfiles/{prefCityName}")
     public List<String> nearCityProfiles (
     		@PathVariable("prefCityName") String prefCityName ){
