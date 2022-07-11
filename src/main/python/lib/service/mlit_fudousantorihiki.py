@@ -198,7 +198,6 @@ ORDER BY pref,city
                             "city" : ret_row["city"],
                             "price": price_m,
                             "sold_count" : sold_count })
-                        break
 
         return ret_datas
     
@@ -536,8 +535,6 @@ ORDER BY pref,city,trade_year_q
                 summaries.append(summary)
 
             summary_json = json.dumps(summaries,      ensure_ascii=False)
-            if len(summary_json) > 4000:
-                print( pkeys, len(summary_json))
                 
             if len(pkeys) == 2:
                 ret_datas.append(

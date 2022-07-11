@@ -810,13 +810,10 @@ city                    varchar(16),
 price                   int,
 calc_date               date,
 onsale_count            int,
-onsale_price            bigint,
 onsale_days             int,
 discuss_count           int,
-discuss_price           bigint,
 discuss_days            int,
 sold_count              numeric,
-sold_price              bigint,
 primary key(pref,city,price,calc_date) );
 
 

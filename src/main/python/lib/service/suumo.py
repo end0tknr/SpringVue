@@ -82,7 +82,6 @@ SET pref=%s, city=%s, address=%s
 WHERE address=%s
 """
         sql_args = (pref,city,other,address_org)
-        #print(sql_args)
         
         with self.db_connect() as db_conn:
             with self.db_cursor(db_conn) as db_cur:
@@ -762,7 +761,6 @@ limit 1
             if not re_result:
                 continue
                 
-            # print(re_result.group(1))
             government = re_result.group(2)
             licence    = unicodedata.normalize("NFKC",re_result.group(3))
             licence    = "第%06d号" % (int(licence))

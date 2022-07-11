@@ -50,12 +50,13 @@ class NewBuildService(appbase.AppBase):
 
             if not pref_shop in ret_datas_tmp:
                 ret_datas_tmp[pref_shop] = {
-                    "discuss_count":0, "discuss_price":0, "discuss_days":0,
-                    "onsale_count" :0, "onsale_price" :0, "onsale_days" :0 }
+                    "onsale_page" :0, "onsale_count" :0, "onsale_price" :0, "onsale_days" :0,
+                    "discuss_page":0, "discuss_count":0, "discuss_price":0, "discuss_days":0 }
 
             if not org_bukken["price"]: # 価格未公開の場合、集計対象外
                 continue
             
+            ret_datas_tmp[pref_shop][calc_key+"_discuss"] += 1
             ret_datas_tmp[pref_shop][calc_key+"_count"] += self.house_count(org_bukken)
             ret_datas_tmp[pref_shop][calc_key+"_price"] += org_bukken["price"]
 
@@ -92,13 +93,13 @@ class NewBuildService(appbase.AppBase):
             if not pref_shop in ret_datas_tmp:
                 ret_datas_tmp[pref_shop] = {
                     "calc_date" : calc_date_to,
-                    "discuss_count":0,  "discuss_price":0, "discuss_days":0,
-                    "onsale_count" :0,  "onsale_price" :0, "onsale_days" :0 }
-
+                    "onsale_page" :0, "onsale_count" :0, "onsale_price" :0, "onsale_days" :0,
+                    "discuss_page":0, "discuss_count":0, "discuss_price":0, "discuss_days":0 }
 
             if not org_bukken["price"]: # 価格未公開の場合、集計対象外
                 continue
             
+            ret_datas_tmp[pref_shop][calc_key+"_discuss"] += 1
             ret_datas_tmp[pref_shop][calc_key+"_count"] += self.house_count(org_bukken)
             ret_datas_tmp[pref_shop][calc_key+"_price"] += org_bukken["price"]
 
@@ -135,15 +136,22 @@ class NewBuildService(appbase.AppBase):
             shop_info["calc_date"]  = calc_date_to
 
             for calc_key in ["onsale","discuss"]:
+                page_key  = calc_key+"_page"
                 count_key = calc_key+"_count"
                 price_key = calc_key+"_price"
                 days_key  = calc_key+"_days"
                 
-                if not shop_info[count_key]:
+                tmp_size = 0
+                if page_key in city_info and city_info[page_key]:
+                    tmp_size = city_info[page_key]
+                elif city_info[count_key]:
+                    tmp_size = city_info[count_key]
+
+                if not tmp_size:
                     continue
 
-                avg_price = shop_info[price_key] / shop_info[count_key]
-                avg_days  = shop_info[days_key] / shop_info[count_key]
+                avg_price = shop_info[price_key] / tmp_size
+                avg_days  = shop_info[days_key]  / tmp_size
 
                 shop_info[price_key] = avg_price
                 shop_info[days_key]  = avg_days
@@ -192,15 +200,22 @@ class NewBuildService(appbase.AppBase):
             shop_info["calc_date"]  = calc_date_to
             
             for calc_key in ["onsale","discuss"]:
+                page_key  = calc_key+"_page"
                 count_key = calc_key+"_count"
                 price_key = calc_key+"_price"
                 days_key  = calc_key+"_days"
                 
-                if not shop_info[count_key]:
+                tmp_size = 0
+                if page_key in city_info and city_info[page_key]:
+                    tmp_size = city_info[page_key]
+                elif city_info[count_key]:
+                    tmp_size = city_info[count_key]
+
+                if not tmp_size:
                     continue
 
-                avg_price = shop_info[price_key] / shop_info[count_key]
-                avg_days  = shop_info[days_key] / shop_info[count_key]
+                avg_price = shop_info[price_key] / tmp_size
+                avg_days  = shop_info[days_key]  / tmp_size
                 shop_info[price_key] = avg_price
                 shop_info[days_key]  = avg_days
                 
@@ -224,7 +239,6 @@ class NewBuildService(appbase.AppBase):
         
         today = datetime.datetime.today().date()
         calc_date_from, calc_date_to = self.get_weekly_period(today)
-
         ret_datas_tmp = self.calc_sales_count_by_city_sub({},
                                                           "onsale",
                                                           calc_date_from,
@@ -248,18 +262,25 @@ class NewBuildService(appbase.AppBase):
             city_info["calc_date"]  = calc_date_to
             
             for calc_key in ["onsale","discuss","sold"]:
+                page_key  = calc_key+"_page"
                 count_key = calc_key+"_count"
                 price_key = calc_key+"_price"
                 days_key  = calc_key+"_days"
-                
-                if not city_info[count_key]:
+
+                tmp_size = 0
+                if page_key in city_info and city_info[page_key]:
+                    tmp_size = city_info[page_key]
+                elif city_info[count_key]:
+                    tmp_size = city_info[count_key]
+
+                if not tmp_size:
                     continue
 
-                avg_price = city_info[price_key] / city_info[count_key]
-                city_info[price_key] = avg_price
-                
                 if calc_key != "sold":
-                    avg_days  = city_info[days_key] / city_info[count_key]
+                    avg_price = city_info[price_key] / tmp_size
+                    city_info[price_key] = avg_price
+                
+                    avg_days  = city_info[days_key] / tmp_size
                     city_info[days_key]  = avg_days
                 
 
@@ -303,14 +324,16 @@ class NewBuildService(appbase.AppBase):
             if not pref_city in ret_datas_tmp:
                 ret_datas_tmp[pref_city] = {
                     "calc_date" : calc_date_to,
-                    "discuss_count":0, "discuss_price":0, "discuss_days":0,
+                    "onsale_page" : 0, "discuss_page" :0,
                     "onsale_count" :0, "onsale_price" :0, "onsale_days" :0,
+                    "discuss_count":0, "discuss_price":0, "discuss_days":0,
                     "sold_count"   :0, "sold_price"   :0}
 
 
             if not org_bukken["price"]: # 価格未公開の場合、集計対象外
                 continue
             
+            ret_datas_tmp[pref_city][calc_key+"_page"]  += 1
             ret_datas_tmp[pref_city][calc_key+"_count"] += self.house_count(org_bukken)
             ret_datas_tmp[pref_city][calc_key+"_price"] += org_bukken["price"]
 
@@ -348,10 +371,11 @@ class NewBuildService(appbase.AppBase):
             
             if not pref_city in ret_datas_tmp:
                 ret_datas_tmp[pref_city] = {
-                    "discuss_count":0, "discuss_price":0, "discuss_days":0,
                     "onsale_count" :0, "onsale_price" :0, "onsale_days" :0,
+                    "discuss_count":0, "discuss_price":0, "discuss_days":0,
                     "sold_count"   :0, "sold_price"    :0}
             
+            ret_datas_tmp[pref_city]["sold_page"]  = sold_summary["sold_count"]
             ret_datas_tmp[pref_city]["sold_count"] = sold_summary["sold_count"]
             ret_datas_tmp[pref_city]["sold_price"] = sold_summary["sold_price"]
             
@@ -393,7 +417,6 @@ class NewBuildService(appbase.AppBase):
     def calc_sold_count_by_price_sub(self,
                                     ret_datas_tmp,
                                     calc_date_to):
-
         year_quatars = []
         date_tmp = calc_date_to
         while len(year_quatars) < 3:
@@ -410,6 +433,7 @@ class NewBuildService(appbase.AppBase):
         re_compile = re.compile("_sold_price_m_(\d+)_count")
 
         for sold_summary in sold_summaries:
+            
             pref_city_price = "\t".join([sold_summary["pref"],
                                          sold_summary["city"],
                                          sold_summary["price"] ])
@@ -486,18 +510,25 @@ ORDER BY pref,city,town
             town_info["calc_date"]  = calc_date_to
             
             for calc_key in ["onsale","discuss","sold"]:
+                page_key  = calc_key+"_page"
                 count_key = calc_key+"_count"
                 price_key = calc_key+"_price"
                 days_key  = calc_key+"_days"
                 
-                if not town_info[count_key]:
+                tmp_size = 0
+                if page_key in town_info and town_info[page_key]:
+                    tmp_size = town_info[page_key]
+                elif town_info[count_key]:
+                    tmp_size = town_info[count_key]
+
+                if not tmp_size:
                     continue
 
-                avg_price = town_info[price_key] / town_info[count_key]
-                town_info[price_key] = avg_price
-                
                 if calc_key != "sold":
-                    avg_days  = town_info[days_key] / town_info[count_key]
+                    avg_price = town_info[price_key] / tmp_size
+                    town_info[price_key] = avg_price
+                
+                    avg_days  = town_info[days_key] / tmp_size
                     town_info[days_key]  = avg_days
 
             ret_datas.append(town_info)
@@ -550,13 +581,15 @@ ORDER BY pref,city,town
             if not pref_city_town in ret_datas_tmp:
                 ret_datas_tmp[pref_city_town] = {
                     "calc_date" : calc_date_to,
-                    "discuss_count":0, "discuss_price":0, "discuss_days":0,
+                    "onsale_page"  :0, "discuss_page" :0,
                     "onsale_count" :0, "onsale_price" :0, "onsale_days" :0,
+                    "discuss_count":0, "discuss_price":0, "discuss_days":0,
                     "sold_count"   :0, "sold_price"   :0 }
 
             if not org_bukken["price"]: # 価格未公開の場合、集計対象外
                 continue
             
+            ret_datas_tmp[pref_city_town][calc_key+"_page"]  += 1
             ret_datas_tmp[pref_city_town][calc_key+"_count"] += self.house_count(org_bukken)
             ret_datas_tmp[pref_city_town][calc_key+"_price"] += org_bukken["price"]
 
@@ -604,15 +637,21 @@ ORDER BY pref,city,town
             city_price_info["calc_date"]  = calc_date_to
 
             for calc_key in ["onsale","discuss","sold"]:
+                page_key  = calc_key+"_page"
                 count_key = calc_key+"_count"
                 days_key  = calc_key+"_days"
                 
-                if not city_price_info[count_key]:
-                    city_price_info[count_key] = 0
+                tmp_size = 0
+                if page_key in city_price_info and city_price_info[page_key]:
+                    tmp_size = city_price_info[page_key]
+                elif city_price_info[count_key]:
+                    tmp_size = city_price_info[count_key]
+
+                if not tmp_size:
                     continue
 
                 if calc_key != "sold":
-                    avg_days  = city_price_info[days_key] / city_price_info[count_key]
+                    avg_days  = city_price_info[days_key] / tmp_size
                     city_price_info[days_key]  = avg_days
 
             ret_datas.append(city_price_info)
