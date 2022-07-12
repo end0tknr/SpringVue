@@ -765,7 +765,22 @@ limit 1
             licence    = unicodedata.normalize("NFKC",re_result.group(3))
             licence    = "第%06d号" % (int(licence))
 
-            return shop_service.get_def_by_licence(government,licence)
+            shop_def = shop_service.get_def_by_licence(government,licence)
+            if shop_def:
+                return shop_def
+
+            tmp_msg = "shop_service.find_licence_def() for %s %s" % \
+                (government,licence)
+            logger.info( tmp_msg )
+
+            # DBにない場合、一旦、以下にて検索
+            # https://etsuran.mlit.go.jp/TAKKEN/takkenKensaku.do
+            shop_service.find_licence_def(licence)
+            shop_def = shop_service.get_def_by_licence(government,licence)
+            logger.info( shop_def )
+
+            return shop_def
+                
         return {}
     
     

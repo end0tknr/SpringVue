@@ -1,6 +1,7 @@
 #!python
 # -*- coding: utf-8 -*-
 
+from bs4                           import BeautifulSoup
 from selenium.webdriver.common.by  import By
 from selenium.webdriver.support.ui import Select
 from util.db import Db
@@ -13,15 +14,25 @@ import time
 import unicodedata   # 標準module
 import urllib.request
 
-url_base    = "https://etsuran.mlit.go.jp/TAKKEN/takkenKensaku.do"
+url_base = "https://etsuran.mlit.go.jp/TAKKEN/takkenKensaku.do"
+api_args_tmpl = \
+    "CMD=search&sv_rdoSelect=1&sv_rdoSelectJoken=1&sv_rdoSelectSort=1&"+\
+    "sv_kenCode=&sv_choice=1&sv_sortValue=1&sv_pageListNo1=1&sv_pageListNo2=1&"+\
+    "sv_comNameKanaOnly=&sv_comNameKanjiOnly=&sv_licenseNoKbn=&"+\
+    "sv_licenseNoFrom=%s&sv_licenseNoTo=%s&sv_licenseNo=&sv_dispCount=50&"+\
+    "sv_dispPage=1&resultCount=5&pageCount=1&dispPage=1&caller=TK&rdoSelect=1&"+\
+    "comNameKanaOnly=&comNameKanjiOnly=&rdoSelectJoken=1&licenseNoKbn=&"+\
+    "licenseNoFrom=%s&licenseNoTo=%s&choice=1&kenCode=&sortValue=1&"+\
+    "rdoSelectSort=1&dispCount=50&pageListNo1=1&pageListNo2=1"
+
 insert_cols = ["government","licence","shop"]
-logger = None
+
+logger = appbase.AppBase().get_logger()
 
 class MlitRealEstateShopService(appbase.AppBase):
 
     def __init__(self):
-        global logger
-        logger = self.get_logger()
+        pass
 
     def del_tbl_rows(self):
         logger.info("start")
@@ -33,6 +44,25 @@ class MlitRealEstateShopService(appbase.AppBase):
         util_db = Db()
         util_db.save_tbl_rows("real_estate_shop",insert_cols,rows )
         
+
+    def find_licence_def(self,licence_no):
+
+        licence_no = licence_no.replace("第","").replace("号","")
+        
+        api_args = api_args_tmpl % (licence_no,licence_no,licence_no,licence_no)
+        req_url = url_base + "?" + api_args
+        browser = self.get_browser()
+        time.sleep(2)
+        browser.get(req_url)
+        shops = self.parse_found_shops_pages(browser)
+
+        util_db = Db()
+        util_db.bulk_upsert("real_estate_shop",
+                            ['government','licence'],
+                            ['government','licence','shop'],
+                            ['shop'],
+                            shops )
+        return shops
 
     # selenium の headless modeでは動作しないみたい...
     def download_and_save_master(self):
@@ -54,10 +84,6 @@ class MlitRealEstateShopService(appbase.AppBase):
             
             # parseした不動産会社情報のdb保存
             shops = self.parse_found_shops_pages(browser)
-            # if not shops:
-            #     logger.warning("retry "+ req_url)
-            #     browser.close()
-            #     continue
                 
             self.save_tbl_rows(shops)
 
