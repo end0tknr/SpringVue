@@ -1,0 +1,4 @@
+const app_conf =
+      {"api_base_url":"https://15db.end0tknr.jp/api/api/"
+      };
+

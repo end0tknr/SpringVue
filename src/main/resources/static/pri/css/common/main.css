@@ -140,19 +140,19 @@ h2 {
 @media (min-width: 600px) {
     
     #pc_menu {
-	display: block;
+        display: block;
 
-	margin-left: auto;
+        margin-left: auto;
     }
     #pc_menu ul {
-	list-style-type: none;
-	margin:  0;
-	padding: 0;
-	display: flex;
+        list-style-type: none;
+        margin:  0;
+        padding: 0;
+        display: flex;
     }
 
     #sp_menu_open_container {
-	display: none;
+        display: none;
     }
 
 }
@@ -211,79 +211,68 @@ li a:hover {
     text-decoration: underline;
 }
 
-.popular_imgs_texts li a {
-    display: grid;
-    grid-template-columns: 100px 1fr;
-    gap: 5px;
-}
-
 @media (min-width: 1200px) {
 
     header {
-	width:  1200px;
-	margin: 0 auto;
+        width:  1200px;
+        margin: 0 auto;
     }
 
     .page_top {
-	background: #F2F3F4;
+        background: #F2F3F4;
     }
     .page_top_container {
-	position: relative;
-	width:  1200px;
-	height: 400px;
-	margin: 0 auto;
+        position: relative;
+        width:  1200px;
+        height: 400px;
+        margin: 0 auto;
     }
     .page_top_container li img {
-	height:    400px;
-	max-width: auto;
+        height:    400px;
+        max-width: auto;
     }
     div.description {
-	position: absolute;
-	width: 350px;
-	right:  0px;
-	bottom: 50px;
-	background: #20285A;
-	color: #fff;
-	padding: 25px;
-    }
-    .carousel_buttons {
-	position: absolute;
-	right: 0px;
-	bottom: 0px;
+        position: absolute;
+        width: 350px;
+        right:  0px;
+        bottom: 50px;
+        background: #20285A;
+        color: #fff;
+        padding: 25px;
     }
 
     .page_middle_container {
-	width:  1200px;
-	margin: 0 auto;
+        width:  1200px;
+        margin: 0 auto;
     }
     .page_bottom {
-	width:  1200px;
-	margin: 0 auto;
+        width:  1200px;
+        margin: 0 auto;
     }
     .container_title {
-	width:  1200px;
-	margin: 0 auto;
+        width:  1200px;
+        margin: 0 auto;
     }
 
     footer {
-	width:  1200px;
-	margin: 0 auto;
+        width:  1200px;
+        margin: 0 auto;
     }
     
     #pc_menu a {
-	display: block;
-	line-height:  50px;
-	padding: 0 12px;
-	color: #000;
-	font-weight: bold;
-	text-decoration: none;
-	white-space: nowrap;
+        display: block;
+        line-height:  50px;
+        padding: 0 6px;
+        color: #000;
+        font-weight: bold;
+        text-decoration: none;
+        white-space: nowrap;
     }
     #pc_menu a img {
-	vertical-align: middle;
+        vertical-align: middle;
     }
     #pc_menu a:hover {
-	text-decoration: underline;
+        text-decoration: underline;
     }
 
 }
