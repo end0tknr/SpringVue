@@ -1,0 +1,589 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/site_logo.svg" type="image/svg+xml">
+  <title>15DB</title>
+  <link rel="stylesheet" href="/demo/css/common.css">
+  <link rel="stylesheet" href="/demo/css/newbuild.css">
+  <style>
+    .scroll_tbl2 .sort_keys th       {cursor: pointer;           }
+    .scroll_tbl2 .sort_keys th:hover {text-decoration: underline;}
+    .scroll_tbl2 .col_key            {cursor: pointer;           }
+    .scroll_tbl2 .col_key:hover      {text-decoration: underline;}
+    .scroll_tbl2 td                  {white-space:nowrap;        }
+
+    .scroll_tbl2 .sort_keys th       {cursor: pointer;
+                                      width: 65px;}
+    .scroll_tbl2 tr td    {text-align: right; white-space:nowrap;}
+    
+    .scroll_tbl2 .station div  { width: 50px;
+                                 overflow: hidden;
+                                 text-overflow: ellipsis;
+                                 white-space: nowrap; }
+    
+  </style>
+</head>
+<body>
+  
+  <div class="header_container">
+    <header>
+      <div class="site_logo">
+        <a href="/">
+          <img src="/site_logo.svg"/>
+        </a>
+      </div>
+      
+      <div id="pc_menu">
+        <nav>
+          <ul>
+          </ul>
+        </nav>
+      </div><!--pc_menu-->
+    </header>
+  </div><!--.header_container-->
+  
+  <div class="page_top">
+  </div><!--.page_top-->
+
+  <div id="vueapp">
+    
+    <div class="container_title">
+      <h1 id="pref_name">{{pref_name}}</h1>
+      <div class="container_title_sub">
+        <div>
+          戸建分譲 週次速報
+          <input type="date"
+                 v-model="disp_date"
+                 :min="disp_date_min"
+                 :max="disp_date_max"
+                 :step="7"
+                 v-on:change="init_page_by_disp_date">
+        </div>
+        <div class="container_title_sub_right">
+        </div>
+      </div>
+      <div>
+        ｲﾝﾀｰﾈｯﾄで見た不動産販売状況。
+      </div>
+    </div><!--.container_title-->
+    
+
+  <div class="page_middle">
+    <div class="page_middle_container">
+
+      <div class="two_cols_layout">
+        <div class="column_left">
+          <h2>会社別</h2>
+
+<div class="scroll_tbl2">
+  <table>
+    <tr>
+      <th></th>
+      <th colspan="3">販売中</th>
+      <th colspan="3">商談中</th>
+      <th></th>
+    </tr>
+    <tr class="sort_keys">
+      <th v-on:click="sort_tbl('shop_sales','shop')">会社</th>
+      <th v-on:click="sort_tbl('shop_sales','onsale_count')">数</th>
+      <th v-on:click="sort_tbl('shop_sales','onsale_price')">百万円</th>
+      <th v-on:click="sort_tbl('shop_sales','onsale_days')">販売日数</th>
+      <th v-on:click="sort_tbl('shop_sales','discuss_count')">数</th>
+      <th v-on:click="sort_tbl('shop_sales','discuss_price')">百万円</th>
+      <th v-on:click="sort_tbl('shop_sales','discuss_days')">販売日数</th>
+    </tr>
+    
+    <tr v-for="shop_data in shop_sales">
+      <th><div>{{ shop_data.shop }}</div></th>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.onsale_count_px+'px 3px'}">
+        {{ shop_data.onsale_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.onsale_price_px+'px 3px'}">
+        {{ shop_data.onsale_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.onsale_days+'px 3px'}">
+        {{ shop_data.onsale_days }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.discuss_count_px+'px 3px'}">
+        {{ shop_data.discuss_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.discuss_price_px+'px 3px'}">
+        {{ shop_data.discuss_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.discuss_days+'px 3px'}">
+        {{ shop_data.discuss_days }}</td>
+    </tr>
+  </table>
+</div><!--.scroll_tbl2-->
+
+        </div><!-- .column_left -->
+        
+        <div class="column_right">
+          <h2>市区町村別</h2>
+
+<div class="scroll_tbl2">
+  <table>
+    <tr>
+      <th></th>
+      <th colspan="3">販売中</th>
+      <th colspan="3">商談中</th>
+      <th colspan="2">売約済</th>
+    </tr>
+    <tr class="sort_keys">
+      <th v-on:click="sort_tbl('city_sales','city')">市区町村</th>
+      <th v-on:click="sort_tbl('city_sales','onsale_count')">数</th>
+      <th v-on:click="sort_tbl('city_sales','onsale_price')">百万円</th>
+      <th v-on:click="sort_tbl('city_sales','onsale_days')">販売日数</th>
+      <th v-on:click="sort_tbl('city_sales','discuss_count')">数</th>
+      <th v-on:click="sort_tbl('city_sales','discuss_price')">百万円</th>
+      <th v-on:click="sort_tbl('city_sales','discuss_days')">販売日数</th>
+      <th v-on:click="sort_tbl('city_sales','sold_count')">数</th>
+      <th v-on:click="sort_tbl('city_sales','sold_price')">百万円</th>
+    </tr>
+    
+    <tr v-for="city_data in city_sales">
+      <th>
+        <div class="col_key"
+             v-on:click="load_city_datas(city_data.pref,city_data.city )">
+          {{ city_data.city }}
+        </div>
+      </th>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.onsale_count_px+'px 3px'}">
+        {{ city_data.onsale_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.onsale_price_px+'px 3px'}">
+        {{ city_data.onsale_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.onsale_days+'px 3px'}">
+        {{ city_data.onsale_days }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.discuss_count_px+'px 3px'}">
+        {{ city_data.discuss_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.discuss_price_px+'px 3px'}">
+        {{ city_data.discuss_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.discuss_days+'px 3px'}">
+        {{ city_data.discuss_days }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.sold_count_px+'px 3px'}">
+        {{ city_data.sold_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.sold_price_px+'px 3px'}">
+        {{ city_data.sold_price }}</td>
+    </tr>
+  </table>
+  
+</div><!--.scroll_tbl2-->
+
+        </div><!-- .column_right -->
+      </div><!--.two_cols_layout-->
+      
+    </div><!--.page_middle_container-->
+  </div><!--.page_middle-->
+  
+  <div class="container_title">
+    <h1 id="pref_name">{{city_name}}</h1>
+    <div class="container_title_sub">
+      <div>
+        戸建分譲 週次速報
+      </div>
+      <div class="container_title_sub_right">
+      </div>
+    </div>
+  </div><!--.container_title-->
+    
+  <div class="page_middle">
+    <div class="page_middle_container">
+
+      <div class="two_cols_layout">
+        <div class="column_left">
+          <h2>会社別</h2>
+          
+<div class="scroll_tbl2">
+  <table>
+    <tr>
+      <th></th>
+      <th colspan="3">販売中</th>
+      <th colspan="3">商談中</th>
+      <th></th>
+    </tr>
+    <tr class="sort_keys">
+      <th v-on:click="sort_tbl('shop_city_sales','shop')">会社</th>
+      <th v-on:click="sort_tbl('shop_city_sales','onsale_count')">数</th>
+      <th v-on:click="sort_tbl('shop_city_sales','onsale_price')">百万円</th>
+      <th v-on:click="sort_tbl('shop_city_sales','onsale_days')">販売日数</th>
+      <th v-on:click="sort_tbl('shop_city_sales','discuss_count')">数</th>
+      <th v-on:click="sort_tbl('shop_city_sales','discuss_price')">百万円</th>
+      <th v-on:click="sort_tbl('shop_city_sales','discuss_days')">販売日数</th>
+    </tr>
+    
+    <tr v-for="shop_data in shop_city_sales">
+      <th><div>{{ shop_data.shop }}</div></th>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.onsale_count_px+'px 3px'}">
+        {{ shop_data.onsale_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.onsale_price_px+'px 3px'}">
+        {{ shop_data.onsale_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.onsale_days+'px 3px'}">
+        {{ shop_data.onsale_days }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.discuss_count_px+'px 3px'}">
+        {{ shop_data.discuss_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.discuss_price_px+'px 3px'}">
+        {{ shop_data.discuss_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:shop_data.discuss_days+'px 3px'}">
+        {{ shop_data.discuss_days }}</td>
+    </tr>
+  </table>
+</div><!--.scroll_tbl2-->
+
+        </div><!--.column_left-->
+        
+        <div class="wcolumn_right">
+          <h2>価格別</h2>
+<div class="scroll_tbl2">
+  <table>
+    <tr>
+      <th></th>
+      <th colspan="2">販売中</th>
+      <th colspan="2">商談中</th>
+      <th>売約済</th>
+    </tr>
+    <tr class="sort_keys">
+      <th v-on:click="sort_tbl('price_sales','price')">百万円</th>
+      <th v-on:click="sort_tbl('price_sales','onsale_count')">数</th>
+      <th v-on:click="sort_tbl('price_sales','onsale_days')">販売日数</th>
+      <th v-on:click="sort_tbl('price_sales','discuss_count')">数</th>
+      <th v-on:click="sort_tbl('price_sales','discuss_days')">販売日数</th>
+      <th v-on:click="sort_tbl('price_sales','sold_count')">数</th>
+    </tr>
+    
+    <tr v-for="sales_data in price_sales">
+      <th>
+        <div>{{ sales_data.price }}</div>
+      </th>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:sales_data.onsale_count_px+'px 3px'}">
+        {{ sales_data.onsale_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:sales_data.onsale_days+'px 3px'}">
+        {{ sales_data.onsale_days }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:sales_data.discuss_count_px+'px 3px'}">
+        {{ sales_data.discuss_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:sales_data.discuss_days+'px 3px'}">
+        {{ sales_data.discuss_days }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:sales_data.sold_count_px+'px 3px'}">
+        {{ sales_data.sold_count }}</td>
+    </tr>
+  </table>
+</div><!--.scroll_tbl2-->
+
+        </div><!--.column_right-->
+
+        <div class="column_left">
+          <h2>近隣 市区町村</h2>
+<div class="scroll_tbl2">
+  
+  <table>
+    <tr>
+      <th></th>
+      <th colspan="3">販売中</th>
+      <th colspan="3">商談中</th>
+      <th colspan="2">売約済</th>
+    </tr>
+    <tr class="sort_keys">
+      <th v-on:click="sort_tbl('near_city_sales','city')">市区町村</th>
+      <th v-on:click="sort_tbl('near_city_sales','onsale_count')">数</th>
+      <th v-on:click="sort_tbl('near_city_sales','onsale_price')">百万円</th>
+      <th v-on:click="sort_tbl('near_city_sales','onsale_days')">販売日数</th>
+      <th v-on:click="sort_tbl('near_city_sales','discuss_count')">数</th>
+      <th v-on:click="sort_tbl('near_city_sales','discuss_price')">百万円</th>
+      <th v-on:click="sort_tbl('near_city_sales','discuss_days')">販売日数</th>
+      <th v-on:click="sort_tbl('near_city_sales','sold_count')">数</th>
+      <th v-on:click="sort_tbl('near_city_sales','sold_price')">百万円</th>
+    </tr>
+    
+    <tr v-for="city_data in near_city_sales">
+      <th>
+        <div class="col_key"
+             v-on:click="load_city_datas(city_data.pref,city_data.city )">
+          {{ city_data.city }}
+        </div>
+      </th>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.onsale_count_px+'px 3px'}">
+        {{ city_data.onsale_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.onsale_price_px+'px 3px'}">
+        {{ city_data.onsale_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.onsale_days+'px 3px'}">
+        {{ city_data.onsale_days }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.discuss_count_px+'px 3px'}">
+        {{ city_data.discuss_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.discuss_price_px+'px 3px'}">
+        {{ city_data.discuss_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.discuss_days+'px 3px'}">
+        {{ city_data.discuss_days }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.sold_count_px+'px 3px'}">
+        {{ city_data.sold_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:city_data.sold_price_px+'px 3px'}">
+        {{ city_data.sold_price }}</td>
+    </tr>
+  </table>
+  
+</div><!--.scroll_tbl2-->
+
+        </div><!--.column_left-->
+        
+        <div class="column_right">
+          <h2>地区別</h2>
+          
+<div class="scroll_tbl2">
+  <table>
+    <tr>
+      <th></th>
+      <th colspan="3">販売中</th>
+      <th colspan="3">商談中</th>
+      <th colspan="2">売約済</th>
+
+    </tr>
+    <tr class="sort_keys">
+      <th v-on:click="sort_tbl('town_sales','town')">地区</th>
+      <th v-on:click="sort_tbl('town_sales','onsale_count')">数</th>
+      <th v-on:click="sort_tbl('town_sales','onsale_price')">百万円</th>
+      <th v-on:click="sort_tbl('town_sales','onsale_days')">販売日数</th>
+      <th v-on:click="sort_tbl('town_sales','discuss_count')">数</th>
+      <th v-on:click="sort_tbl('town_sales','discuss_price')">百万円</th>
+      <th v-on:click="sort_tbl('town_sales','discuss_days')">販売日数</th>
+      <th v-on:click="sort_tbl('town_sales','sold_count')">数</th>
+      <th v-on:click="sort_tbl('town_sales','sold_price')">百万円</th>
+    </tr>
+    
+    <tr v-for="town_data in town_sales">
+      <th><div>{{ town_data.town }}</div></th>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_data.onsale_count_px+'px 3px'}">
+        {{ town_data.onsale_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_data.onsale_price_px+'px 3px'}">
+        {{ town_data.onsale_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_data.onsale_days+'px 3px'}">
+        {{ town_data.onsale_days }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_data.discuss_count_px+'px 3px'}">
+        {{ town_data.discuss_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_data.discuss_price_px+'px 3px'}">
+        {{ town_data.discuss_price }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_data.discuss_days+'px 3px'}">
+        {{ town_data.discuss_days }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_data.sold_count_px+'px 3px'}">
+        {{ town_data.sold_count }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_data.sold_price_px+'px 3px'}">
+        {{ town_data.sold_price }}</td>
+    </tr>
+  </table>
+</div><!--.scroll_tbl2-->
+
+        </div><!--.column_right-->
+        
+      </div><!--.two_cols_layout-->
+
+    </div><!--.page_middle_container-->
+  </div><!--.page_middle-->
+
+  <div class="container_title">
+    <div class="container_title_sub">
+      <div>人口や世帯数等の長期トレンド</div>
+      <div class="container_title_sub_right"></div>
+    </div>
+  </div><!--.container_title-->
+
+  <div class="page_bottom">
+    <div class="two_cols_layout">
+      <div class="column_left">
+        <h2>{{city_name}}</h2>
+          
+<table class="city_profile">
+  <tr>
+    <th rowspan="2">人口<div class="sub">2020</div></th>
+    <td class="caption" rowspan="2">20～24</td>
+    <td>{{city_profile["人口_20_24歳_万人"]}}</td>
+    <td class="caption" rowspan="2">25～59</td>
+    <td>{{city_profile["人口_25_59歳_万人"]}}</td>
+    <td class="caption" rowspan="2">60～</td>
+    <td>{{city_profile["人口_60歳_万人"]}}</td><td>(万人/歳)</td>
+  </tr>
+  <tr>
+    <td>{{city_profile["人口_20_24歳_万人_差"]}}</td>
+    <td>{{city_profile["人口_25_59歳_万人_差"]}}</td>
+    <td>{{city_profile["人口_60歳_万人_差"]}}</td>
+    <td>(対2015)</td>
+  </tr>
+  <tr>
+    <th rowspan="2">世帯<div class="sub">2020</div></th>
+    <td class="caption" rowspan="2">総世帯</td><td>{{city_profile["総世帯"]}}</td>
+    <td class="caption" rowspan="2">家族</td><td>{{city_profile["家族世帯"]}}</td>
+    <td class="caption" rowspan="2">単身</td><td>{{city_profile["単身世帯"]}}</td>
+  </tr>
+  <tr>
+    <td>{{city_profile["総世帯_差"]}}</td>
+    <td>{{city_profile["家族世帯_差"]}}</td>
+    <td>{{city_profile["単身世帯_差"]}}</td>
+    <td>(対2015)</td>
+  </tr>
+  <tr>
+    <th>面積</th>
+    <td class="caption" rowspan="2">住居系</td><td>{{city_profile["用途地域_住居系_ha"]}}ha</td>
+    <td class="caption" rowspan="2">商業系</td><td>{{city_profile["用途地域_商業系_ha"]}}ha</td>
+    <td class="caption" rowspan="2">生産緑地</td><td>{{city_profile["生産緑地_ha"]}}ha</td>
+  </tr>
+  <tr>
+    <th>地価</th>
+    <td>{{city_profile["地価_万円_m2_住居系"]}}万/㎡</td>
+    <td>{{city_profile["地価_万円_m2_商業系"]}}万/㎡</td>
+    <td></td>
+  </tr>
+  <tr>
+    <th>所有形態</th>
+    <td class="caption">持家(※)</td><td>{{city_profile["持家率"]}}%</td>
+    <td class="caption">戸建</td><td>{{city_profile["戸建率"]}}%</td>
+    <th>個人年収</th>
+    <td>{{city_profile["年収_百万円"]}}百万</td>
+    <td>※ﾏﾝｼｮﾝ含</td>
+  </tr>
+  <tr>
+    <th>新築入手</th>
+    <td class="caption">分譲(※)</td><td>{{city_profile["入手_分譲"]}}%</td>
+    <td class="caption">新築</td><td>{{city_profile["入手_新築"]}}%</td>
+    <td class="caption">建替</td><td>{{city_profile["入手_建替"]}}%</td>
+  </tr>
+  <tr>
+    <th rowspan="2">外部ﾘﾝｸ</th>
+    <td colspan="2">
+      <a v-bind:href="'https://www.google.com/maps/place/' + city_profile.pref+city_profile.city"
+         target="_blank">GoogleMap</a>
+    </td>
+    <td colspan="2">
+      <a v-bind:href="'http://maps.gsi.go.jp/#12/'+city_profile.lng+'/'+city_profile.lat"
+         target="_blank">地理院地図</a>
+    </td>
+    <td colspan="3">
+      <a v-bind:href="'https://people.mapexpert.net/StatMap?L='+city_profile.mapexpert_id +'&N='+city_profile.city"
+         target="_blank">人口世帯 地価 用途</a>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <a href="https://www1.touki.or.jp/" target="_blank">登記情報提供</a>
+    </td>
+    <td colspan="2">
+    </td>
+    <td colspan="3">
+      <a href="https://www2.wagmap.jp/tokyo_tokeizu/MAP?linkid=85c2a889-96bc-4467-9b76-6a77bcd35030&mid=1"
+         target="_blank">生産緑地(東京のみ)</a>
+    </td>
+  </tr>
+</table>
+
+      </div><!--.column_left-->
+
+      <div class="column_right">
+        <h2>地区別</h2>
+          
+<div class="scroll_tbl2">
+  <table>
+    <tr>
+      <th></th>
+      <th>地価</th>
+      <th colspan="2">最寄駅</th>
+      <th colspan="6">年齢別人口<span class="sub">人/500mﾒｯｼｭ</span></th>
+    </tr>
+    <tr class="sort_keys">
+      <th v-on:click="sort_tbl('town_profiles','town')">地区</th>
+      <th v-on:click="sort_tbl('town_profiles','price')">万/㎡</th>
+      <th v-on:click="sort_tbl('town_profiles','station')">駅</th>
+      <th v-on:click="sort_tbl('town_profiles','from_station')">km</th>
+      <th v-on:click="sort_tbl('town_profiles','pop_2020_20_24')">20～24</th>
+      <th v-on:click="sort_tbl('town_profiles','pop_diff_20_24')"><span class="sub">2030</span></th>
+      <th v-on:click="sort_tbl('town_profiles','pop_2020_25_59')">25～59</th>
+      <th v-on:click="sort_tbl('town_profiles','pop_diff_25_59')"><span class="sub">2030</span></th>
+      <th v-on:click="sort_tbl('town_profiles','pop_2020_60')">60～</th>
+      <th v-on:click="sort_tbl('town_profiles','pop_diff_60')"><span class="sub">2030</span></th>
+    </tr>
+    
+    <tr v-for="town_profile in town_profiles">
+      <th><div>{{ town_profile.town }}</div></th>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_profile.price_px+'px 3px'}">
+        {{ town_profile.price }}</td>
+      <td class="station"><div>{{ town_profile.station }}<div></td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_profile.from_station_px+'px 3px'}">
+        {{ town_profile.from_station }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_profile.pop_2020_20_24_px+'px 3px'}">
+        {{ town_profile.pop_2020_20_24 }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_profile.pop_diff_20_24_px+'px 3px'}">
+        <span v-if="town_profile.pop_diff_20_24>0">+</span>{{ town_profile.pop_diff_20_24 }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_profile.pop_2020_25_59_px+'px 3px'}">
+        {{ town_profile.pop_2020_25_59 }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_profile.pop_diff_25_59_px+'px 3px'}">
+        <span v-if="town_profile.pop_diff_25_59>0">+</span>{{ town_profile.pop_diff_25_59 }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_profile.pop_2020_60_px+'px 3px'}">
+        {{ town_profile.pop_2020_60 }}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_profile.pop_diff_60_px+'px 3px'}">
+        <span v-if="town_profile.pop_diff_60>0">+</span>{{ town_profile.pop_diff_60 }}</td>
+    </tr>
+  </table>
+</div><!--.scroll_tbl2-->
+
+      </div><!--.column_right-->
+</div><!--.two_cols_layout-->
+
+  <footer>
+    &copy; <span class="copyright_year"></span>
+    end0tknr
+  </footer>
+
+  </div><!-- id=vueapp-->
+  
+  <script src="/demo/js/AppBase.js"></script>
+  <script src="https://unpkg.com/vue@next"></script>
+  <script src="/demo/js/app_conf.js"></script>
+  <script src="/demo/js/VueNewBuild.js"></script>
+  <script>
+    window.newbuild = new NewBuild();
+    newbuild.init_page();
+  </script>
+</body>
+</html>

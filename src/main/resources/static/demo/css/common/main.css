@@ -1,0 +1,278 @@
+body {
+    margin: 0;
+    /* font refer from yahoo japan */
+    font-family: 'ヒラギノ角ゴ Pro W3',Hiragino Kaku Gothic Pro,"メイリオ",Meiryo,Osaka,'ＭＳ Ｐゴシック',MS PGothic,sans-serif;
+    font-size: 14px;
+}
+
+
+footer {
+    padding:    16px;
+    text-align: center;
+    color:      #fff;
+    background: #20285A;
+}
+
+header {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+}
+
+.site_logo img {
+    vertical-align: middle;
+    width: 50px;
+    height: 50px;
+    margin-right:   5px;
+}
+
+.site_logo a {
+    margin: 0;
+    font-size:       20px;
+    font-weight:     bold;
+    color:           #000;
+    text-decoration: none;
+    white-space:     nowrap;
+}
+
+.links a::before{
+    content: ">";
+    font-size:10px;
+    background: #666;
+    color: #fff;
+    padding: 0 3px;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+h1 {
+    font-size:   28px;
+    font-weight: normal;
+    margin: 0;
+}
+h2 {
+    font-size:   14px;
+    font-weight: bold;
+    margin: 0;
+    margin-top: 10px;
+    border-top: 2px solid  #333;
+}
+
+.badge {
+    position: absolute;
+    top: -0.5em;
+    left:-0.5em;
+    border-radius: 50%;
+    padding: 3px 10px;
+    font-size: 14px;
+    background: gold;
+}
+
+#sp_menu_open_container {
+    margin-left: auto;
+    text-align: right;
+}
+
+#sp_menu_open_container #open {
+    font-size:   32px;
+    line-height: 64px;
+    cursor: pointer;
+}
+
+#sp_menu_open_container #open.hide {
+  display: none;
+}
+
+#sp_menu_overlay {
+    position: fixed;
+    top:    0;
+    bottom: 0;
+    right:  0;
+    left:   0;
+    background: rgba(255, 255, 255, 0.95);
+    text-align: center;
+    padding:    64px;
+    opacity:    0;
+    pointer-events: none; /* click無効化 */
+    transition: opacity .6s;
+    z-index: 100;
+}
+
+#sp_menu_overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#sp_menu_overlay #close {
+    position: absolute;
+    top:   16px;
+    right: 16px;
+    font-size: 32px;
+    cursor: pointer;
+}
+
+#sp_menu_overlay ul {
+    list-style-type: none;
+    margin:  0;
+    padding: 0;
+}
+
+#sp_menu_overlay li {
+    margin-top: 24px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity .3s, transform .3s;
+}
+
+#sp_menu_overlay.show li {
+    opacity: 1;
+    transform: none;
+}
+
+#pc_menu {
+    display: none;
+}
+
+.container_title {
+    padding-top:    30px;
+    padding-bottom: 10px;
+}
+
+@media (min-width: 600px) {
+    
+    #pc_menu {
+        display: block;
+
+        margin-left: auto;
+    }
+    #pc_menu ul {
+        list-style-type: none;
+        margin:  0;
+        padding: 0;
+        display: flex;
+    }
+
+    #sp_menu_open_container {
+        display: none;
+    }
+
+}
+
+
+.container_title_sub {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+.container_title_sub_right {
+    text-align: right;
+}
+
+.container_title_sub_right a {
+    color: #333;
+    text-decoration: none;
+}
+.container_title_sub_right a:hover {
+    text-decoration: underline;
+}
+.container_title_sub_right a::after {
+    content: url(/pri/img/icon_arrow_short.svg);
+    display: inline-block;
+}
+
+
+.two_cols_layout {
+    display: grid;
+    gap:     5px;
+    grid-template-columns: 1fr 1fr;
+}
+
+.three_cols_layout {
+    display: grid;
+    gap:     5px;
+    grid-template-columns: 2fr 1fr 1fr;
+}
+
+.popular_imgs_texts img {
+    width: 100px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    padding: 4px;
+}
+li a {
+    color: #333;
+    text-decoration: none;
+}
+li a:hover {
+    text-decoration: underline;
+}
+
+@media (min-width: 1200px) {
+
+    header {
+        width:  1200px;
+        margin: 0 auto;
+    }
+
+    .page_top {
+        background: #F2F3F4;
+    }
+    .page_top_container {
+        position: relative;
+        width:  1200px;
+        height: 400px;
+        margin: 0 auto;
+    }
+    .page_top_container li img {
+        height:    400px;
+        max-width: auto;
+    }
+    div.description {
+        position: absolute;
+        width: 350px;
+        right:  0px;
+        bottom: 50px;
+        background: #20285A;
+        color: #fff;
+        padding: 25px;
+    }
+
+    .page_middle_container {
+        width:  1200px;
+        margin: 0 auto;
+    }
+    .page_bottom {
+        width:  1200px;
+        margin: 0 auto;
+    }
+    .container_title {
+        width:  1200px;
+        margin: 0 auto;
+    }
+
+    footer {
+        width:  1200px;
+        margin: 0 auto;
+    }
+    
+    #pc_menu a {
+        display: block;
+        line-height:  50px;
+        padding: 0 6px;
+        color: #000;
+        font-weight: bold;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+    #pc_menu a img {
+        vertical-align: middle;
+    }
+    #pc_menu a:hover {
+        text-decoration: underline;
+    }
+
+}
