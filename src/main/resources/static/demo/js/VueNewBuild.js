@@ -60,7 +60,7 @@ let vue_newbuild = Vue.createApp({
             this.load_price_data(this.pref_name,this.city_name);
             this.load_city_profile(this.pref_name,this.city_name);
             this.load_town_profiles(this.pref_name,this.city_name);
-            this.load_near_city_profiles(this.pref_name,this.city_name);
+            //this.load_near_city_profiles(this.pref_name,this.city_name);
         },
         
         set_pref_name(event){
@@ -192,7 +192,7 @@ class NewBuild extends AppBase {
         vue_obj.load_near_city_data(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_price_data(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_city_profile(vue_obj.pref_name,vue_obj.city_name);
-        vue_obj.load_near_city_profiles(vue_obj.pref_name,vue_obj.city_name);
+        //vue_obj.load_near_city_profiles(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_town_profiles(vue_obj.pref_name,vue_obj.city_name);
     }
     
