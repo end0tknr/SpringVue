@@ -27,11 +27,37 @@ public interface NewBuildRepository {
     List<NewBuildSalesCountByShopEntity> getSalesCountByShop(
     		String prefName,String dateFrom,String dateTo);
 
+    @Select("SELECT scale_sales FROM newbuild_sales_count_by_city_scale "+
+    		"WHERE pref='${prefName}' AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
+    		limit )
+    List<String> getSalesCountByCityScale(
+    		String prefName,String dateFrom,String dateTo);
+
+    @Select("SELECT scale_sales FROM newbuild_sales_count_by_shop_scale "+
+    		"WHERE pref='${prefName}' AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
+    		limit )
+    List<String> getSalesCountByShopScale(
+    		String prefName,String dateFrom,String dateTo);
+
     @Select("SELECT * FROM newbuild_sales_count_by_shop_city "+
     		" WHERE pref='${prefName}' AND city='${cityName}' "+
     		 "AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
     		 limit )
     List<NewBuildSalesCountByShopCityEntity> getSalesCountByShopCity(
+    		String prefName,String cityName,String dateFrom,String dateTo);
+
+    @Select("SELECT scale_sales FROM newbuild_sales_count_by_shop_city_scale "+
+    		" WHERE pref='${prefName}' AND city='${cityName}' "+
+    		 "AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
+    		 limit )
+    List<String> getSalesCountByShopCityScale(
+    		String prefName,String cityName,String dateFrom,String dateTo);
+
+    @Select("SELECT scale_sales FROM newbuild_sales_count_by_town_scale "+
+    		" WHERE pref='${prefName}' AND city='${cityName}' "+
+    		 "AND calc_date BETWEEN '${dateFrom}' AND '${dateTo}' "+
+    		 limit )
+    List<String> getSalesCountByTownScale(
     		String prefName,String cityName,String dateFrom,String dateTo);
 
     @Select("SELECT * FROM newbuild_sales_count_by_city "+

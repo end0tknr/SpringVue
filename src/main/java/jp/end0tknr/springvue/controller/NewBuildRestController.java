@@ -78,6 +78,72 @@ public class NewBuildRestController {
     			prefName,calcDate.get(0),calcDate.get(1) );
     }
 
+    @RequestMapping("/api/newbuild/SalesCountByShopScale/{prefName}")
+    public List<String> salesCountByShopScale(
+    		@PathVariable("prefName") String prefName,
+    		@RequestParam(value="date", required=false) String calcDateStr ){
+
+    	List<String> calcDate = convStr2CalcDate(calcDateStr);
+
+    	try {
+			prefName = URLDecoder.decode(prefName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	return newBuildService.getSalesCountByShopScale(
+    			prefName,calcDate.get(0),calcDate.get(1) );
+    }
+
+    @RequestMapping("/api/newbuild/SalesCountByShopCityScale/{prefCityName}")
+    public List<String> salesCountByShopCityScale(
+    		@PathVariable("prefCityName") String prefCityName,
+    		@RequestParam(value="date", required=false) String calcDateStr ){
+
+    	List<String> calcDate = convStr2CalcDate(calcDateStr);
+
+    	try {
+			prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	String[] names = prefCityName.split("_");
+    	return newBuildService.getSalesCountByShopCityScale(
+    			names[0],names[1],calcDate.get(0),calcDate.get(1) );
+    }
+
+    @RequestMapping("/api/newbuild/SalesCountByTownScale/{prefCityName}")
+    public List<String> salesCountByTownScale(
+    		@PathVariable("prefCityName") String prefCityName,
+    		@RequestParam(value="date", required=false) String calcDateStr ){
+
+    	List<String> calcDate = convStr2CalcDate(calcDateStr);
+
+    	try {
+			prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	String[] names = prefCityName.split("_");
+    	return newBuildService.getSalesCountByTownScale(
+    			names[0],names[1],calcDate.get(0),calcDate.get(1) );
+    }
+
+    @RequestMapping("/api/newbuild/SalesCountByCityScale/{prefName}")
+    public List<String> salesCountByCityScale(
+    		@PathVariable("prefName") String prefName,
+    		@RequestParam(value="date", required=false) String calcDateStr ){
+
+    	List<String> calcDate = convStr2CalcDate(calcDateStr);
+
+    	try {
+			prefName = URLDecoder.decode(prefName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	return newBuildService.getSalesCountByCityScale(
+    			prefName,calcDate.get(0),calcDate.get(1) );
+    }
+
     @RequestMapping("/api/newbuild/SalesCountByShopCity/{prefCityName}")
     public List<NewBuildSalesCountByShopCityEntity> salesCountByShopCity(
     		@PathVariable("prefCityName") String prefCityName,
