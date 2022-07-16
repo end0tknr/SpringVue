@@ -1,4 +1,4 @@
 const app_conf =
-      {"api_base_url":"http://18.182.50.155/api/api/"
+      {"api_base_url":"/api/api/"
       };
 
