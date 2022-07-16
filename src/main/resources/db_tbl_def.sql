@@ -749,6 +749,20 @@ discuss_days            int,
 sold_count              numeric,
 primary key(pref,city,price,calc_date) );
 
+CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_shop_scale (
+pref                    varchar(4),
+shop                    varchar(64),
+calc_date               date,
+scale_sales             varchar(4096),
+primary key(pref,shop,calc_date) );
+
+CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_city_scale (
+pref                    varchar(4),
+city                    varchar(16),
+calc_date               date,
+scale_sales             varchar(4096),
+primary key(pref,city,calc_date) );
+
 
 CREATE TABLE IF NOT EXISTS sumstock_sales_count_by_shop (
 pref                    varchar(4),

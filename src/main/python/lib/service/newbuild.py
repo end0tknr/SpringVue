@@ -6,6 +6,7 @@ from service.suumo                 import SuumoService
 from util.db import Db
 import appbase
 import datetime
+import json
 import re
 
 logger = appbase.AppBase().get_logger()
@@ -50,20 +51,144 @@ class NewBuildService(appbase.AppBase):
 
             if not pref_shop in ret_datas_tmp:
                 ret_datas_tmp[pref_shop] = {
-                    "onsale_page" :0, "onsale_count" :0, "onsale_price" :0, "onsale_days" :0,
-                    "discuss_page":0, "discuss_count":0, "discuss_price":0, "discuss_days":0 }
+                    "onsale_page" :0,   "discuss_page" :0,
+                    "onsale_count":0,   "discuss_count":0,
+                    "onsale_price":0,   "discuss_price":0,
+                    "onsale_days" :0,   "discuss_days" :0 }
 
             if not org_bukken["price"]: # 価格未公開の場合、集計対象外
                 continue
             
-            ret_datas_tmp[pref_shop][calc_key+"_discuss"] += 1
-            ret_datas_tmp[pref_shop][calc_key+"_count"] += self.house_count(org_bukken)
+            ret_datas_tmp[pref_shop][calc_key+"_page"]  += 1
+            ret_datas_tmp[pref_shop][calc_key+"_count"] += \
+                self.house_count(org_bukken)
             ret_datas_tmp[pref_shop][calc_key+"_price"] += org_bukken["price"]
 
             tmp_days = org_bukken["check_date"] - org_bukken["found_date"]
             ret_datas_tmp[pref_shop][calc_key+"_days"] += tmp_days.days
 
         return ret_datas_tmp
+    
+        
+    def calc_sales_count_by_shop_scale_sub(self,
+                                           calc_date_from,
+                                           calc_date_to ):
+        suumo_service = SuumoService()
+        org_bukkens = suumo_service.get_bukkens_by_check_date(
+            self.build_type(),
+            calc_date_from,
+            calc_date_to )
+        
+        ret_datas_tmp = {}
+        for org_bukken in org_bukkens:
+            if not org_bukken["pref"]:
+                org_bukken["pref"] = "?"
+            if not org_bukken["shop"]:
+                org_bukken["shop"] = "?"
+
+            pref_shop = "%s\t%s" % (org_bukken["pref"],org_bukken["shop"])
+
+            if not pref_shop in ret_datas_tmp:
+                ret_datas_tmp[pref_shop] = {
+                    "s4_points" :0,     "s4_total"  :0, "s4_onsale" :0,
+                    "s9_points" :0,     "s9_total"  :0, "s9_onsale" :0,
+                    "s10_points":0,     "s10_total" :0, "s10_onsale" :0 }
+
+            if not org_bukken["total_house"] and org_bukken["house_for_sale"]:
+                org_bukken["total_house"] = org_bukken["house_for_sale"]
+                
+            if org_bukken["total_house"] < 2:
+                continue
+
+            points_key = "s%s_points"
+            total_key  = "s%s_total" 
+            onsale_key = "s%s_onsale"
+            
+            if org_bukken["total_house"] <= 4:
+                points_key = "s%s_points" % (4,)
+                total_key  = "s%s_total"  % (4,)
+                onsale_key = "s%s_onsale" % (4,)
+            elif org_bukken["total_house"] <= 9:
+                points_key = "s%s_points" % (9,)
+                total_key  = "s%s_total"  % (9,)
+                onsale_key = "s%s_onsale" % (9,)
+            else:
+                points_key = "s10_points"
+                total_key  = "s10_total"
+                onsale_key = "s10_onsale"
+
+            ret_datas_tmp[pref_shop][points_key] += 1
+            ret_datas_tmp[pref_shop][total_key]  += org_bukken["total_house"]
+            ret_datas_tmp[pref_shop][onsale_key] += org_bukken["house_for_sale"]
+        return ret_datas_tmp
+    
+    
+    def calc_sales_count_by_city_scale_sub(self,
+                                           calc_date_from,
+                                           calc_date_to ):
+        suumo_service = SuumoService()
+        org_bukkens = suumo_service.get_bukkens_by_check_date(
+            self.build_type(),
+            calc_date_from,
+            calc_date_to )
+        
+        ret_datas_tmp = {}
+        for org_bukken in org_bukkens:
+            if not org_bukken["pref"]:
+                org_bukken["pref"] = "?"
+            if not org_bukken["shop"]:
+                org_bukken["city"] = "?"
+
+            pref_city = "%s\t%s" % (org_bukken["pref"],org_bukken["city"])
+
+            if not pref_city in ret_datas_tmp:
+                ret_datas_tmp[pref_city] = {
+                    "s4_points" :0,     "s4_total"  :0, "s4_onsale" :0,
+                    "s9_points" :0,     "s9_total"  :0, "s9_onsale" :0,
+                    "s10_points":0,     "s10_total" :0, "s10_onsale" :0 }
+
+            if not org_bukken["total_house"] and org_bukken["house_for_sale"]:
+                org_bukken["total_house"] = org_bukken["house_for_sale"]
+                
+            if org_bukken["total_house"] < 2:
+                continue
+
+            points_key = "s%s_points"
+            total_key  = "s%s_total" 
+            onsale_key = "s%s_onsale"
+            
+            if org_bukken["total_house"] <= 4:
+                points_key = "s%s_points" % (4,)
+                total_key  = "s%s_total"  % (4,)
+                onsale_key = "s%s_onsale" % (4,)
+            elif org_bukken["total_house"] <= 9:
+                points_key = "s%s_points" % (9,)
+                total_key  = "s%s_total"  % (9,)
+                onsale_key = "s%s_onsale" % (9,)
+            else:
+                points_key = "s10_points"
+                total_key  = "s10_total"
+                onsale_key = "s10_onsale"
+
+            ret_datas_tmp[pref_city][points_key] += 1
+            ret_datas_tmp[pref_city][total_key]  += org_bukken["total_house"]
+            ret_datas_tmp[pref_city][onsale_key] += org_bukken["house_for_sale"]
+        return ret_datas_tmp
+    
+    
+    def conv_scale_sales_to_list(self,ret_datas_tmp, pkeys, calc_date ):
+        ret_datas = []
+
+        for pkeys_str, scale_sales in ret_datas_tmp.items():
+            (scale_sales[pkeys[0]],
+             scale_sales[pkeys[1]] ) = pkeys_str.split("\t")
+            ret_datas.append({pkeys[0]    : scale_sales[pkeys[0]],
+                              pkeys[1]    : scale_sales[pkeys[1]],
+                              "calc_date" : calc_date,
+                              "scale_sales":json.dumps(scale_sales,
+                                                       ensure_ascii=False)
+                              })
+        return ret_datas
     
         
     def calc_sales_count_by_shop_city_sub(self,
@@ -93,21 +218,69 @@ class NewBuildService(appbase.AppBase):
             if not pref_shop in ret_datas_tmp:
                 ret_datas_tmp[pref_shop] = {
                     "calc_date" : calc_date_to,
-                    "onsale_page" :0, "onsale_count" :0, "onsale_price" :0, "onsale_days" :0,
-                    "discuss_page":0, "discuss_count":0, "discuss_price":0, "discuss_days":0 }
+                    "onsale_page" :0,   "discuss_page" :0,
+                    "onsale_count":0,   "discuss_count":0,
+                    "onsale_price":0,   "discuss_price":0,
+                    "onsale_days" :0,   "discuss_days" :0 }
 
             if not org_bukken["price"]: # 価格未公開の場合、集計対象外
                 continue
             
-            ret_datas_tmp[pref_shop][calc_key+"_discuss"] += 1
-            ret_datas_tmp[pref_shop][calc_key+"_count"] += self.house_count(org_bukken)
+            ret_datas_tmp[pref_shop][calc_key+"_page"]  += 1
+            ret_datas_tmp[pref_shop][calc_key+"_count"] += \
+                self.house_count(org_bukken)
             ret_datas_tmp[pref_shop][calc_key+"_price"] += org_bukken["price"]
 
             tmp_days = org_bukken["check_date"] - org_bukken["found_date"]
             ret_datas_tmp[pref_shop][calc_key+"_days"] += tmp_days.days
 
         return ret_datas_tmp
+    
         
+    def calc_save_sales_count_by_shop_scale(self):
+        logger.info("start")
+        
+        today = datetime.datetime.today().date()
+        calc_date_from, calc_date_to = self.get_weekly_period(today)
+
+        ret_datas_tmp = self.calc_sales_count_by_shop_scale_sub(calc_date_from,
+                                                                calc_date_to)
+        ret_datas = self.conv_scale_sales_to_list( ret_datas_tmp,
+                                                   ["pref","shop"],
+                                                   calc_date_to )
+        util_db = Db()
+        util_db.bulk_upsert(
+            self.tbl_name_header()+"_sales_count_by_shop_scale",
+            ["pref","shop","calc_date"],
+            ["pref","shop","calc_date","scale_sales"],
+            ["scale_sales"],
+            ret_datas )
+        
+        return ret_datas
+
+    
+    def calc_save_sales_count_by_city_scale(self):
+        logger.info("start")
+        
+        today = datetime.datetime.today().date()
+        calc_date_from, calc_date_to = self.get_weekly_period(today)
+
+        ret_datas_tmp = self.calc_sales_count_by_city_scale_sub(calc_date_from,
+                                                                calc_date_to)
+        ret_datas = self.conv_scale_sales_to_list( ret_datas_tmp,
+                                                   ["pref","city"],
+                                                   calc_date_to )
+        util_db = Db()
+        util_db.bulk_upsert(
+            self.tbl_name_header()+"_sales_count_by_city_scale",
+            ["pref","city","calc_date"],
+            ["pref","city","calc_date","scale_sales"],
+            ["scale_sales"],
+            ret_datas )
+        
+        return ret_datas
+
+    
     def calc_save_sales_count_by_shop(self):
         logger.info("start")
         
@@ -132,7 +305,7 @@ class NewBuildService(appbase.AppBase):
             (shop_info["pref"],shop_info["shop"]) = pref_shop.split("\t")
 
             # postgresはdate型の制約が厳しいのですが
-            # pythonが内部的に、datetime.date(2022, 7, 3) のようにcastしれくれます。
+            # pythonが内部的に datetime.date(2022, 7, 3) のようにcastしれくれます
             shop_info["calc_date"]  = calc_date_to
 
             for calc_key in ["onsale","discuss"]:
@@ -142,10 +315,10 @@ class NewBuildService(appbase.AppBase):
                 days_key  = calc_key+"_days"
                 
                 tmp_size = 0
-                if page_key in city_info and city_info[page_key]:
-                    tmp_size = city_info[page_key]
-                elif city_info[count_key]:
-                    tmp_size = city_info[count_key]
+                if page_key in shop_info and shop_info[page_key]:
+                    tmp_size = shop_info[page_key]
+                elif shop_info[count_key]:
+                    tmp_size = shop_info[count_key]
 
                 if not tmp_size:
                     continue
@@ -196,7 +369,7 @@ class NewBuildService(appbase.AppBase):
                 pref_shop.split("\t")
 
             # postgresはdate型の制約が厳しいのですが
-            # pythonが内部的に、datetime.date(2022, 7, 3) のようにcastしれくれます。
+            # pythonが内部的に datetime.date(2022, 7, 3) のようにcastしれくれます
             shop_info["calc_date"]  = calc_date_to
             
             for calc_key in ["onsale","discuss"]:
@@ -206,10 +379,10 @@ class NewBuildService(appbase.AppBase):
                 days_key  = calc_key+"_days"
                 
                 tmp_size = 0
-                if page_key in city_info and city_info[page_key]:
-                    tmp_size = city_info[page_key]
-                elif city_info[count_key]:
-                    tmp_size = city_info[count_key]
+                if page_key in shop_info and shop_info[page_key]:
+                    tmp_size = shop_info[page_key]
+                elif shop_info[count_key]:
+                    tmp_size = shop_info[count_key]
 
                 if not tmp_size:
                     continue
