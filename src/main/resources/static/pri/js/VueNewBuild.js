@@ -6,9 +6,11 @@ let vue_newbuild = Vue.createApp({
             pref_name : "東京都",
             city_name : "",
             shop_sales      : [],
-            city_sales      : [],
-            price_sales     : [],
             shop_city_sales : [],
+            shop_scale_sales: [],
+            city_sales      : [],
+            city_scale_sales: [],
+            price_sales     : [],
             town_sales      : [],
             near_city_sales : [],
             city_profile    : {},
@@ -17,7 +19,9 @@ let vue_newbuild = Vue.createApp({
             sort_tbl_dirs : {
                 "shop_sales"      : {},
                 "shop_city_sales" : {},
+                "shop_scale_sales": {},
                 "city_sales"      : {},
+                "city_scale_sales": {},
                 "price_sales"     : {},
                 "town_sales"      : {},
                 "town_profiles"   : {},
@@ -35,8 +39,6 @@ let vue_newbuild = Vue.createApp({
     methods : {
         load_disp_date_range(){
             newbuild.load_disp_date_range(this);
-            //this.load_shops_data(  this.pref_name );
-            //this.load_cities_data( this.pref_name );
         },
 
         init_page_by_disp_date(){
@@ -55,10 +57,12 @@ let vue_newbuild = Vue.createApp({
             
             this.city_name = city_name;
             this.load_shop_city_data(this.pref_name,this.city_name);
+            this.load_shop_scale_data(this.pref_name);
             this.load_town_data(this.pref_name,this.city_name);
             this.load_near_city_data(this.pref_name,this.city_name);
             this.load_price_data(this.pref_name,this.city_name);
             this.load_city_profile(this.pref_name,this.city_name);
+            this.load_city_scale_data(this.pref_name);
             this.load_town_profiles(this.pref_name,this.city_name);
             this.load_near_city_profiles(this.pref_name,this.city_name);
         },
@@ -92,6 +96,12 @@ let vue_newbuild = Vue.createApp({
         
         load_shops_data(pref){
             newbuild.load_shops_data(pref,this);
+        },
+        load_shop_scale_data(pref){
+            newbuild.load_shop_scale_data(pref,this);
+        },
+        load_city_scale_data(pref){
+            newbuild.load_city_scale_data(pref,this);
         },
         load_shop_city_data(pref,city){
             newbuild.load_shop_city_data(pref,city,this);
@@ -158,18 +168,75 @@ class NewBuild extends AppBase {
         vue_obj.disp_date     = disp_dates[1];
 
         vue_obj.load_shops_data(vue_obj.pref_name);
+        vue_obj.load_shop_scale_data(vue_obj.pref_name);
         vue_obj.load_cities_data(vue_obj.pref_name);
+        vue_obj.load_city_scale_data(vue_obj.pref_name);
     }
     
     async load_shops_data(pref,vue_obj){
         let req_url = this.server_api_base() + "SalesCountByShop/"+
             encodeURIComponent(pref) + "?date=" + vue_obj.disp_date;
 
-        
         let res = await fetch(req_url);
         let shop_sales = await res.json();
         shop_sales = this.conv_counts_for_disp( shop_sales );
         vue_obj.shop_sales = shop_sales;
+    }
+    
+    async load_shop_scale_data(pref,vue_obj){
+        let req_url = this.server_api_base() + "SalesCountByShopScale/"+
+            encodeURIComponent(pref) + "?date=" + vue_obj.disp_date;
+
+        let res = await fetch(req_url);
+        let scale_sales = await res.json();
+        let max_sets = this.scale_sales_max_sets();
+        
+        let scale_sales_tmp = [];
+        for( let scale_sale of scale_sales ) {
+            scale_sale = JSON.parse( scale_sale );
+            
+            //最大値算出
+            for( let max_set of max_sets ) {
+                for( let atri_key of max_set.atri_keys ){
+                    if( scale_sale[atri_key] <= max_set.max ){
+                        continue
+                    }
+                    max_set.max = scale_sale[atri_key];
+                }
+            }
+            scale_sales_tmp.push( scale_sale );
+        }
+        
+        scale_sales = this.conv_scale_counts_for_disp( scale_sales_tmp );
+        vue_obj.shop_scale_sales = scale_sales;
+    }
+    
+    async load_city_scale_data(pref,vue_obj){
+        let req_url = this.server_api_base() + "SalesCountByCityScale/"+
+            encodeURIComponent(pref) + "?date=" + vue_obj.disp_date;
+
+        let res = await fetch(req_url);
+        let scale_sales = await res.json();
+        let max_sets = this.scale_sales_max_sets();
+        
+        let scale_sales_tmp = [];
+        for( let scale_sale of scale_sales ) {
+            scale_sale = JSON.parse( scale_sale );
+            
+            //最大値算出
+            for( let max_set of max_sets ) {
+                for( let atri_key of max_set.atri_keys ){
+                    if( scale_sale[atri_key] <= max_set.max ){
+                        continue
+                    }
+                    max_set.max = scale_sale[atri_key];
+                }
+            }
+            scale_sales_tmp.push( scale_sale );
+        }
+        
+        scale_sales = this.conv_scale_counts_for_disp( scale_sales_tmp );
+        vue_obj.city_scale_sales = scale_sales;
     }
     
     async load_cities_data(pref,city, vue_obj){
@@ -260,6 +327,18 @@ class NewBuild extends AppBase {
                  '新築_世帯主_年齢_24',         '新築_世帯主_年齢_25_34',
                  '新築_世帯主_年齢_35_44',      '新築_世帯主_年齢_45_54',
                  '新築_世帯主_年齢_55_64',      '新築_世帯主_年齢_65']},
+        ];
+        return max_sets;
+    }
+
+    scale_sales_max_sets(){
+        let max_sets = [
+            {"key_name" :"points", "max":0,
+             "atri_keys":['s4_points','s9_points','s10_points']},
+            {"key_name" :"total", "max":0,
+             "atri_keys":['s4_total','s9_total','s10_total']},
+            {"key_name" :"onsale", "max":0,
+             "atri_keys":['s4_onsale','s9_onsale','s10_onsale']}
         ];
         return max_sets;
     }
@@ -420,11 +499,16 @@ class NewBuild extends AppBase {
         city_profile["持家率"] = Math.round(city_profile["持家率"] *100);
         
         let tmp_sum =
-            city_profile["入手_分譲"] + city_profile["入手_新築"] + city_profile["入手_建替"];
+            city_profile["入手_分譲"] +
+            city_profile["入手_新築"] +
+            city_profile["入手_建替"];
         
-        city_profile["入手_分譲"] = Math.round(city_profile["入手_分譲"] / tmp_sum *100);
-        city_profile["入手_新築"] = Math.round(city_profile["入手_新築"] / tmp_sum *100);
-        city_profile["入手_建替"] = Math.round(city_profile["入手_建替"] / tmp_sum *100);
+        city_profile["入手_分譲"] =
+            Math.round(city_profile["入手_分譲"] / tmp_sum *100);
+        city_profile["入手_新築"] =
+            Math.round(city_profile["入手_新築"] / tmp_sum *100);
+        city_profile["入手_建替"] =
+            Math.round(city_profile["入手_建替"] / tmp_sum *100);
         
         let atri_keys =
             ["人口_20_24歳_万人","人口_25_59歳_万人",,"人口_60歳_万人",
@@ -452,10 +536,8 @@ class NewBuild extends AppBase {
                 city_profile[atri_key].toLocaleString();
         }
         city_profile["mapexpert_id"] =
-            city_profile["citycode"].substr( 0, city_profile["citycode"].length-1 );
-        
-        
-        //console.log(city_profile);
+            city_profile["citycode"].substr( 0,city_profile["citycode"].length-1);
+
         vue_obj.city_profile = city_profile;
     }
     
@@ -536,6 +618,52 @@ class NewBuild extends AppBase {
         // sort
         sales_counts = sales_counts.sort(function(a, b) {
             return b["discuss_count"] - a["discuss_count"];
+        });
+        
+        let atri_min_max = {}
+        for( let atri_key of atri_keys ) {
+            let atri_list = Array.from( atri_sets[atri_key] );
+            atri_min_max[atri_key] =
+                [Math.min(...atri_list), Math.max(...atri_list)]
+        }
+        
+        for( let sales_count of sales_counts ) {
+            for( let atri_key of atri_keys ) {
+                
+                let graph_bar_key = atri_key + "_px";
+                sales_count[graph_bar_key] =
+                    this.calc_graph_bar_px(sales_count[atri_key],
+                                           atri_min_max[atri_key][0],
+                                           atri_min_max[atri_key][1],
+                                           50 );
+                //数値の3桁区切り化
+                sales_count[atri_key] =
+                    Number(sales_count[atri_key]).toLocaleString();
+            }
+        }
+        return sales_counts;
+    }
+    
+    conv_scale_counts_for_disp( sales_counts ){
+        // 最大/最小値を算出する為の準備
+        let atri_sets = {}
+        const atri_keys = ["s4_points",  "s9_points",  "s10_points",
+                           "s4_total",   "s9_total",   "s10_total",
+                           "s4_onsale",  "s9_onsale",  "s10_onsale"]
+        
+        for( let atri_key of atri_keys ) {
+            atri_sets[atri_key] = new Set();
+        }
+        
+        for( let sales_count of sales_counts ) {
+            for( let atri_key of atri_keys ) {
+                atri_sets[atri_key].add( sales_count[atri_key] );
+            }
+        }
+        
+        // sort
+        sales_counts = sales_counts.sort(function(a, b) {
+            return b["s10_points"] - a["s10_points"];
         });
         
         let atri_min_max = {}
