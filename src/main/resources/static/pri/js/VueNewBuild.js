@@ -5,28 +5,32 @@ let vue_newbuild = Vue.createApp({
         return {
             pref_name : "東京都",
             city_name : "",
-            shop_sales      : [],
-            shop_city_sales : [],
-            shop_scale_sales: [],
-            city_sales      : [],
-            city_scale_sales: [],
-            price_sales     : [],
-            town_sales      : [],
-            near_city_sales : [],
-            city_profile    : {},
-            town_profiles   : [],
-            near_city_profiles : [],
+            shop_sales            : [],
+            shop_scale_sales      : [],
+            shop_city_sales       : [],
+            shop_city_scale_sales : [],
+            city_sales            : [],
+            city_scale_sales      : [],
+            price_sales           : [],
+            town_sales            : [],
+            town_scale_sales      : [],
+            near_city_sales       : [],
+            city_profile          : {},
+            town_profiles         : [],
+            near_city_profiles    : [],
             sort_tbl_dirs : {
-                "shop_sales"      : {},
-                "shop_city_sales" : {},
-                "shop_scale_sales": {},
-                "city_sales"      : {},
-                "city_scale_sales": {},
-                "price_sales"     : {},
-                "town_sales"      : {},
-                "town_profiles"   : {},
-                "near_city_sales" : {},
-                "near_city_profiles" : {} },
+                "shop_sales"            : {},
+                "shop_scale_sales"      : {},
+                "shop_city_sales"       : {},
+                "shop_city_scale_sales" : {},
+                "city_sales"            : {},
+                "city_scale_sales"      : {},
+                "price_sales"           : {},
+                "town_sales"            : {},
+                "town_scale_sales"      : {},
+                "town_profiles"         : {},
+                "near_city_sales"       : {},
+                "near_city_profiles"    : {} },
             show_jpn_map: false,
             disp_date    : "",
             disp_date_min: "",
@@ -42,7 +46,7 @@ let vue_newbuild = Vue.createApp({
         },
 
         init_page_by_disp_date(){
-            this.load_shops_data(  this.pref_name );
+            this.load_shops_data( this.pref_name );
             this.load_cities_data( this.pref_name );
         },
         
@@ -51,18 +55,18 @@ let vue_newbuild = Vue.createApp({
             if ( this.pref_name != pref_name){
                 this.pref_name = pref_name;
                 this.load_shops_data(this.pref_name);
-                this.load_cities_data(this.pref_name, city_name);
+                this.load_cities_data(this.pref_name );
                 return;
             }
             
             this.city_name = city_name;
             this.load_shop_city_data(this.pref_name,this.city_name);
-            this.load_shop_scale_data(this.pref_name);
-            this.load_town_data(this.pref_name,this.city_name);
+            this.load_shop_city_scale_data(this.pref_name,this.city_name);
             this.load_near_city_data(this.pref_name,this.city_name);
             this.load_price_data(this.pref_name,this.city_name);
             this.load_city_profile(this.pref_name,this.city_name);
-            this.load_city_scale_data(this.pref_name);
+            this.load_town_data(this.pref_name,this.city_name);
+            this.load_town_scale_data(this.pref_name,this.city_name);
             this.load_town_profiles(this.pref_name,this.city_name);
             this.load_near_city_profiles(this.pref_name,this.city_name);
         },
@@ -90,18 +94,28 @@ let vue_newbuild = Vue.createApp({
             
             this.load_shops_data(this.pref_name);
             this.load_cities_data(this.pref_name);
-            
+            this.load_city_scale_data(this.pref_name);
             this.hide_jpn_map_modal();
         },
         
         load_shops_data(pref){
             newbuild.load_shops_data(pref,this);
+            newbuild.load_shop_scale_data(pref,this);
         },
         load_shop_scale_data(pref){
             newbuild.load_shop_scale_data(pref,this);
         },
+        load_shop_city_scale_data(pref,city){
+            newbuild.load_shop_city_scale_data(pref,city,this);
+        },
         load_city_scale_data(pref){
             newbuild.load_city_scale_data(pref,this);
+        },
+        load_shop_city_scale_data(pref,city){
+            newbuild.load_shop_city_scale_data(pref,city,this);
+        },
+        load_town_scale_data(pref,city){
+            newbuild.load_town_scale_data(pref,city,this);
         },
         load_shop_city_data(pref,city){
             newbuild.load_shop_city_data(pref,city,this);
@@ -255,11 +269,13 @@ class NewBuild extends AppBase {
         }
         
         vue_obj.load_shop_city_data(vue_obj.pref_name,vue_obj.city_name);
-        vue_obj.load_town_data(vue_obj.pref_name,vue_obj.city_name);
+        vue_obj.load_shop_city_scale_data(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_near_city_data(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_price_data(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_city_profile(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_near_city_profiles(vue_obj.pref_name,vue_obj.city_name);
+        vue_obj.load_town_data(vue_obj.pref_name,vue_obj.city_name);
+        vue_obj.load_town_scale_data(vue_obj.pref_name,vue_obj.city_name);
         vue_obj.load_town_profiles(vue_obj.pref_name,vue_obj.city_name);
     }
     
@@ -272,6 +288,64 @@ class NewBuild extends AppBase {
         let town_sales = await res.json();
         town_sales = this.conv_counts_for_disp( town_sales );
         vue_obj.town_sales = town_sales;
+    }
+    
+    async load_town_scale_data(pref,city, vue_obj){
+        let req_url = this.server_api_base() + "SalesCountByTownScale/"+
+            encodeURIComponent(pref) +"_"+ encodeURIComponent(city)
+            + "?date=" + vue_obj.disp_date;
+
+        let res = await fetch(req_url);
+        let scale_sales = await res.json();
+        let max_sets = this.scale_sales_max_sets();
+        
+        let scale_sales_tmp = [];
+        for( let scale_sale of scale_sales ) {
+            scale_sale = JSON.parse( scale_sale );
+            
+            //最大値算出
+            for( let max_set of max_sets ) {
+                for( let atri_key of max_set.atri_keys ){
+                    if( scale_sale[atri_key] <= max_set.max ){
+                        continue
+                    }
+                    max_set.max = scale_sale[atri_key];
+                }
+            }
+            scale_sales_tmp.push( scale_sale );
+        }
+        
+        scale_sales = this.conv_scale_counts_for_disp( scale_sales_tmp );
+        vue_obj.town_scale_sales = scale_sales;
+    }
+    
+    async load_shop_city_scale_data(pref,city, vue_obj){
+        let req_url = this.server_api_base() + "SalesCountByShopCityScale/"+
+            encodeURIComponent(pref) +"_"+ encodeURIComponent(city)
+            + "?date=" + vue_obj.disp_date;
+
+        let res = await fetch(req_url);
+        let scale_sales = await res.json();
+        let max_sets = this.scale_sales_max_sets();
+        
+        let scale_sales_tmp = [];
+        for( let scale_sale of scale_sales ) {
+            scale_sale = JSON.parse( scale_sale );
+            
+            //最大値算出
+            for( let max_set of max_sets ) {
+                for( let atri_key of max_set.atri_keys ){
+                    if( scale_sale[atri_key] <= max_set.max ){
+                        continue
+                    }
+                    max_set.max = scale_sale[atri_key];
+                }
+            }
+            scale_sales_tmp.push( scale_sale );
+        }
+        
+        scale_sales = this.conv_scale_counts_for_disp( scale_sales_tmp );
+        vue_obj.shop_city_scale_sales = scale_sales;
     }
     
     async load_shop_city_data(pref,city,vue_obj){
@@ -697,4 +771,3 @@ class NewBuild extends AppBase {
         return Math.ceil(val / val_max * bar_max);
     }
 }
-
