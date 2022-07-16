@@ -89,14 +89,14 @@ footer {        padding:    16px;
                         gap:     5px;
                         grid-template-columns: 1fr 1fr; }
 
+    .
     .page_top {         background: #F2F3F4;    }
     .page_top_container {position: relative;
                          width:  1200px;
                          height: 400px;
                          margin: 0 auto;        }
-
-    .page_middle_container {    width:  1200px;
-                                margin: 0 auto; }
+    .container_title,
+    .page_middle_container,
     .page_bottom {              width:  1200px;
                                 margin: 0 auto; }
 }

@@ -813,7 +813,6 @@ SELECT * FROM suumo_bukken
 WHERE build_type=%s and (check_date BETWEEN %s AND %s)
       and shop is not null;
 """
-
         sql_args = (build_type, date_from, date_to )
         
         with self.db_connect() as db_conn:

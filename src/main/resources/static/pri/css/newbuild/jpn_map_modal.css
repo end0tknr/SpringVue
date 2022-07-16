@@ -25,7 +25,7 @@
                 margin: 0 auto;
                 z-index: 2; }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 700px) {
     #jpn_map_modal {width: 100%;}
 }
 
@@ -201,7 +201,7 @@
         レスポンシブ
 ****************************************/
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 700px) {
     #japan-map p.area-title {
         display: inline-block;
         width: 100%;
