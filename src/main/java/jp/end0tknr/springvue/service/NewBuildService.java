@@ -31,6 +31,26 @@ public class NewBuildService {
     	return newBuildRepository.getSalesCountByShop(prefName, dateFrom, dateTo );
     }
 
+    public  List<String> getSalesCountByShopScale(
+    		String prefName, String dateFrom, String dateTo) {
+    	return newBuildRepository.getSalesCountByShopScale(prefName, dateFrom, dateTo );
+    }
+
+    public  List<String> getSalesCountByShopCityScale(
+    		String prefName, String cityName, String dateFrom, String dateTo) {
+    	return newBuildRepository.getSalesCountByShopCityScale(prefName, cityName, dateFrom, dateTo );
+    }
+
+    public  List<String> getSalesCountByTownScale(
+    		String prefName, String cityName, String dateFrom, String dateTo) {
+    	return newBuildRepository.getSalesCountByTownScale(prefName, cityName, dateFrom, dateTo );
+    }
+
+    public  List<String> getSalesCountByCityScale(
+    		String prefName, String dateFrom, String dateTo) {
+    	return newBuildRepository.getSalesCountByCityScale(prefName, dateFrom, dateTo );
+    }
+
     public  List<NewBuildSalesCountByShopCityEntity>
     getSalesCountByShopCity(
     		String prefName, String cityName, String dateFrom, String dateTo) {
