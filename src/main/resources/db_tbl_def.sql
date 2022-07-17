@@ -626,6 +626,17 @@ address_other   varchar(64),
 primary key(site,client_ip) );
 
 
+CREATE TABLE IF NOT EXISTS client_ip_pos (
+client_ip       varchar(16),
+ip_type         varchar(8),
+lng             double precision,
+lat             double precision,
+pref            varchar(4),
+city            varchar(16),
+address_other   varchar(64),
+primary key(client_ip) );
+
+
 CREATE TABLE IF NOT EXISTS soumu_zeisei_j51_20_b (
 pref                    varchar(4),
 city                    varchar(8),
