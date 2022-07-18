@@ -9,6 +9,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,22 +20,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jp.end0tknr.springvue.entity.ClientIpPosEntity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByCityEntity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByPriceEntity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCityEntity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopEntity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByTownEntity;
 import jp.end0tknr.springvue.service.CityProfileService;
+import jp.end0tknr.springvue.service.ClientIpPosService;
 import jp.end0tknr.springvue.service.NewBuildService;
 
 @RestController
 @CrossOrigin
 public class NewBuildRestController {
 
+	 Logger logger = LoggerFactory.getLogger( NewBuildRestController.class );
+
     @Autowired
     NewBuildService newBuildService;
     @Autowired
     CityProfileService cityProfileService;
+
+    @Autowired
+    ClientIpPosService clientIpPosService;
 
     List<String> convStr2CalcDate(String dateStr) {
         SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -53,6 +64,19 @@ public class NewBuildRestController {
         		sdFormat.format(dateFrom),
         		sdFormat.format(dateTo) );
     }
+
+    @RequestMapping("/api/newbuild/ClientPos")
+    public ClientIpPosEntity clientIpPos(HttpServletRequest request){
+    	ClientIpPosEntity clientIpPos = clientIpPosService.getClientPos(request);
+    	logger.info( clientIpPos.toString() );
+    	return clientIpPos;
+    }
+
+    @RequestMapping("/api/newbuild/ClientIp")
+    public String clientIp(HttpServletRequest request){
+    	return clientIpPosService.getClientIp(request);
+    }
+
 
     @RequestMapping("/api/newbuild/DispDateRange")
     public String[] dispDateRange(){
