@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jp.end0tknr.springvue.entity.CityEntity;
-import jp.end0tknr.springvue.entity.ClientIpPosEntity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByCityEntity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByPriceEntity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCityEntity;
@@ -79,18 +79,11 @@ public class NewBuildRestController {
     	return cityService.getByLatLng(lat,lng);
     }
 
-    @RequestMapping("/api/newbuild/ClientPos")
-    public ClientIpPosEntity clientIpPos(HttpServletRequest request){
-    	ClientIpPosEntity clientIpPos = clientIpPosService.getClientPos(request);
-    	logger.info( clientIpPos.toString() );
-    	return clientIpPos;
-    }
-
     @RequestMapping("/api/newbuild/ClientIp")
-    public String clientIp(HttpServletRequest request){
-    	return clientIpPosService.getClientIp(request);
+    public Map<String, String> clientIp(HttpServletRequest request){
+    	Map<String, String> ipInfo = clientIpPosService.getClientIp(request);
+    	return ipInfo;
     }
-
 
     @RequestMapping("/api/newbuild/DispDateRange")
     public String[] dispDateRange(){
