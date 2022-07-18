@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jp.end0tknr.springvue.entity.CityEntity;
 import jp.end0tknr.springvue.entity.ClientIpPosEntity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByCityEntity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByPriceEntity;
@@ -27,6 +28,7 @@ import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopCityEntity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByShopEntity;
 import jp.end0tknr.springvue.entity.NewBuildSalesCountByTownEntity;
 import jp.end0tknr.springvue.service.CityProfileService;
+import jp.end0tknr.springvue.service.CityService;
 import jp.end0tknr.springvue.service.ClientIpPosService;
 import jp.end0tknr.springvue.service.NewBuildService;
 
@@ -39,8 +41,9 @@ public class NewBuildRestController {
     @Autowired
     NewBuildService newBuildService;
     @Autowired
+    CityService cityService;
+    @Autowired
     CityProfileService cityProfileService;
-
     @Autowired
     ClientIpPosService clientIpPosService;
 
@@ -63,6 +66,17 @@ public class NewBuildRestController {
         return Arrays.asList(
         		sdFormat.format(dateFrom),
         		sdFormat.format(dateTo) );
+    }
+
+    @RequestMapping("/api/newbuild/CityByLatLng/{latLng}")
+    public CityEntity cityByLatLng(
+    		@PathVariable("latLng") String latLng ){
+    	String coordStr[] = latLng.split(",");
+
+    	float lat = Float.parseFloat( coordStr[0] );
+    	float lng = Float.parseFloat( coordStr[1] );
+
+    	return cityService.getByLatLng(lat,lng);
     }
 
     @RequestMapping("/api/newbuild/ClientPos")
