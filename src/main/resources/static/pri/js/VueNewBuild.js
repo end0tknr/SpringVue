@@ -5,8 +5,6 @@ let vue_newbuild = Vue.createApp({
         return {
             pref_name : "",
             city_name : "",
-            client_ip : "",
-            ip_type   : "",
             shop_sales            : [],
             shop_scale_sales      : [],
             shop_city_sales       : [],
@@ -180,9 +178,7 @@ class NewBuild extends AppBase {
     }
     
     async chk_client(vue_obj){
-        let ret_pos = await this.load_client_pos();
-        vue_obj.client_ip = ret_pos.client_ip;
-        vue_obj.ip_type   = ret_pos.ip_type;
+        let ret_pos = await this.load_client_ip();
         if(ret_pos.ip_type=="private"){
             vue_obj.show_jpn_map_modal();
             return;
@@ -190,9 +186,9 @@ class NewBuild extends AppBase {
 
         vue_obj.show_gps_modal();
         
-        let latlng_err;
+        let latlng_pos;
         try {
-            let latlng_pos = await this.get_latlng();
+            latlng_pos = await this.get_latlng();
         } catch(err) {
             let error_msg = ["chk_client()",
                              "err_code=",
@@ -201,25 +197,25 @@ class NewBuild extends AppBase {
             this.error_to_server( error_msg );
             return;
         }
+
+        let req_url = this.server_api_base() + "CityByLatLng/"+
+            latlng_pos.coords.latitude +","+latlng_pos.coords.longitude;
+        let res = await fetch(req_url);
+        let pref_city = await res.json();
         
-        let pref_city = find_pref_city_by_latlng(latlng_pos.coords.latitude,
-                                                 latlng_pos.coords.longitude);
-        vue_obj.pref = pref_city["pref"];
+        vue_obj.pref_name = pref_city["pref"];
+
+        vue_obj.load_shops_data(vue_obj.pref_name);
+        vue_obj.load_cities_data(vue_obj.pref_name);
+        vue_obj.load_city_scale_data(vue_obj.pref_name);
         vue_obj.hide_gps_modal();
     }
     
-    async find_pref_city_by_latlng(lat,lng){
-        let req_url = this.server_api_base() + "CityByLatLng/"+lat+","+lng;
+    async load_client_ip(){
+        let req_url = this.server_api_base() + "ClientIp";
         let res = await fetch(req_url);
-        let pref_city = await res.json();
-        return pref_city;
-    }
-    
-    async load_client_pos(){
-        let req_url = this.server_api_base() + "ClientPos";
-        let res = await fetch(req_url);
-        let client_pos = await res.json();
-        return client_pos;
+        let client_ip = await res.json();
+        return client_ip;
     }
     
     async load_disp_date_range(vue_obj){
@@ -231,10 +227,10 @@ class NewBuild extends AppBase {
         vue_obj.disp_date_max = disp_dates[1];
         vue_obj.disp_date     = disp_dates[1];
 
-        vue_obj.load_shops_data(vue_obj.pref_name);
-        vue_obj.load_shop_scale_data(vue_obj.pref_name);
-        vue_obj.load_cities_data(vue_obj.pref_name);
-        vue_obj.load_city_scale_data(vue_obj.pref_name);
+        // vue_obj.load_shops_data(vue_obj.pref_name);
+        // vue_obj.load_shop_scale_data(vue_obj.pref_name);
+        // vue_obj.load_cities_data(vue_obj.pref_name);
+        // vue_obj.load_city_scale_data(vue_obj.pref_name);
     }
     
     async load_shops_data(pref,vue_obj){
