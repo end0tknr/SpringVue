@@ -1,18 +1,17 @@
 /* https://dotinstall.com/lessons/modal_js_v3 */
 /* http://takuri.realwork.jp/freematerials/2607 */
 
-#open_jpn_map_modal { cursor: pointer;}
 #close_jpn_map_modal { cursor: pointer;
                        width: 150px;
                        border: 1px solid #ccc;
                        border-radius: 4px;
                        text-align: center;
                        margin: 16px auto 0; }
-#mask { background: rgba(0, 0, 0, 0.4);
-        position: fixed;
-        top:0; bottom:0; right:0; left:0;
-        z-index: 1; }
-#mask.hidden { display: none; }
+#jpn_map_mask { background: rgba(0, 0, 0, 0.4);
+                position: fixed;
+                top:0; bottom:0; right:0; left:0;
+                z-index: 1; }
+#jpn_map_mask.hidden { display: none; }
 
 #jpn_map_modal {background: #fff;
                 width: 800px;

@@ -3,8 +3,10 @@
 let vue_newbuild = Vue.createApp({
     data(){
         return {
-            pref_name : "東京都",
+            pref_name : "",
             city_name : "",
+            client_ip : "",
+            ip_type   : "",
             shop_sales            : [],
             shop_scale_sales      : [],
             shop_city_sales       : [],
@@ -32,18 +34,17 @@ let vue_newbuild = Vue.createApp({
                 "near_city_sales"       : {},
                 "near_city_profiles"    : {} },
             show_jpn_map: false,
+            show_gps    : false,
             disp_date    : "",
             disp_date_min: "",
             disp_date_max: ""
         }
     },
     mounted(){
-        this.load_disp_date_range();
+        newbuild.load_disp_date_range(this);
+        newbuild.chk_client(this);
     },
     methods : {
-        load_disp_date_range(){
-            newbuild.load_disp_date_range(this);
-        },
 
         init_page_by_disp_date(){
             this.load_shops_data( this.pref_name );
@@ -153,6 +154,12 @@ let vue_newbuild = Vue.createApp({
                                                sort_key,
                                                sort_dir);
         },
+        show_gps_modal(){
+            this.show_gps = true;
+        },
+        hide_gps_modal(){
+            this.show_gps = false;
+        },
         show_jpn_map_modal(){
             this.show_jpn_map = true;
         },
@@ -170,6 +177,49 @@ class NewBuild extends AppBase {
     
     server_api_base(){
         return app_conf["api_base_url"] + "newbuild/"
+    }
+    
+    async chk_client(vue_obj){
+        let ret_pos = await this.load_client_pos();
+        vue_obj.client_ip = ret_pos.client_ip;
+        vue_obj.ip_type   = ret_pos.ip_type;
+        if(ret_pos.ip_type=="private"){
+            vue_obj.show_jpn_map_modal();
+            return;
+        }
+
+        vue_obj.show_gps_modal();
+        
+        let latlng_err;
+        try {
+            let latlng_pos = await this.get_latlng();
+        } catch(err) {
+            let error_msg = ["chk_client()",
+                             "err_code=",
+                             err.code,
+                             err.message].join(" ");
+            this.error_to_server( error_msg );
+            return;
+        }
+        
+        let pref_city = find_pref_city_by_latlng(latlng_pos.coords.latitude,
+                                                 latlng_pos.coords.longitude);
+        vue_obj.pref = pref_city["pref"];
+        vue_obj.hide_gps_modal();
+    }
+    
+    async find_pref_city_by_latlng(lat,lng){
+        let req_url = this.server_api_base() + "CityByLatLng/"+lat+","+lng;
+        let res = await fetch(req_url);
+        let pref_city = await res.json();
+        return pref_city;
+    }
+    
+    async load_client_pos(){
+        let req_url = this.server_api_base() + "ClientPos";
+        let res = await fetch(req_url);
+        let client_pos = await res.json();
+        return client_pos;
     }
     
     async load_disp_date_range(vue_obj){

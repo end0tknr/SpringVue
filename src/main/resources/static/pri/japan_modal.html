@@ -1,8 +1,9 @@
-<div v-show="show_jpn_map" id="mask"></div>
+<div v-show="show_jpn_map" id="jpn_map_mask"></div>
   
 <section v-show="show_jpn_map" id="jpn_map_modal"
          v-on:click="set_pref_name($event)"
          style="display: none;">
+  表示する都道府県を選択してください
   <div id="japan-map" class="clearfix">
     
     <div id="hokkaido-touhoku" class="clearfix">
@@ -102,5 +103,4 @@
     
   </div> <!-- japan-map -->
   
-  <div id="close_jpn_map_modal" v-on:click="hide_jpn_map_modal">close</div>
 </section><!--jpn_map_modal-->

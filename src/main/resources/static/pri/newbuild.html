@@ -15,7 +15,24 @@
     .scroll_tbl2 .col_key:hover      {text-decoration: underline;}
     .scroll_tbl2 td                  {white-space:nowrap;        }
 
-    .open_jpn_map_modal              {cursor: pointer;           }
+    .open_modal_link                 {cursor: pointer;           }
+    #gps_mask { background: rgba(0, 0, 0, 0.4);
+                position: fixed;
+                top:0; bottom:0; right:0; left:0;
+                z-index: 1; }
+    #gps_mask.hidden { display: none; }
+    #gps_modal {background: #fff;
+		width: 400px;
+		padding: 20px;
+		border-radius: 4px;
+		position: absolute;
+		top: 40px;
+		left: 0;
+		right: 0;
+		margin: 0 auto;
+		transition: transform 0.4s;
+		z-index: 2; }
+    
     .scroll_tbl2 .sort_keys th       {cursor: pointer;
                                       width: 65px;}
     .scroll_tbl2 tr td    {text-align: right; white-space:nowrap;}
@@ -58,7 +75,9 @@
                  v-on:change="init_page_by_disp_date">
         </div>
         <div class="container_title_sub_right">
-          <a class="open_jpn_map_modal" v-on:click="show_jpn_map_modal">
+          <a class="open_modal_link" v-on:click="show_gps_modal">
+            GPS</a>
+          <a class="open_modal_link" v-on:click="show_jpn_map_modal">
             都道府県選択</a>
         </div>
       </div>
@@ -173,7 +192,8 @@
     end0tknr
   </footer>
   
-  <!--#include virtual="./map/japan_modal.html" -->
+  <!--#include virtual="./japan_modal.html" -->
+  <!--#include virtual="./gps.html" -->
 
   </div><!-- id=vueapp-->
   
