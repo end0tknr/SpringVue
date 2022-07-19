@@ -20,6 +20,10 @@ public class CityProfileService {
         return cityProfileRepository.getCityProfile(prefName, cityName);
     }
 
+    public  String getBuildYearProfile(String prefName, String cityName) {
+        return cityProfileRepository.getBuildYearProfile(prefName, cityName);
+    }
+
     public  List<String> getNearCityProfiles(
     		String prefName, String cityName) {
         return cityProfileRepository.getNearCityProfiles(prefName, cityName);

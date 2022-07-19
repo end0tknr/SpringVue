@@ -8,9 +8,13 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface CityProfileRepository {
 
-    @Select("SELECT summary FROM city_profile "+
-    		" WHERE pref='${prefName}' AND city='${cityName}'")
-    String getCityProfile(String prefName,String cityName);
+	@Select("SELECT summary FROM city_profile "+
+			" WHERE pref='${prefName}' AND city='${cityName}'")
+	String getCityProfile(String prefName,String cityName);
+
+	@Select("SELECT build_year_summary FROM city_profile "+
+			" WHERE pref='${prefName}' AND city='${cityName}'")
+	String getBuildYearProfile(String prefName,String cityName);
 
     @Select("SELECT summary FROM city_profile tbl1"+
  		   " JOIN near_city tbl2 "+

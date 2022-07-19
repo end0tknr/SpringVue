@@ -277,6 +277,23 @@ public class NewBuildRestController {
     	return cityProfile;
     }
 
+    @RequestMapping("/api/newbuild/CityProfileByBuildYear/{prefCityName}")
+    public String buildYearCityProfile(
+    		@PathVariable("prefCityName") String prefCityName ){
+
+    	try {
+			prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	String[] names = prefCityName.split("_");
+
+    	String cityProfile =
+    			cityProfileService.getBuildYearProfile(names[0],names[1]);
+
+    	return cityProfile;
+    }
+
     @RequestMapping("/api/newbuild/NearCityProfiles/{prefCityName}")
     public List<String> nearCityProfiles (
     		@PathVariable("prefCityName") String prefCityName ){
