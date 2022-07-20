@@ -169,8 +169,9 @@ class NewBuild extends AppBase {
         vue_obj.pref_name = pref_city["pref"];
 
         this.load_shops_data(vue_obj.pref_name, vue_obj);
+        this.load_shop_scale_data(vue_obj.pref_name, vue_obj);
         this.load_cities_data(vue_obj.pref_name,vue_obj);
-        this.vue_obj.load_city_scale_data(vue_obj.pref_name,vue_obj);
+        this.load_city_scale_data(vue_obj.pref_name,vue_obj);
         vue_obj.hide_gps_modal();
     }
     
