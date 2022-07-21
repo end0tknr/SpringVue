@@ -1008,7 +1008,7 @@ ORDER BY pref,city,town
         util_db = Db()
         util_db.bulk_upsert(
             self.tbl_name_header()+"_sales_count_by_city_price",
-            ["pref","city","price"],
+            ["pref","city","price","calc_date"],
             ["pref","city","price","calc_date",
              "discuss_count", "discuss_days",
              "onsale_count",  "onsale_days",

@@ -6,8 +6,8 @@
                         height: 250px;
                         overflow: auto;}
 
-.scroll_tbl2 th {	white-space:nowrap;
-			background: #FFF;
+.scroll_tbl2 th {       white-space:nowrap;
+                        background: #FFF;
                         position: sticky;
                         top:  0;
                         left: 0;}
@@ -29,7 +29,7 @@
 .scroll_tbl2 tr:first-child th:first-child { z-index: 1; }
 
 .graph_bar {
-    background-image:url("/pri/img/graph_bar_blue.svg");
+    background-image:url("/demo/img/graph_bar_blue.svg");
     background-position: 6px 90%;
     background-repeat: no-repeat;
     text-align: right;

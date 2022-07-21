@@ -32,21 +32,19 @@
       <h1 id="pref_name">{{pref_name}}</h1>
       <div class="container_title_sub">
         <div>
-          戸建分譲 週次速報
           <input type="date"
                  v-model="disp_date"
                  :min="disp_date_min"
                  :max="disp_date_max"
                  :step="7"
                  v-on:change="init_page_by_disp_date">
+          戸建分譲 週次速報 :
+          不動産会社、市区町村、開発規模別
         </div>
         <div class="container_title_sub_right">
           <a class="open_modal_link" v-on:click="show_jpn_map_modal">
             都道府県選択</a>
         </div>
-      </div>
-      <div>
-        ｲﾝﾀｰﾈｯﾄで見た不動産販売状況。
       </div>
     </div><!--.container_title-->
     

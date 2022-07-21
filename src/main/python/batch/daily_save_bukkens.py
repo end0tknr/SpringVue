@@ -11,9 +11,9 @@ from service.sumstock import SumStockService
 def main():
     # 物件情報の収集
     suumo_service = SuumoService()
-    # suumo_service.save_bukken_infos_main()
-    # suumo_service.save_bukken_details( '中古戸建',"" )
-    # suumo_service.save_bukken_details( '新築戸建',"" )
+    suumo_service.save_bukken_infos_main()
+    suumo_service.save_bukken_details( '中古戸建',"" )
+    suumo_service.save_bukken_details( '新築戸建',"" )
 
     # suumo_service.save_bukken_details( '新築戸建',"shop is null" )
     # suumo_service.save_bukken_details( '中古戸建',"shop is null" )
