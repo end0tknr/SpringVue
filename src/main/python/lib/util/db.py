@@ -101,18 +101,17 @@ ORDER BY isc.ORDINAL_POSITION
         sql = "INSERT INTO %s (%s) VALUES %s" % (tbl_name,
                                                  ",".join(atri_keys),"%s")
         
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-
-                for row_group in row_groups:
-                    try:
-                        # bulk insert
-                        extras.execute_values(db_cur,sql,row_group)
-                    except Exception as e:
-                        logger.error(e)
-                        logger.error(sql)
-                        logger.error(row_group)
-                        return False
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            for row_group in row_groups:
+                try:
+                    # bulk insert
+                    extras.execute_values(db_cur,sql,row_group)
+                except Exception as e:
+                    logger.error(e)
+                    logger.error(sql)
+                    logger.error(row_group)
+                    return False
                     
             db_conn.commit()
         return True

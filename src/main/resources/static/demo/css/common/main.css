@@ -27,6 +27,9 @@ h2 {            font-size:   14px;
                 margin-top: 10px;
                 border-top: 2px solid  #333;}
 
+table th {	font-weight: normal;
+		white-space: nowrap;	}
+
 #pc_menu {      display: block;
                 margin-left: auto;      }
 #pc_menu ul {   list-style-type: none;
@@ -89,14 +92,14 @@ footer {        padding:    16px;
                         gap:     5px;
                         grid-template-columns: 1fr 1fr; }
 
+    .
     .page_top {         background: #F2F3F4;    }
     .page_top_container {position: relative;
                          width:  1200px;
                          height: 400px;
                          margin: 0 auto;        }
-
-    .page_middle_container {    width:  1200px;
-                                margin: 0 auto; }
+    .container_title,
+    .page_middle_container,
     .page_bottom {              width:  1200px;
                                 margin: 0 auto; }
 }
