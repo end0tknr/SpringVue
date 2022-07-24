@@ -1,17 +1,19 @@
 #!python
 # -*- coding: utf-8 -*-
 
+from functools import cmp_to_key
 from jeraconv import jeraconv
 from psycopg2 import extras # for bulk insert
 from bs4      import BeautifulSoup
 from util.db  import Db
-
+import operator
 import appbase
 import copy
 import csv
 import datetime
 import glob
 import json
+import operator
 import os
 import re
 import tempfile
@@ -49,16 +51,13 @@ re_compile_city         = re.compile("^.+郡(.+町)$")
 re_compile_num          = re.compile("^(\d+)")
 re_compile_trade_year_q = re.compile("^(\d+)年第(\d)四半期")
 
-
 logger = appbase.AppBase().get_logger()
-
 
 class MlitFudousanTorihikiService(appbase.AppBase):
 
     def __init__(self):
         pass
         
-
     def download_save_master(self):
         download_url_pairs = self.find_download_urls()
         util_db = Db()
@@ -77,7 +76,10 @@ class MlitFudousanTorihikiService(appbase.AppBase):
                      "structure","new_usage","youto_chiiki"],
                     csv_info[1] )
 
-
+    # https://www.land.mlit.go.jp/webland/download.html で
+    # 公開済(= ダウンロード可能)なデータと
+    # 既にDB保存されているデータを比較し
+    # 未保存なデータのみ、ダウンロード & 保存します
     def find_download_urls(self):
         downloadable_year_quatars = self.find_download_year_quatars()
         saved_year_quatars = self.get_saved_year_quatars()
@@ -90,7 +92,8 @@ class MlitFudousanTorihikiService(appbase.AppBase):
 
             download_param = download_param_tmpl % (year_quatar,year_quatar)
             url_1 = download_host + download_init_path + download_param
-            download_zip_path = download_zip_path_tmpl % (year_quatar,year_quatar)
+            download_zip_path = download_zip_path_tmpl % (year_quatar,
+                                                          year_quatar)
             url_2 = download_host + download_zip_path
             ret_datas.append( [url_1,url_2] )
             
@@ -105,7 +108,6 @@ FROM mlit_fudousantorihiki
 WHERE trade_year_q >= %s
 GROUP BY trade_year_q
 ORDER BY trade_year_q
-
 """
         ret_datas = []
         
@@ -120,12 +122,114 @@ ORDER BY trade_year_q
             for ret_row in  db_cur.fetchall():
                 ret_datas.append( dict( ret_row )["trade_year_q"])
         return ret_datas
+    
 
-    def get_city_summaries(self,atri_key_header, year_quatars ):
+    def get_city_summaries(self, atri_key_header, year_quatars ):
         sql = """
 SELECT *
 FROM mlit_fudousantorihiki_by_city
 ORDER BY pref,city
+"""
+        ret_datas = []
+        ret_datas_tmp = []
+        
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute( sql )
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+
+            for ret_row in db_cur.fetchall():
+                ret_row = dict( ret_row )
+                tmp_summary = []
+                if ret_row["summary"]:
+                    tmp_summary = json.loads( ret_row["summary"] )
+
+                tmp_summary = self.sort_select_summary(tmp_summary,
+                                                       year_quatars[0],
+                                                       year_quatars[-1],
+                                                       1)
+                count_key = atri_key_header+"_sold_count"
+                price_key = atri_key_header+"_sold_price"
+                ret_datas.append({
+                    "pref" : ret_row["pref"],
+                    "city" : ret_row["city"],
+                    "sold_count" : tmp_summary[count_key],
+                    "sold_price" : tmp_summary[price_key] })
+
+        return ret_datas
+
+    def get_city_sumed_summaries(self, atri_key_header, year_quatars ):
+        sql = """
+SELECT *
+FROM mlit_fudousantorihiki_by_city
+ORDER BY pref,city
+"""
+        ret_datas = []
+        ret_datas_tmp = []
+        
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute( sql )
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+
+            for ret_row in db_cur.fetchall():
+                ret_row = dict( ret_row )
+                tmp_summaries = []
+                if ret_row["summary"]:
+                    tmp_summaries = json.loads( ret_row["summary"] )
+
+                tmp_summaries = self.sort_select_summary(tmp_summaries,
+                                                         year_quatars[0],
+                                                         year_quatars[-1],
+                                                         4)
+                count = 0
+                price = 0
+                count_key = atri_key_header+"_sold_count"
+                price_key = atri_key_header+"_sold_price"
+                
+                for tmp_summary in tmp_summaries:
+                    quatar_count = tmp_summary[count_key] *12
+                    count += quatar_count
+                    price += ( tmp_summary[price_key] * quatar_count )
+                    
+                if count:
+                    price /= count
+                    
+                ret_datas.append({
+                    "pref" : ret_row["pref"],
+                    "city" : ret_row["city"],
+                    "sold_count" : round(count),
+                    "sold_price" : round(price) })
+
+        return ret_datas
+
+    def sort_select_summary(self,summaries,cmp_key_min,cmp_key_max,limit):
+        ret_datas = []
+        cmp_key = "sold_trade_year_q"
+
+        for summary in sorted(summaries, key=operator.itemgetter(cmp_key) ):
+            if summary[cmp_key]<cmp_key_min or cmp_key_max<summary[cmp_key]:
+                continue
+
+            ret_datas.append(summary)
+            if len(ret_datas) >= limit:
+                break
+        return ret_datas
+    
+
+    def get_town_summaries(self,atri_key_header, year_quatars ):
+        sql = """
+SELECT *
+FROM mlit_fudousantorihiki_by_town
+ORDER BY pref,city,town
 """
         ret_datas = []
         
@@ -139,24 +243,28 @@ ORDER BY pref,city
                 return []
             for ret_row in  db_cur.fetchall():
                 ret_row = dict( ret_row )
-                year_quatar_summaries = reversed( json.loads( ret_row["summary"] ) )
+                tmp_summary = []
+                if ret_row["summary"]:
+                    tmp_summary = json.loads( ret_row["summary"] )
 
-                for year_quatar_summary in year_quatar_summaries:
-                    sold_trade_year_q = year_quatar_summary["sold_trade_year_q"]
-                    if not sold_trade_year_q in year_quatars:
-                        continue
+                tmp_summary = self.sort_select_summary(tmp_summary,
+                                                       year_quatars[0],
+                                                       year_quatars[-1],
+                                                       1)
 
-                    ret_datas.append({
-                        "pref" : ret_row["pref"],
-                        "city" : ret_row["city"],
-                        "sold_count" : year_quatar_summary[atri_key_header+"_sold_count"],
-                        "sold_price" : year_quatar_summary[atri_key_header+"_sold_price"]
-                    })
-                    break
+                count_key = atri_key_header+"_sold_count"
+                price_key = atri_key_header+"_sold_price"
+                ret_datas.append({
+                    "pref" : ret_row["pref"],
+                    "city" : ret_row["city"],
+                    "town" : ret_row["town"],
+                    "sold_count" : year_quatar_summary[count_key],
+                    "sold_price" : year_quatar_summary[price_key]
+                })
 
         return ret_datas
-    
 
+        
     def get_city_price_summaries(self,atri_key_header, year_quatars ):
         sql = """
 SELECT *
@@ -178,68 +286,30 @@ ORDER BY pref,city
 
             for ret_row in  db_cur.fetchall():
                 ret_row = dict( ret_row )
-                year_quatar_summaries = reversed( json.loads( ret_row["summary"] ) )
+                tmp_summary = []
+                if ret_row["summary"]:
+                    tmp_summary = json.loads( ret_row["summary"] )
 
-                for year_quatar_summary in year_quatar_summaries:
-                    sold_trade_year_q = year_quatar_summary["sold_trade_year_q"]
-                    if not sold_trade_year_q in year_quatars:
+                tmp_summary = self.sort_select_summary(tmp_summary,
+                                                       year_quatars[0],
+                                                       year_quatars[-1],
+                                                       1)
+                for atri_key in tmp_summary.keys():
+                    re_result = re_compile.search( atri_key )
+                    if not re_result:
                         continue
 
-                    for atri_key in year_quatar_summary.keys():
-                        re_result = re_compile.search( atri_key )
-                        if not re_result:
-                            continue
-
-                        price_m = re_result.group(1)
-                        sold_count = year_quatar_summary[atri_key]
+                    price_m = re_result.group(1)
+                    sold_count = year_quatar_summary[atri_key]
                         
-                        ret_datas.append({
-                            "pref" : ret_row["pref"],
-                            "city" : ret_row["city"],
-                            "price": price_m,
-                            "sold_count" : sold_count })
-
-        return ret_datas
-    
-    
-    def get_town_summaries(self,atri_key_header, year_quatars ):
-        sql = """
-SELECT *
-FROM mlit_fudousantorihiki_by_town
-ORDER BY pref,city,town
-"""
-        ret_datas = []
-        
-        db_conn = self.db_connect()
-        with self.db_cursor(db_conn) as db_cur:
-            try:
-                db_cur.execute( sql )
-            except Exception as e:
-                logger.error(e)
-                logger.error(sql)
-                return []
-            for ret_row in  db_cur.fetchall():
-                ret_row = dict( ret_row )
-
-                year_quatar_summaries = reversed( json.loads( ret_row["summary"] ) )
-
-                for year_quatar_summary in year_quatar_summaries:
-                    sold_trade_year_q = year_quatar_summary["sold_trade_year_q"]
-                    if not sold_trade_year_q in year_quatars:
-                        continue
-
                     ret_datas.append({
                         "pref" : ret_row["pref"],
                         "city" : ret_row["city"],
-                        "town" : ret_row["town"],
-                        "sold_count" : year_quatar_summary[atri_key_header+"_sold_count"],
-                        "sold_price" : year_quatar_summary[atri_key_header+"_sold_price"]
-                    })
-                    break
-
+                        "price": price_m,
+                        "sold_count" : sold_count })
         return ret_datas
-
-        
+    
+    
     def find_download_year_quatars(self):
         # BeautifulSoup の方が安定していますが、urllib.request で
         # なぜか 「[Errno 104] Connection reset by peer」エラーとなる為、
@@ -480,14 +550,18 @@ ORDER BY pref,city,trade_year_q
                 ret_datas_tmp[pkeys_str][y_quarter] = {}
                 
                 for build_type in ["newbuild","sumstock"]:
-                    ret_datas_tmp[pkeys_str][y_quarter][build_type +"_sold_count"] = 0
-                    ret_datas_tmp[pkeys_str][y_quarter][build_type +"_sold_price"] = 0
+                    count_key = build_type +"_sold_count"
+                    price_key = build_type +"_sold_price"
+                    ret_datas_tmp[pkeys_str][y_quarter][count_key] = 0
+                    ret_datas_tmp[pkeys_str][y_quarter][price_key] = 0
                 
         year_quatar = ret_row["trade_year_q"]
         build_type  = self.newbuild_or_sumstock( ret_row )
+        count_key = build_type +"_sold_count"
+        price_key = build_type +"_sold_price"
         
-        ret_datas_tmp[pkeys_str][year_quatar][build_type +"_sold_count"] += 1
-        ret_datas_tmp[pkeys_str][year_quatar][build_type +"_sold_price"] += ret_row["price"]
+        ret_datas_tmp[pkeys_str][year_quatar][count_key] += 1
+        ret_datas_tmp[pkeys_str][year_quatar][price_key] += ret_row["price"]
 
         # 価格帯別集計
         price_m = self.round_200m( ret_row["price"] )

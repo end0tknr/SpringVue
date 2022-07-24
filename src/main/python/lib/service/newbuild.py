@@ -14,8 +14,7 @@ logger = appbase.AppBase().get_logger()
 class NewBuildService(appbase.AppBase):
 
     def __init__(self):
-        global logger
-        logger = self.get_logger()
+        pass
 
     def build_type(self):
         return "新築戸建"
@@ -698,14 +697,15 @@ class NewBuildService(appbase.AppBase):
                                     ret_datas_tmp,
                                     calc_date_to):
 
-        year_quatars = []
+        year_quatars = []       # 直近から3Q分
         date_tmp = calc_date_to
         while len(year_quatars) < 3:
             year_quatar = self.conv_date_to_year_quatar( date_tmp )
             if not year_quatar in year_quatars:
                 year_quatars.append( year_quatar )
             date_tmp = date_tmp - datetime.timedelta(days=30)
-        
+
+        # 直近から3Q以内で最も新しい summaryを取得
         fudousantorihiki_service = MlitFudousanTorihikiService()
         sold_summaries = \
             fudousantorihiki_service.get_city_summaries(self.tbl_name_header(),
@@ -802,7 +802,28 @@ class NewBuildService(appbase.AppBase):
         calc_date_from = today - datetime.timedelta(days= weekday  ) # Mon
         calc_date_to   = today + datetime.timedelta(days= 6-weekday) # Sun
         return calc_date_from, calc_date_to
+    
 
+    def get_newest_sales_count_by_city(self):
+        sql ="""
+SELECT tbl1.*
+FROM newbuild_sales_count_by_city tbl1
+WHERE calc_date=(SELECT max(calc_date) FROM newbuild_sales_count_by_city)
+"""
+        db_conn = self.db_connect()
+        ret_datas = []
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+            
+            for ret_row in  db_cur.fetchall():
+                ret_datas.append( dict( ret_row ))
+        return ret_datas
+    
 
     def get_all_town_names(self):
         sql ="""

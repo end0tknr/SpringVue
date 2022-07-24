@@ -20,14 +20,12 @@ import dictknife
 import json
 import re
 
-logger = None
-
+logger = appbase.AppBase().get_logger()
 
 class CityProfileService(appbase.AppBase):
     
     def __init__(self):
-        global logger
-        logger = self.get_logger()
+        pass
 
     def del_profiles(self):
         logger.info("start")
@@ -70,6 +68,39 @@ VALUES (%s,%s,%s)
                     logger.error(sql_args)
                     return False
         return True
+        
+    def get_all(self):
+
+        sql = """
+SELECT * from city_profile
+"""
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+            
+            ret_datas = []
+            for ret_row in  db_cur.fetchall():
+                ret_row = dict( ret_row )
+                for atri_key in ["summary","rating"]:
+                    if ret_row[atri_key]:
+                        ret_row[atri_key] = json.loads( ret_row[atri_key] )
+                    else:
+                        ret_row[atri_key] = {}
+                        
+                atri_key = "build_year_summary"
+                if ret_row[atri_key]:
+                    ret_row[atri_key] = json.loads( ret_row[atri_key] )
+                else:
+                    ret_row[atri_key] = []
+                        
+                ret_datas.append( ret_row )
+            return ret_datas
+        
         
     def calc_profiles(self):
         logger.info("start")
@@ -157,7 +188,8 @@ VALUES (%s,%s,%s)
             if not "持ち家" in ret_val:
                 continue
 
-            income = ret_val["year_income"].replace('万円未満','').replace('万円以上','')
+            income = ret_val["year_income"]
+            income = income.replace('万円未満','').replace('万円以上','')
             
             profiles[pref_city]["世帯年収_"+income ] = ret_val["持ち家"]
         return profiles
@@ -172,14 +204,12 @@ VALUES (%s,%s,%s)
             if not pref_city in profiles:
                 logger.warning("%s not exist" % (pref_city,) )
                 continue
-            
-            profiles[pref_city]["新築_世帯主_年齢_24"]    = ret_val["owner_age_24"]
-            profiles[pref_city]["新築_世帯主_年齢_25_34"] = ret_val["owner_age_25_34"]
-            profiles[pref_city]["新築_世帯主_年齢_35_44"] = ret_val["owner_age_35_44"]
-            profiles[pref_city]["新築_世帯主_年齢_45_54"] = ret_val["owner_age_45_54"]
-            profiles[pref_city]["新築_世帯主_年齢_55_64"] = ret_val["owner_age_55_64"]
-            profiles[pref_city]["新築_世帯主_年齢_65"]    = ret_val["owner_age_65"]
-            
+
+            for age_key in ["24","25_34","35_44","45_54","55_64","65"]:
+                tmp_key_1 = "新築_世帯主_年齢_%s" % (age_key,)
+                tmp_key_2 = "owner_age_%s"        % (age_key,)
+
+                profiles[pref_city][tmp_key_1]    = ret_val[tmp_key_2]
         return profiles
 
     def calc_jutakutochi_e101_recenct(self, profiles):
@@ -259,15 +289,15 @@ VALUES (%s,%s,%s)
             for year in ["","_2015"]:
                 profiles[pref_city]["総世帯"+year] = \
                     int( ret_val["total_setai"+year])
-                profiles[pref_city]["家族世帯"+year] = \
-                    int( ret_val["family_setai"+year] )
-                profiles[pref_city]["単身世帯"+year] = \
-                    int( ret_val["single_setai"+year])
 
-            profiles[pref_city]["家族世帯_変動"] = \
-                profiles[pref_city]["家族世帯"] - profiles[pref_city]["家族世帯_2015"]
-            profiles[pref_city]["単身世帯_変動"] = \
-                profiles[pref_city]["単身世帯"] - profiles[pref_city]["単身世帯_2015"]
+                for setai_key in [["家族世帯","family_setai"],
+                                  ["単身世帯","single_setai"]]:
+                    profiles[pref_city][setai_key[0]+year] = \
+                        int( ret_val[setai_key[1]+year] )
+
+                    profiles[pref_city][setai_key[0] +"変動"] = \
+                        profiles[pref_city][setai_key[0]] - \
+                        profiles[pref_city][setai_key[0]+"_2015"]
         return profiles
         
         
@@ -305,13 +335,12 @@ VALUES (%s,%s,%s)
 
             if not pref_city in profiles:
                 profiles[pref_city] = {}
+
+            for area_key in ["住居","工業","商業"]:
+                area_key_2 = "用途地域_%s系_ha" % (area_key,)
                 
-            profiles[pref_city]["用途地域_住居系_ha"] = \
-                int( usage_area_m2["住居"]/10000)
-            profiles[pref_city]["用途地域_工業系_ha"] = \
-                int( usage_area_m2["工業"]/10000)
-            profiles[pref_city]["用途地域_商業系_ha"] = \
-                int( usage_area_m2["商業"]/10000)
+                profiles[pref_city][area_key_2] = \
+                    int( usage_area_m2[area_key]/10000)
         return profiles
     
     
@@ -373,9 +402,10 @@ VALUES (%s,%s,%s)
             if not pref_city in profiles:
                 logger.warning("%s not exist" % (pref_city,) )
                 continue
-                
-            profiles[pref_city]["年収_百万円"] = \
-                round(ret_val["salary"]/1000000 + ret_val["capital_income"]/1000000,2)
+
+            tmp_val = ret_val["salary"] + ret_val["capital_income"]
+            profiles[pref_city]["年収_百万円"] = round( tmp_val/1000000, 2)
+            
         return profiles
     
 
@@ -490,7 +520,8 @@ WHERE pref=%s AND city=%s
             if not pref_city in profiles:
                 profiles[pref_city] = {}
 
-            profiles[pref_city] = dictknife.deepmerge(profiles[pref_city], ret_val )
+            profiles[pref_city] = dictknife.deepmerge(profiles[pref_city],
+                                                      ret_val )
         return profiles
     
     
@@ -507,7 +538,8 @@ WHERE pref=%s AND city=%s
             if not pref_city in profiles:
                 profiles[pref_city] = {}
 
-            profiles[pref_city] = dictknife.deepmerge(profiles[pref_city], ret_val )
+            profiles[pref_city] = dictknife.deepmerge(profiles[pref_city],
+                                                      ret_val )
             
         return profiles
         
@@ -524,7 +556,7 @@ WHERE pref=%s AND city=%s
             if not pref_city in profiles:
                 profiles[pref_city] = {}
 
-            profiles[pref_city] = dictknife.deepmerge(profiles[pref_city], ret_val )
-            
+            profiles[pref_city] = dictknife.deepmerge(profiles[pref_city],
+                                                      ret_val )
         return profiles
         
