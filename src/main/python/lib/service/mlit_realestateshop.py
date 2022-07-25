@@ -108,6 +108,12 @@ class MlitRealEstateShopService(appbase.AppBase):
 
             select_elms = browser.find_elements(by=By.CSS_SELECTOR,
                                                 value="#pageListNo1")
+            if len(select_elms) == 0:
+                tmp_msg = "fail find_elements() for " +_browser.current_url
+                logger.error( tmp_msg )
+                i += 1
+                continue
+                
             page_no = 0
             try:
                 page_no = \
