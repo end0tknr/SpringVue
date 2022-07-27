@@ -353,11 +353,14 @@ ORDER BY pref,city
                 if ret_row["summary"]:
                     tmp_summary = json.loads( ret_row["summary"] )
 
-                tmp_summary = self.sort_select_summary(tmp_summary,
-                                                       year_quatars[0],
-                                                       year_quatars[-1],
-                                                       1)
-                for atri_key in tmp_summary.keys():
+                tmp_summaries = self.sort_select_summary(tmp_summary,
+                                                         year_quatars[0],
+                                                         year_quatars[-1],
+                                                         1)
+                if len(tmp_summaries) == 0:
+                    continue
+                
+                for atri_key in tmp_summaries[0].keys():
                     re_result = re_compile.search( atri_key )
                     if not re_result:
                         continue
