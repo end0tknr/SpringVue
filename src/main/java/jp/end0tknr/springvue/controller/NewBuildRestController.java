@@ -311,6 +311,32 @@ public class NewBuildRestController {
     }
 
 
+    @RequestMapping("/api/newbuild/CityRatings/{prefName}")
+    public List<String> nearCityRatings (
+    		@PathVariable("prefName") String prefName ){
+
+    	List<String> cityProfile =
+    			cityProfileService.getCityRatings( prefName );
+    	return cityProfile;
+    }
+
+    @RequestMapping("/api/newbuild/TownRatings/{prefCityName}")
+    public List<String> townRatings (
+    		@PathVariable("prefCityName") String prefCityName ){
+
+    	try {
+			prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	String[] names = prefCityName.split("_");
+
+    	List<String> townRatings =
+    			cityProfileService.getTownRatings(names[0],names[1] );
+    	return townRatings;
+    }
+
+
     @RequestMapping("/api/newbuild/TownProfiles/{prefCityName}")
     public List<String> townProfiles (
     		@PathVariable("prefCityName") String prefCityName ){
