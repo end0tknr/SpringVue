@@ -26,6 +26,36 @@ class KokuseiPopulationH06Service(
     def __init__(self):
         pass
 
+    def get_all_2020_2015(self):
+        sql = """
+SELECT
+  tbl20.*,
+  tbl15.total_setai   as total_setai_2015,
+  tbl15.family_setai  as family_setai_2015,
+  tbl15.other_setai   as other_setai_2015,
+  tbl15.single_setai  as single_setai_2015,
+  tbl15.unknown_setai as unknown_setai_2015
+FROM kokusei_population_h06 tbl20
+JOIN kokusei2015_population_h06 tbl15
+ON (tbl20.pref=tbl15.pref AND
+    tbl20.city=tbl15.city AND
+    tbl20.town=tbl15.town )
+"""
+        ret_data = []
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+                for ret_row in  db_cur.fetchall():
+                    ret_data.append( dict( ret_row ))
+                    
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+        return ret_data
+
+        
     def download_save_data_src(self,pref_url):
 
         pref_html = self.get_http_requests( pref_url )

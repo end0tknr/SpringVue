@@ -824,6 +824,26 @@ WHERE calc_date=(SELECT max(calc_date) FROM newbuild_sales_count_by_city)
                 ret_datas.append( dict( ret_row ))
         return ret_datas
     
+    def get_newest_sales_count_by_town(self):
+        sql ="""
+SELECT tbl1.*
+FROM newbuild_sales_count_by_town tbl1
+WHERE calc_date=(SELECT max(calc_date) FROM newbuild_sales_count_by_town)
+"""
+        db_conn = self.db_connect()
+        ret_datas = []
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+            
+            for ret_row in  db_cur.fetchall():
+                ret_datas.append( dict( ret_row ))
+        return ret_datas
+    
 
     def get_all_town_names(self):
         sql ="""

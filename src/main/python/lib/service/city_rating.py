@@ -50,7 +50,6 @@ class CityRatingService(CityProfileService):
                     profiles_hash[pref_city]["rating"][atri_key] = \
                         city_profile["summary"][atri_key]
 
-
             buy_new = 0
             if "入手_分譲" in city_profile["summary"] and \
                city_profile["summary"]["入手_分譲"]:
@@ -62,8 +61,11 @@ class CityRatingService(CityProfileService):
                     continue
                 tmp_sum += city_profile["summary"][atri_key]
 
-            profiles_hash[pref_city]["rating"]["buy_new_rate"] = \
-            round(buy_new/tmp_sum, 2)
+            if tmp_sum :
+                profiles_hash[pref_city]["rating"]["buy_new_rate"] = \
+                    round(buy_new/tmp_sum, 2)
+            else:
+                profiles_hash[pref_city]["rating"]["buy_new_rate"] = 0
 
         return profiles_hash
 
