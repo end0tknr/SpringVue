@@ -13,7 +13,7 @@ from service.kokusei2015_population_018 import Kokusei2015Population018Service
 from util.db import Db
 
 import re
-import service.kokusei_population
+import service.kokusei_population_b
 
 download_url = \
     "https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032142543&fileKind=0"
@@ -23,7 +23,7 @@ insert_sql  = "INSERT INTO kokusei_population_b18 (%s) VALUES %s"
 logger = None
 
 class KokuseiPopulationB18Service(
-        service.kokusei_population.KokuseiPopulationService):
+        service.kokusei_population_b.KokuseiPopulationService):
 
     def __init__(self):
         global logger
@@ -127,16 +127,15 @@ class KokuseiPopulationB18Service(
         sql = "select * from kokusei_population_b18"
         
         ret_data = []
-        
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-                try:
-                    db_cur.execute(sql)
-                    for ret_row in  db_cur.fetchall():
-                        ret_data.append( dict( ret_row ))
+        db_conn = self.db_connect():
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+                for ret_row in  db_cur.fetchall():
+                    ret_data.append( dict( ret_row ))
                     
-                except Exception as e:
-                    logger.error(e)
-                    logger.error(sql)
-                    return []
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
         return ret_data

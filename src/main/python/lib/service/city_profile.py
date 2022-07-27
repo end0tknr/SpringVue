@@ -126,9 +126,9 @@ SELECT * from city_profile
         # 年収
         profiles = self.calc_soumu_zeisei(profiles)
         # 世帯年収
-        profiles = self.calc_jutakutochi_e044(profiles)
+        # profiles = self.calc_jutakutochi_e044(profiles)
         # 新築 世帯主年齢
-        profiles = self.calc_jutakutochi_e048(profiles)
+        # profiles = self.calc_jutakutochi_e048(profiles)
         
         ret_datas = []
         for pref_city, profile in profiles.items():
@@ -174,43 +174,43 @@ SELECT * from city_profile
                 round( ret_val["pop_2015"]/10000,2)
         return profiles
     
-    def calc_jutakutochi_e044(self,profiles):
-        jutakutochi_service = EstatJutakuTochiE044Service()
+    # def calc_jutakutochi_e044(self,profiles):
+    #     jutakutochi_service = EstatJutakuTochiE044Service()
 
-        ret_vals = jutakutochi_service.get_group_by_city_income()
+    #     ret_vals = jutakutochi_service.get_group_by_city_income()
 
-        for ret_val in ret_vals:
-            pref_city = ret_val["pref"]+"\t"+ret_val["city"]
-            if not pref_city in profiles:
-                logger.warning("%s not exist" % (pref_city,) )
-                continue
+    #     for ret_val in ret_vals:
+    #         pref_city = ret_val["pref"]+"\t"+ret_val["city"]
+    #         if not pref_city in profiles:
+    #             logger.warning("%s not exist" % (pref_city,) )
+    #             continue
 
-            if not "持ち家" in ret_val:
-                continue
+    #         if not "持ち家" in ret_val:
+    #             continue
 
-            income = ret_val["year_income"]
-            income = income.replace('万円未満','').replace('万円以上','')
+    #         income = ret_val["year_income"]
+    #         income = income.replace('万円未満','').replace('万円以上','')
             
-            profiles[pref_city]["世帯年収_"+income ] = ret_val["持ち家"]
-        return profiles
+    #         profiles[pref_city]["世帯年収_"+income ] = ret_val["持ち家"]
+    #     return profiles
 
-    def calc_jutakutochi_e048(self,profiles):
-        jutakutochi_service = EstatJutakuTochiE048Service()
+    # def calc_jutakutochi_e048(self,profiles):
+    #     jutakutochi_service = EstatJutakuTochiE048Service()
 
-        ret_vals = jutakutochi_service.get_shinchiku_vals_group_by_city()
+    #     ret_vals = jutakutochi_service.get_shinchiku_vals_group_by_city()
 
-        for ret_val in ret_vals:
-            pref_city = ret_val["pref"]+"\t"+ret_val["city"]
-            if not pref_city in profiles:
-                logger.warning("%s not exist" % (pref_city,) )
-                continue
+    #     for ret_val in ret_vals:
+    #         pref_city = ret_val["pref"]+"\t"+ret_val["city"]
+    #         if not pref_city in profiles:
+    #             logger.warning("%s not exist" % (pref_city,) )
+    #             continue
 
-            for age_key in ["24","25_34","35_44","45_54","55_64","65"]:
-                tmp_key_1 = "新築_世帯主_年齢_%s" % (age_key,)
-                tmp_key_2 = "owner_age_%s"        % (age_key,)
+    #         for age_key in ["24","25_34","35_44","45_54","55_64","65"]:
+    #             tmp_key_1 = "新築_世帯主_年齢_%s" % (age_key,)
+    #             tmp_key_2 = "owner_age_%s"        % (age_key,)
 
-                profiles[pref_city][tmp_key_1]    = ret_val[tmp_key_2]
-        return profiles
+    #             profiles[pref_city][tmp_key_1]    = ret_val[tmp_key_2]
+    #     return profiles
 
     def calc_jutakutochi_e101_recenct(self, profiles):
         jutakutochi_service = EstatJutakuTochiE101Service()
@@ -268,6 +268,8 @@ SELECT * from city_profile
             profiles[pref_city]["人口_25_59歳_万人_変動"] = \
                 profiles[pref_city]["人口_25_59歳_万人"] - \
                 profiles[pref_city]["人口_25_59歳_万人_2015"]
+            profiles[pref_city]["人口_25_59歳_万人_変動"] = \
+                round( profiles[pref_city]["人口_25_59歳_万人_変動"], 2)
                 
         return profiles
 

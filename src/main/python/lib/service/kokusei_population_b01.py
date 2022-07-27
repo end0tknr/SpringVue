@@ -15,7 +15,7 @@ from service.city import CityService
 from util.db import Db
 
 import re
-import service.kokusei_population
+import service.kokusei_population_b
 
 download_url = \
     "https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032142402&fileKind=0"
@@ -24,7 +24,7 @@ insert_sql  = "INSERT INTO kokusei_population_b01 (%s) VALUES %s"
 logger = None
 
 class KokuseiPopulationB01Service(
-        service.kokusei_population.KokuseiPopulationService):
+        service.kokusei_population_b.KokuseiPopulationService):
 
     def __init__(self):
         global logger
