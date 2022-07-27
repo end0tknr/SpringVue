@@ -8,18 +8,18 @@
       <th colspan="3">他 参考</th>
     </tr>
     <tr class="sort_keys">
-      <th v-on:click="sort_tbl('near_city_ratings','city')">市区町村</th>
-      <th v-on:click="sort_tbl('near_city_ratings','sold_x_family_setai')">顧客 多</th>
-      <th v-on:click="sort_tbl('near_city_ratings','discuss_days')">回転 早</th>
-      <th v-on:click="sort_tbl('near_city_ratings','sold_x_onsale_count')">競合 少</th>
-      <th v-on:click="sort_tbl('near_city_ratings','家族世帯')">
+      <th v-on:click="sort_tbl('city_ratings','city')">市区町村</th>
+      <th v-on:click="sort_tbl('city_ratings','sold_x_family_setai')">顧客 多</th>
+      <th v-on:click="sort_tbl('city_ratings','discuss_days')">回転 早</th>
+      <th v-on:click="sort_tbl('city_ratings','sold_x_onsale_count')">競合 少</th>
+      <th v-on:click="sort_tbl('city_ratings','家族世帯')">
 	<div class="sub">家族世帯</div></th>
-      <th v-on:click="sort_tbl('near_city_ratings','家族世帯_変動')">
+      <th v-on:click="sort_tbl('city_ratings','家族世帯_変動')">
         <div class="sub">対2015</div></th>
-      <th v-on:click="sort_tbl('near_city_ratings','sold_count')">
+      <th v-on:click="sort_tbl('city_ratings','sold_count')">
         <div class="sub">販売数/年</div></th>
     </tr>
-    <tr v-for="city_rating in near_city_ratings">
+    <tr v-for="city_rating in city_ratings">
       <th>
         <div class="col_key"
              v-on:click="load_city_datas(city_rating.pref,city_rating.city )">
