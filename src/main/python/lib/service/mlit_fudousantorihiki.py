@@ -305,21 +305,26 @@ ORDER BY pref,city,town
                 if ret_row["summary"]:
                     tmp_summary = json.loads( ret_row["summary"] )
 
-                tmp_summary = self.sort_select_summary(tmp_summary,
-                                                       year_quatars[0],
-                                                       year_quatars[-1],
-                                                       1)
-
+                tmp_summaries = self.sort_select_summary(tmp_summary,
+                                                         year_quatars[0],
+                                                         year_quatars[-1],
+                                                         1)
                 count_key = atri_key_header+"_sold_count"
                 price_key = atri_key_header+"_sold_price"
-                ret_datas.append({
-                    "pref" : ret_row["pref"],
-                    "city" : ret_row["city"],
-                    "town" : ret_row["town"],
-                    "sold_count" : year_quatar_summary[count_key],
-                    "sold_price" : year_quatar_summary[price_key]
-                })
-
+                if len(tmp_summaries):
+                    ret_datas.append({
+                        "pref" : ret_row["pref"],
+                        "city" : ret_row["city"],
+                        "town" : ret_row["town"],
+                        "sold_count" : tmp_summaries[count_key],
+                        "sold_price" : tmp_summaries[price_key] })
+                else:
+                    ret_datas.append({
+                        "pref" : ret_row["pref"],
+                        "city" : ret_row["city"],
+                        "town" : ret_row["town"],
+                        "sold_count" : 0,
+                        "sold_price" : 0 })
         return ret_datas
 
         
