@@ -471,14 +471,15 @@ class NewBuild extends AppBase {
 
     ratings_max_sets(){
         let max_sets = [
-            {"key_name":"family",      "max":0, "atri_keys":['家族世帯']},
-            {"key_name":"family_diff", "max":0, "atri_keys":['家族世帯_変動']},
-            {"key_name":"sold_count",  "max":0, "atri_keys":['sold_count']},
+            {"key_name":"sold_family_setai", "max":0,
+             "atri_keys":['sold_family_setai']},
+	    
+            {"key_name":"sold_onsale_count", "max":0,
+             "atri_keys":['sold_onsale_count']},
+            {"key_name":"family",      "max":0,"atri_keys":['家族世帯']},
+            {"key_name":"family_diff", "max":0,"atri_keys":['家族世帯_変動']},
+            {"key_name":"sold_count",  "max":0,"atri_keys":['sold_count']},
             {"key_name":"discuss_days","max":0,"atri_keys":['discuss_days']},
-            {"key_name":"sold_x_family_setai", "max":0,
-	     "atri_keys":['sold_x_family_setai']},
-            {"key_name":"sold_x_onsale_count", "max":0,
-	     "atri_keys":['sold_x_onsale_count']}
         ];
         return max_sets;
     }
@@ -531,6 +532,10 @@ class NewBuild extends AppBase {
             city_profiles_tmp.push(city_profile);
         }
         
+        city_profiles_tmp = city_profiles_tmp.sort(function(a, b) {
+            return b["人口_25_59歳_万人"] - a["人口_25_59歳_万人"];
+        });
+
         vue_obj.near_city_profiles = [];
         for( let city_profile of city_profiles_tmp ) {
             
@@ -573,18 +578,20 @@ class NewBuild extends AppBase {
         let city_ratings_tmp = [];
         for( let city_rating of city_ratings ) {
             city_rating = JSON.parse( city_rating );
-            
             //最大値算出
             for( let max_set of max_sets ) {
                 for( let atri_key of max_set.atri_keys ){
-                    if( city_rating[atri_key] <= max_set.max ){
-                        continue
+                    if( city_rating[atri_key] > max_set.max ){
+			max_set.max = city_rating[atri_key];
                     }
-                    max_set.max = city_rating[atri_key];
                 }
             }
             city_ratings_tmp.push(city_rating);
         }
+
+        city_ratings_tmp = city_ratings_tmp.sort(function(a, b) {
+            return b["sold_family_setai"] - a["sold_family_setai"];
+        });
         
         vue_obj.city_ratings = [];
         for( let city_rating of city_ratings_tmp ) {
@@ -596,13 +603,11 @@ class NewBuild extends AppBase {
                 
                 for( let atri_key of max_set.atri_keys ){
                     let graph_bar_key = atri_key + "_px";
-                    
                     city_rating[graph_bar_key] =
                         this.calc_graph_bar_px(city_rating[atri_key],
-                                               0,
+                                               0.0,
                                                max_set.max,
-                                               50 );
-                    
+                                               50.0 );
                     //数値の3桁区切り化
                     city_rating[atri_key] =
                         Number(city_rating[atri_key]).toLocaleString();
@@ -637,6 +642,10 @@ class NewBuild extends AppBase {
             }
             town_ratings_tmp.push(town_rating);
         }
+        
+        town_ratings_tmp = town_ratings_tmp.sort(function(a, b) {
+            return b["sold_family_setai"] - a["sold_family_setai"];
+        });
         
         vue_obj.town_ratings = [];
         for( let town_rating of town_ratings_tmp ) {
@@ -767,18 +776,25 @@ class NewBuild extends AppBase {
             Math.round(city_profile["入手_建替"] / tmp_sum *100);
         
         let atri_keys =
-            ["人口_20_24歳_万人","人口_25_59歳_万人",,"人口_60歳_万人",
+            ["人口_20_24歳_万人","人口_25_59歳_万人","人口_60歳_万人",
              "総世帯","家族世帯","単身世帯"]
         for( let atri_key of atri_keys ) {
-            city_profile[atri_key+"_差"] =
-                city_profile[atri_key] - city_profile[atri_key+"_2015"];
-            city_profile[atri_key+"_差"] =
-                city_profile[atri_key+"_差"].toLocaleString();
-            if(! city_profile[atri_key+"_差"]){
-                city_profile[atri_key+"_差"] = "±0"
-            } else if (city_profile[atri_key+"_差"].indexOf("-") < 0 ){
-                city_profile[atri_key+"_差"] =
-                    "+"+ city_profile[atri_key+"_差"];
+            for ( let diff_key of ["_差","_変動"] ) {
+
+                city_profile[atri_key+diff_key] =
+                    city_profile[atri_key] - city_profile[atri_key+"_2015"];
+                
+                city_profile[atri_key+diff_key] =
+                    Math.round(city_profile[atri_key+diff_key]*100) /100;
+
+                city_profile[atri_key+diff_key] =
+                    city_profile[atri_key+diff_key].toLocaleString();
+                if(! city_profile[atri_key+diff_key]){
+                    city_profile[atri_key+diff_key] = "±0"
+                } else if (city_profile[atri_key+diff_key].indexOf("-") < 0 ){
+                    city_profile[atri_key+diff_key] =
+                        "+"+ city_profile[atri_key+diff_key];
+                }
             }
         }
         
@@ -873,7 +889,7 @@ class NewBuild extends AppBase {
         
         // sort
         sales_counts = sales_counts.sort(function(a, b) {
-            return b["discuss_count"] - a["discuss_count"];
+            return b["onsale_count"] - a["onsale_count"];
         });
         
         let atri_min_max = {}

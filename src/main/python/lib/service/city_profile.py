@@ -297,9 +297,15 @@ SELECT * from city_profile
                     profiles[pref_city][setai_key[0]+year] = \
                         int( ret_val[setai_key[1]+year] )
 
-                    profiles[pref_city][setai_key[0] +"変動"] = \
-                        profiles[pref_city][setai_key[0]] - \
-                        profiles[pref_city][setai_key[0]+"_2015"]
+                    if setai_key[0]+"_2015" in profiles[pref_city]:
+                        profiles[pref_city][setai_key[0] +"_変動"] = \
+                            profiles[pref_city][setai_key[0]] - \
+                            profiles[pref_city][setai_key[0]+"_2015"]
+                        profiles[pref_city][setai_key[0] +"_変動"] = \
+                            round( profiles[pref_city][setai_key[0] +"_変動"], 2)
+                    else:
+                        profiles[pref_city][setai_key[0] +"_変動"] = 0
+                    
         return profiles
         
         

@@ -9,11 +9,11 @@
     </tr>
     <tr class="sort_keys">
       <th v-on:click="sort_tbl('price_sales','price')">百万円</th>
-      <th v-on:click="sort_tbl('price_sales','onsale_count')">数</th>
+      <th v-on:click="sort_tbl('price_sales','onsale_count')">戸数</th>
       <th v-on:click="sort_tbl('price_sales','onsale_days')">販売日数</th>
-      <th v-on:click="sort_tbl('price_sales','discuss_count')">数</th>
+      <th v-on:click="sort_tbl('price_sales','discuss_count')">戸数</th>
       <th v-on:click="sort_tbl('price_sales','discuss_days')">販売日数</th>
-      <th v-on:click="sort_tbl('price_sales','sold_count')">数</th>
+      <th v-on:click="sort_tbl('price_sales','sold_count')">戸数</th>
     </tr>
     
     <tr v-for="sales_data in price_sales">

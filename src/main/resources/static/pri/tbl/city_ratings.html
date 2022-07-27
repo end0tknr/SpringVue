@@ -9,9 +9,9 @@
     </tr>
     <tr class="sort_keys">
       <th v-on:click="sort_tbl('city_ratings','city')">市区町村</th>
-      <th v-on:click="sort_tbl('city_ratings','sold_x_family_setai')">顧客 多</th>
+      <th v-on:click="sort_tbl('city_ratings','sold_family_setai')">顧客 多</th>
       <th v-on:click="sort_tbl('city_ratings','discuss_days')">回転 早</th>
-      <th v-on:click="sort_tbl('city_ratings','sold_x_onsale_count')">競合 少</th>
+      <th v-on:click="sort_tbl('city_ratings','sold_onsale_count')">競合 少</th>
       <th v-on:click="sort_tbl('city_ratings','家族世帯')">
 	<div class="sub">家族世帯</div></th>
       <th v-on:click="sort_tbl('city_ratings','家族世帯_変動')">
@@ -27,14 +27,14 @@
         </div>
       </th>
       <td class="graph_bar"
-          v-bind:style="{backgroundSize:city_rating['sold_x_family_setai_px']+'px 3px'}">
-        {{city_rating["sold_x_family_setai"]}}</td>
+          v-bind:style="{backgroundSize:city_rating['sold_family_setai_px']+'px 3px'}">
+        {{city_rating["sold_family_setai"]}}</td>
       <td class="graph_bar"
           v-bind:style="{backgroundSize:city_rating['discuss_days_px']+'px 3px'}">
         {{city_rating["discuss_days"]}}</td>
       <td class="graph_bar"
-          v-bind:style="{backgroundSize:city_rating['sold_x_onsale_count_px']+'px 3px'}">
-        {{city_rating["sold_x_onsale_count"]}}</td>
+          v-bind:style="{backgroundSize:city_rating['sold_onsale_count_px']+'px 3px'}">
+        {{city_rating["sold_onsale_count"]}}</td>
       <td class="graph_bar"
           v-bind:style="{backgroundSize:city_rating['家族世帯_px']+'px 3px'}">
         {{city_rating["家族世帯"]}}</td>

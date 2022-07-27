@@ -99,9 +99,10 @@ class CityRatingService(CityProfileService):
             if not pref_city in profiles_hash:
                 continue
 
-            profiles_hash[pref_city]["rating"]["discuss_days"] = \
-                sales_count["discuss_days"]
-
+            profiles_hash[pref_city]["rating"]["discuss_days"] = 0
+            if sales_count["discuss_days"]:
+                profiles_hash[pref_city]["rating"]["discuss_days"] = \
+                    round(10 / sales_count["discuss_days"],2)
 
             onsale_count = sales_count["onsale_count"]
             if not onsale_count:
@@ -111,7 +112,7 @@ class CityRatingService(CityProfileService):
                 continue
             
             sold_count = profiles_hash[pref_city]["rating"]["sold_count"]
-            profiles_hash[pref_city]["rating"]["sold_x_onsale_count"] = \
+            profiles_hash[pref_city]["rating"]["sold_onsale_count"] = \
                 round(sold_count*10 / onsale_count,2)
         return profiles_hash
 
@@ -143,7 +144,10 @@ class CityRatingService(CityProfileService):
 
             family_setai = profiles_hash[pref_city]["summary"]["家族世帯"]
 
-            profiles_hash[pref_city]["rating"]["sold_x_family_setai"] = \
-                round(sold_count * 1000 / family_setai,2)
+            if family_setai:
+                profiles_hash[pref_city]["rating"]["sold_family_setai"] = \
+                    round(sold_count * 1000 / family_setai,2)
+            else:
+                profiles_hash[pref_city]["rating"]["sold_family_setai"] = 0
 
         return profiles_hash

@@ -5,6 +5,7 @@ body {
     font-size: 14px;
 }
 
+a {  cursor: pointer; }
 .site_logo img {vertical-align: middle;
                 width: 50px;
                 height: 50px;
@@ -46,7 +47,8 @@ h2 {            font-size:   14px;
 .container_title {              padding-top:    30px;
                                 padding-bottom: 10px;           }
 .container_title_sub {          display: grid;
-                                grid-template-columns: 1fr 1fr; }
+                                grid-template-columns: 1fr 1fr;
+                                white-space: nowrap;            }
 .container_title_sub_right {    text-align: right;              }
 .container_title_sub_right a {  color: #333;
                                 text-decoration: none;          }
@@ -63,7 +65,9 @@ li a {          color: #333;
 li a:hover {    text-decoration: underline;     }
 
 
-header {        display: grid;
+header {        max-width: 1200px;
+                margin: 0 auto;
+                display: grid;
                 grid-template-columns: 100px 1fr;}
 
 footer {        padding:    16px;
@@ -74,11 +78,11 @@ footer {        padding:    16px;
 
 .page_top {         background: #F2F3F4;    }
 .page_top_container {position: relative;
-                     width:  700px;
+                     width:  100%;
                      height: 400px;
                      margin: 0 auto;        }
 
-.page_middle_container {    width:  700px;
+.page_middle_container {    width:  100%;
                             margin: 0 auto; }
 .page_bottom {              width:  700px;
                             margin: 0 auto; }
