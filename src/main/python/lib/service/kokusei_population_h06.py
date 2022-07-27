@@ -57,6 +57,7 @@ ON (tbl20.pref=tbl15.pref AND
 
         
     def download_save_data_src(self,pref_url):
+        logger.info(pref_url)
 
         pref_html = self.get_http_requests( pref_url )
         download_url = self.get_download_url(pref_html,data_name)

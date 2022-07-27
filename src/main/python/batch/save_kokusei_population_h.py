@@ -13,8 +13,8 @@ def main():
 
     service_classes = [
         KokuseiPopulationH03Service(),
-        KokuseiPopulationH06Service()
-        KokuseiPopulationH07Service()
+        KokuseiPopulationH06Service(),
+        KokuseiPopulationH07Service(),
         KokuseiPopulationH08Service()
     ]
 
