@@ -10,7 +10,7 @@
 # 都道府県，市区町村
 from service.city import CityService
 import re
-import service.kokusei_population
+import service.kokusei_population_b
 
 download_url = \
     "https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032142483&fileKind=0"

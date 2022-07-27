@@ -31,14 +31,12 @@ re_pref_cities = [re.compile("^(%s).*?(%s)(.*)"  % (re_exp_pref,re_exp_city) ),
                   re.compile("^(%s)(.+?市.+?区)(.*)"    % (re_exp_pref) ),
                   re.compile("^(%s)(.+?[市区町村])(.*)" % (re_exp_pref) ),
                   re.compile("^(%s).+?郡(.+?[町村])(.*)"% (re_exp_pref) ) ]
-logger = None
-
+logger = appbase.AppBase().get_logger()
 
 class CityService(appbase.AppBase):
     
     def __init__(self):
-        global logger
-        logger = self.get_logger()
+        pass
 
 
     def calc_save_lnglat(self):

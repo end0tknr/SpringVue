@@ -2,12 +2,13 @@
 /* refer to https://csshtml.work/table-scroll/ */
 /* .scroll_tbl2 は、ヘッダが 2行               */
 
-.scroll_tbl2 {          width: 100%;
+.scroll_tbl2 {          /* width: 100%; */
+    width: 600px;
                         height: 250px;
                         overflow: auto;}
 
-.scroll_tbl2 th {	white-space:nowrap;
-			background: #FFF;
+.scroll_tbl2 th {       white-space:nowrap;
+                        background: #FFF;
                         position: sticky;
                         top:  0;
                         left: 0;}

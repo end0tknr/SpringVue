@@ -15,7 +15,7 @@ from service.city import CityService
 from util.db import Db
 
 import re
-import service.kokusei_population
+import service.kokusei_population_b
 
 download_url = \
     "https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032142402&fileKind=0"

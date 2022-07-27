@@ -77,6 +77,7 @@ town            varchar(64),
 lng             double precision,
 lat             double precision,
 summary         varchar(4096),
+rating          varchar(4096),
 primary key(pref,city,town) );
 
 -- 2015年の古いデータの為、対象外
@@ -858,3 +859,76 @@ sold_count              numeric,
 primary key(pref,city,price,calc_date) );
 
 
+CREATE TABLE IF NOT EXISTS kokusei_population_h03 (
+pref            varchar(4),
+city            varchar(8),
+town            varchar(64),
+pop_0_4         bigint,
+pop_5_9         bigint,
+pop_10_14       bigint,
+pop_15_19       bigint,
+pop_20_24       bigint,
+pop_25_29       bigint,
+pop_30_34       bigint,
+pop_35_39       bigint,
+pop_40_44       bigint,
+pop_45_49       bigint,
+pop_50_54       bigint,
+pop_55_59       bigint,
+pop_60_64       bigint,
+pop_65_69       bigint,
+pop_70_74       bigint,
+pop_75_79       bigint,
+pop_80_84       bigint,
+pop_85_89       bigint,
+pop_90_94       bigint,
+pop_95_99       bigint,
+pop_100         bigint,
+primary key(pref,city,town) );
+
+COMMENT ON TABLE kokusei_population_h03 IS
+'https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200521&tstat=000001136464&tclass1=000001136472
+3 男女，年齢（5歳階級）別人口，平均年齢及び総年齢－町丁・字等';
+
+CREATE TABLE IF NOT EXISTS kokusei_population_h06 (
+pref            varchar(4),
+city            varchar(8),
+town            varchar(64),
+total_setai     bigint,
+family_setai    bigint,
+other_setai     bigint,
+single_setai    bigint,
+unknown_setai   bigint,
+primary key(pref,city,town) );
+
+COMMENT ON TABLE kokusei_population_h06 IS
+'https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200521&tstat=000001136464&tclass1=000001136472
+6-1 世帯の家族類型，世帯員の年齢による世帯の種類別一般世帯数－町丁・字等';
+
+CREATE TABLE IF NOT EXISTS kokusei_population_h07 (
+pref            varchar(4),
+city            varchar(8),
+town            varchar(64),
+owned_house     bigint,
+public_rented   bigint,
+private_rented  bigint,
+company_house   bigint,
+primary key(pref,city,town) );
+
+COMMENT ON TABLE kokusei_population_h07 IS
+'https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200521&tstat=000001136464&tclass1=000001136472
+7-1 住宅の所有の関係別一般世帯数－町丁・字等';
+
+CREATE TABLE IF NOT EXISTS kokusei_population_h08 (
+pref            varchar(4),
+city            varchar(8),
+town            varchar(64),
+total           bigint,
+detached_house  bigint,
+tenement_houses bigint,
+apartment       bigint,
+primary key(pref,city,town) );
+COMMENT ON TABLE kokusei_population_h08 IS
+'https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200521&tstat=000001136464&tclass1=000001136472
+8-1 住宅の建て方別一般世帯数－町丁・字等
+';

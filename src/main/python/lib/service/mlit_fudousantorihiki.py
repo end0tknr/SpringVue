@@ -159,8 +159,58 @@ ORDER BY pref,city
                     "city" : ret_row["city"],
                     "sold_count" : tmp_summary[count_key],
                     "sold_price" : tmp_summary[price_key] })
-
         return ret_datas
+    
+
+    def get_town_sumed_summaries(self, atri_key_header, year_quatars ):
+        sql = """
+SELECT *
+FROM mlit_fudousantorihiki_by_town
+ORDER BY pref,city,town
+"""
+        ret_datas = []
+        ret_datas_tmp = []
+        
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute( sql )
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+
+            for ret_row in db_cur.fetchall():
+                ret_row = dict( ret_row )
+                tmp_summaries = []
+                if ret_row["summary"]:
+                    tmp_summaries = json.loads( ret_row["summary"] )
+
+                tmp_summaries = self.sort_select_summary(tmp_summaries,
+                                                         year_quatars[0],
+                                                         year_quatars[-1],
+                                                         4)
+                count = 0
+                price = 0
+                count_key = atri_key_header+"_sold_count"
+                price_key = atri_key_header+"_sold_price"
+                
+                for tmp_summary in tmp_summaries:
+                    quatar_count = tmp_summary[count_key] *12
+                    count += quatar_count
+                    price += ( tmp_summary[price_key] * quatar_count )
+                    
+                if count:
+                    price /= count
+                    
+                ret_datas.append({
+                    "pref" : ret_row["pref"],
+                    "city" : ret_row["city"],
+                    "town" : ret_row["town"],
+                    "sold_count" : round(count),
+                    "sold_price" : round(price) })
+        return ret_datas
+    
 
     def get_city_sumed_summaries(self, atri_key_header, year_quatars ):
         sql = """
@@ -208,8 +258,8 @@ ORDER BY pref,city
                     "city" : ret_row["city"],
                     "sold_count" : round(count),
                     "sold_price" : round(price) })
-
         return ret_datas
+    
 
     def sort_select_summary(self,summaries,cmp_key_min,cmp_key_max,limit):
         ret_datas = []
@@ -591,14 +641,16 @@ ORDER BY pref,city,trade_year_q
 
                 for summary_key in summary.keys():
 
-                    if summary_key in ["newbuild_sold_count","sumstock_sold_count"]:
+                    if summary_key in ["newbuild_sold_count",
+                                       "sumstock_sold_count" ]:
                         if not summary[summary_key]:
                             continue
                         count_key = summary_key
                         price_key = summary_key.replace("_count","_price")
                         
                         #平均価格
-                        summary[price_key] = round(summary[price_key] / summary[count_key]);
+                        summary[price_key] = \
+                            round(summary[price_key] / summary[count_key]);
                         # 週次の値にする為、計12で除算
                         summary[count_key] = round(summary[count_key] / 1.2 ) /10;
                     elif "_sold_price_m_" in summary_key:
@@ -614,13 +666,13 @@ ORDER BY pref,city,trade_year_q
                 ret_datas.append(
                     {"pref":pkeys[0],
                      "city":pkeys[1],
-                     "summary"      :json.dumps(summaries,      ensure_ascii=False) })
+                     "summary" :json.dumps(summaries,  ensure_ascii=False) })
             elif len(pkeys) == 3:
                 ret_datas.append(
                     {"pref":pkeys[0],
                      "city":pkeys[1],
                      "town":pkeys[2],
-                     "summary"      :json.dumps(summaries,      ensure_ascii=False) })
+                     "summary" :json.dumps(summaries,  ensure_ascii=False) })
                     
         return ret_datas
 
