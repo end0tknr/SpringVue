@@ -26,7 +26,7 @@ insert_sql  = "INSERT INTO kokusei_population_b02 (%s) VALUES %s"
 logger = None
 
 class KokuseiPopulationB02Service(
-        service.kokusei_population.KokuseiPopulationService):
+        service.kokusei_population_b.KokuseiPopulationService):
 
     def __init__(self):
         global logger

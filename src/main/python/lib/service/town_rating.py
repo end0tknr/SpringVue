@@ -12,7 +12,6 @@ class TownRatingService(TownService):
     def __init__(self):
         pass
 
-
     def calc_save_ratings(self):
         profiles_hash = self.calc_town_profiles()
         profiles_hash = self.calc_city_profiles( profiles_hash )
@@ -96,7 +95,8 @@ class TownRatingService(TownService):
             for atri_key in ["pop_2020_25_59","pop_diff_25_59"]:
                 if not atri_key in town_profile["summary"]:
                     continue
-            
+
+                print( town_profile["summary"] )
                 profiles_hash[pref_city_town]["rating"][atri_key] = \
                     town_profile["summary"][atri_key]
         return profiles_hash
