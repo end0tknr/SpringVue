@@ -9,7 +9,12 @@ import org.apache.ibatis.annotations.Select;
 public interface TownProfileRepository {
 
     @Select("SELECT summary FROM town_profile"+
+  		   " WHERE pref='${prefName}' AND city='${cityName}' "+
+  		   " ORDER BY town ")
+    List<String> getTownProfiles(String prefName,String cityName);
+
+    @Select("SELECT rating FROM town_profile"+
  		   " WHERE pref='${prefName}' AND city='${cityName}' "+
  		   " ORDER BY town ")
-    List<String> getTownProfiles(String prefName,String cityName);
+    List<String> getTownRatings(String prefName,String cityName);
 }

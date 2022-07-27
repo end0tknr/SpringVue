@@ -29,6 +29,14 @@ public class CityProfileService {
         return cityProfileRepository.getNearCityProfiles(prefName, cityName);
     }
 
+    public  List<String> getCityRatings( String prefName) {
+        return cityProfileRepository.getCityRatings(prefName);
+    }
+
+    public  List<String> getTownRatings( String prefName, String cityName) {
+        return townProfileRepository.getTownRatings(prefName, cityName);
+    }
+
     public  List<String> getTownProfiles(
     		String prefName, String cityName) {
         return townProfileRepository.getTownProfiles(prefName, cityName);
