@@ -704,6 +704,7 @@ class NewBuildService(appbase.AppBase):
             if not year_quatar in year_quatars:
                 year_quatars.append( year_quatar )
             date_tmp = date_tmp - datetime.timedelta(days=30)
+        year_quatars.reverse() # 降順化
 
         # 直近から3Q以内で最も新しい summaryを取得
         fudousantorihiki_service = MlitFudousanTorihikiService()
@@ -737,6 +738,7 @@ class NewBuildService(appbase.AppBase):
             if not year_quatar in year_quatars:
                 year_quatars.append( year_quatar )
             date_tmp = date_tmp - datetime.timedelta(days=30)
+        year_quatars.reverse() # 降順化
         
         fudousantorihiki_service = MlitFudousanTorihikiService()
         sold_summaries = \
@@ -771,6 +773,7 @@ class NewBuildService(appbase.AppBase):
             if not year_quatar in year_quatars:
                 year_quatars.append( year_quatar )
             date_tmp = date_tmp - datetime.timedelta(days=30)
+        year_quatars.reverse() # 降順化
         
         fudousantorihiki_service = MlitFudousanTorihikiService()
         sold_summaries = \

@@ -273,7 +273,10 @@ ORDER BY pref,city
         ret_datas = []
         cmp_key = "sold_trade_year_q"
 
-        for summary in sorted(summaries, key=operator.itemgetter(cmp_key) ):
+        for summary in sorted(summaries,
+                              key=operator.itemgetter(cmp_key),
+                              reverse=True):  # 直近のdataから探索
+
             if summary[cmp_key]<cmp_key_min or cmp_key_max<summary[cmp_key]:
                 continue
 
@@ -316,8 +319,8 @@ ORDER BY pref,city,town
                         "pref" : ret_row["pref"],
                         "city" : ret_row["city"],
                         "town" : ret_row["town"],
-                        "sold_count" : tmp_summaries[count_key],
-                        "sold_price" : tmp_summaries[price_key] })
+                        "sold_count" : tmp_summaries[0][count_key],
+                        "sold_price" : tmp_summaries[0][price_key] })
                 else:
                     ret_datas.append({
                         "pref" : ret_row["pref"],
@@ -366,7 +369,7 @@ ORDER BY pref,city
                         continue
 
                     price_m = re_result.group(1)
-                    sold_count = year_quatar_summary[atri_key]
+                    sold_count = tmp_summaries[0][atri_key]
                         
                     ret_datas.append({
                         "pref" : ret_row["pref"],
