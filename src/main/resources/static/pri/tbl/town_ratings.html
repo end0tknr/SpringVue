@@ -11,13 +11,18 @@
       <th v-on:click="sort_tbl('town_ratings','town')">地区</th>
       <th v-on:click="sort_tbl('town_ratings','sold_family_setai')">顧客 多</th>
       <th v-on:click="sort_tbl('town_ratings','discuss_days')">回転 早</th>
-      <th v-on:click="sort_tbl('town_ratings','sold_onsale_count')">競合 少</th>
+      <th v-on:click="sort_tbl('town_ratings','sold_onsale_count')">
+        競合物件 少</th>
+      <th v-on:click="sort_tbl('town_ratings','sold_onsale_shop')">
+        競合会社 少</th>
+      <th v-on:click="sort_tbl('town_ratings','sold_count')">
+        <div class="sub">販売数/年</div></th>
+      <th v-on:click="sort_tbl('town_ratings','land_price')">
+        <span class="sub">地価</span></th>
       <th v-on:click="sort_tbl('town_ratings','家族世帯')">
 	<div class="sub">家族世帯</div></th>
       <th v-on:click="sort_tbl('town_ratings','家族世帯_変動')">
         <div class="sub">対2015</div></th>
-      <th v-on:click="sort_tbl('town_ratings','sold_count')">
-        <div class="sub">販売数/年</div></th>
     </tr>
     <tr v-for="town_rating in town_ratings">
       <th><div>{{ town_rating.town }}</div></th>
@@ -31,14 +36,20 @@
           v-bind:style="{backgroundSize:town_rating['sold_onsale_count_px']+'px 3px'}">
         {{town_rating["sold_onsale_count"]}}</td>
       <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_rating['sold_onsale_shop_px']+'px 3px'}">
+        {{town_rating["sold_onsale_shop"]}}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_rating['sold_count_px']+'px 3px'}">
+        {{town_rating["sold_count"]}}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_rating['land_price_px']+'px 3px'}">
+        {{town_rating["land_price"]}}</td>
+      <td class="graph_bar"
           v-bind:style="{backgroundSize:town_rating['家族世帯_px']+'px 3px'}">
         {{town_rating["家族世帯"]}}</td>
       <td class="graph_bar"
           v-bind:style="{backgroundSize:town_rating['家族世帯_変動_px']+'px 3px'}">
         {{town_rating["家族世帯_変動"]}}</td>
-      <td class="graph_bar"
-          v-bind:style="{backgroundSize:town_rating['sold_count_px']+'px 3px'}">
-        {{town_rating["sold_count"]}}</td>
     </tr>
   </table>
   

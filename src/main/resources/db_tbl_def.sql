@@ -721,6 +721,20 @@ discuss_price           bigint,
 discuss_days            int,
 primary key(pref,city,shop,calc_date) );
 
+CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_shop_town(
+pref                    varchar(4),
+city                    varchar(16),
+town                    varchar(64),
+shop                    varchar(64),
+calc_date               date,
+onsale_count            int,
+onsale_price            bigint,
+onsale_days             int,
+discuss_count           int,
+discuss_price           bigint,
+discuss_days            int,
+primary key(pref,city,town,shop,calc_date) );
+
 CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_city (
 pref                    varchar(4),
 city                    varchar(16),

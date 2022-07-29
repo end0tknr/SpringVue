@@ -24,6 +24,7 @@ class TownRatingService(TownService):
         profiles_hash = self.calc_kokusei_population( profiles_hash )
         profiles_hash = self.calc_fudousan_torihiki( profiles_hash )
         profiles_hash = self.calc_sales_count_by_town( profiles_hash )
+        profiles_hash = self.calc_sales_count_by_shop( profiles_hash )
 
         profiles_list = self.conv_ratings_to_list(profiles_hash)
         
@@ -151,7 +152,11 @@ class TownRatingService(TownService):
                                         town_profile["town"] ])
 
             profiles_hash[pref_city_town] = {
-                "summary":town_profile["summary"], "rating":{} }
+                "summary":town_profile["summary"], "rating":{"land_price":0} }
+
+            if "price" in profiles_hash[pref_city_town]["summary"]:
+                profiles_hash[pref_city_town]["rating"]["land_price"] = \
+                    round(profiles_hash[pref_city_town]["summary"]["price"] / 10000)
             
         return profiles_hash
 
@@ -183,3 +188,28 @@ class TownRatingService(TownService):
             profiles_hash[pref_city_town]["rating"]["sold_onsale_count"] = \
                 round(sold_count*10 / onsale_count,2)
         return profiles_hash
+
+
+    def calc_sales_count_by_shop(self, profiles_hash):
+        newbuild_service = NewBuildService()
+        sales_counts = newbuild_service.get_newest_sales_count_by_shop_town()
+        
+        for sales_count in sales_counts:
+            pref_city = "\t".join([ sales_count["pref"],
+                                    sales_count["city"],
+                                    sales_count["town"] ])
+
+            if not pref_city in profiles_hash:
+                continue
+
+            if not "sold_count" in profiles_hash[pref_city]["rating"]:
+                continue
+            
+            sold_count = profiles_hash[pref_city]["rating"]["sold_count"]
+            onsale_shop = sales_count["shop"]
+            
+            profiles_hash[pref_city]["rating"]["sold_onsale_shop"] = \
+                round(sold_count*5 / onsale_shop,2)
+        return profiles_hash
+
+    

@@ -252,7 +252,7 @@ class NewBuildService(appbase.AppBase):
             for pkey in ["pref","city"]:
                 if not org_bukken[pkey]:
                     org_bukken[pkey] = "?"
-            # dict形式へのkey-value追加は、update()を使用する
+
             org_bukken.update({"town":org_bukken["address"]})
             re_result = re_compile.search( org_bukken["town"] )
             if re_result:
@@ -339,6 +339,60 @@ class NewBuildService(appbase.AppBase):
                                         org_bukken["city"],
                                         org_bukken["shop"])
 
+            if not pref_shop in ret_datas_tmp:
+                ret_datas_tmp[pref_shop] = {
+                    "calc_date" : calc_date_to,
+                    "onsale_page" :0,   "discuss_page" :0,
+                    "onsale_count":0,   "discuss_count":0,
+                    "onsale_price":0,   "discuss_price":0,
+                    "onsale_days" :0,   "discuss_days" :0 }
+
+            if not org_bukken["price"]: # 価格未公開の場合、集計対象外
+                continue
+            
+            ret_datas_tmp[pref_shop][calc_key+"_page"]  += 1
+            ret_datas_tmp[pref_shop][calc_key+"_count"] += \
+                self.house_count(org_bukken)
+            ret_datas_tmp[pref_shop][calc_key+"_price"] += org_bukken["price"]
+
+            tmp_days = org_bukken["check_date"] - org_bukken["found_date"]
+            ret_datas_tmp[pref_shop][calc_key+"_days"] += tmp_days.days
+
+        return ret_datas_tmp
+    
+        
+    def calc_sales_count_by_shop_town_sub(self,
+                                          ret_datas_tmp,
+                                          calc_key,
+                                          calc_date_from,
+                                          calc_date_to):
+        suumo_service = SuumoService()
+        org_bukkens = suumo_service.get_bukkens_by_check_date(
+            self.build_type(),
+            calc_date_from,
+            calc_date_to )
+        
+        re_compile = re.compile("^([あ-んア-ン一-鿐]+)")
+        
+        for org_bukken_tmp in org_bukkens:
+            org_bukken = {}
+            for atri_key,atri_val in org_bukken_tmp.items():
+                org_bukken[atri_key] = atri_val
+            
+            org_bukken.update({"town":org_bukken["address"]})
+            re_result = re_compile.search( org_bukken["town"] )
+            if re_result:
+                org_bukken["town"] = re_result.group(1)
+                
+            for pkey in ["pref","city","town","shop"]:
+                if not org_bukken[pkey]:
+                    org_bukken[pkey] = "?"
+
+            pref_shop = "\t".join([org_bukken["pref"],
+                                   org_bukken["city"],
+                                   org_bukken["town"],
+                                   org_bukken["shop"]])
+            
             if not pref_shop in ret_datas_tmp:
                 ret_datas_tmp[pref_shop] = {
                     "calc_date" : calc_date_to,
@@ -504,6 +558,71 @@ class NewBuildService(appbase.AppBase):
             self.tbl_name_header()+"_sales_count_by_shop",
             ["pref","shop","calc_date"],
             ["pref","shop","calc_date",
+             "discuss_count",   "discuss_price",   "discuss_days",
+             "onsale_count","onsale_price","onsale_days"],
+            ["discuss_count",   "discuss_price",   "discuss_days",
+             "onsale_count","onsale_price","onsale_days"],
+            ret_datas )
+        
+        return ret_datas
+
+    def calc_save_sales_count_by_shop_town(self):
+        logger.info("start")
+        
+        today = datetime.datetime.today().date()
+        calc_date_from, calc_date_to = self.get_weekly_period(today)
+
+        ret_datas_tmp = self.calc_sales_count_by_shop_town_sub({},
+                                                               "onsale",
+                                                               calc_date_from,
+                                                               calc_date_to)
+        
+        pre_calc_date_from, pre_calc_date_to = \
+            self.get_weekly_period( today - datetime.timedelta(days=7) )
+
+        ret_datas_tmp = self.calc_sales_count_by_shop_town_sub(ret_datas_tmp,
+                                                               "discuss",
+                                                               pre_calc_date_from,
+                                                               pre_calc_date_to)
+        
+        ret_datas = []
+        for pref_shop, shop_info in ret_datas_tmp.items():
+            (shop_info["pref"],
+             shop_info["city"],
+             shop_info["town"],
+             shop_info["shop"]) = pref_shop.split("\t")
+
+            # postgresはdate型の制約が厳しいのですが
+            # pythonが内部的に datetime.date(2022, 7, 3) のようにcastしれくれます
+            shop_info["calc_date"]  = calc_date_to
+            
+            for calc_key in ["onsale","discuss"]:
+                page_key  = calc_key+"_page"
+                count_key = calc_key+"_count"
+                price_key = calc_key+"_price"
+                days_key  = calc_key+"_days"
+                
+                tmp_size = 0
+                if page_key in shop_info and shop_info[page_key]:
+                    tmp_size = shop_info[page_key]
+                elif shop_info[count_key]:
+                    tmp_size = shop_info[count_key]
+
+                if not tmp_size:
+                    continue
+
+                avg_price = shop_info[price_key] / tmp_size
+                avg_days  = shop_info[days_key]  / tmp_size
+                shop_info[price_key] = avg_price
+                shop_info[days_key]  = avg_days
+                
+            ret_datas.append(shop_info)
+
+        util_db = Db()
+        util_db.bulk_upsert(
+            self.tbl_name_header()+"_sales_count_by_shop_town",
+            ["pref","city","town","shop","calc_date"],
+            ["pref","city","town","shop","calc_date",
              "discuss_count",   "discuss_price",   "discuss_days",
              "onsale_count","onsale_price","onsale_days"],
             ["discuss_count",   "discuss_price",   "discuss_days",
@@ -809,8 +928,8 @@ class NewBuildService(appbase.AppBase):
 
     def get_newest_sales_count_by_city(self):
         sql ="""
-SELECT tbl1.*
-FROM newbuild_sales_count_by_city tbl1
+SELECT *
+FROM newbuild_sales_count_by_city
 WHERE calc_date=(SELECT max(calc_date) FROM newbuild_sales_count_by_city)
 """
         db_conn = self.db_connect()
@@ -832,6 +951,52 @@ WHERE calc_date=(SELECT max(calc_date) FROM newbuild_sales_count_by_city)
 SELECT tbl1.*
 FROM newbuild_sales_count_by_town tbl1
 WHERE calc_date=(SELECT max(calc_date) FROM newbuild_sales_count_by_town)
+"""
+        db_conn = self.db_connect()
+        ret_datas = []
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+            
+            for ret_row in  db_cur.fetchall():
+                ret_datas.append( dict( ret_row ))
+        return ret_datas
+    
+    def get_newest_sales_count_by_shop_city(self):
+        sql ="""
+SELECT pref, city, count(shop) as shop
+FROM newbuild_sales_count_by_shop_city
+WHERE calc_date=(SELECT max(calc_date)
+                 FROM newbuild_sales_count_by_shop_city)
+GROUP BY pref, city
+ORDER BY pref, city
+"""
+        db_conn = self.db_connect()
+        ret_datas = []
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+            
+            for ret_row in  db_cur.fetchall():
+                ret_datas.append( dict( ret_row ))
+        return ret_datas
+    
+    def get_newest_sales_count_by_shop_town(self):
+        sql ="""
+SELECT pref, city, town, count(shop) as shop
+FROM newbuild_sales_count_by_shop_town
+WHERE calc_date=(SELECT max(calc_date)
+                 FROM newbuild_sales_count_by_shop_town)
+GROUP BY pref, city, town
+ORDER BY pref, city, town
 """
         db_conn = self.db_connect()
         ret_datas = []

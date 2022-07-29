@@ -47,7 +47,10 @@ ORDER BY pref,city,town
                 logger.error(sql)
                 return []
             for ret_row in  db_cur.fetchall():
-                ret_datas.append( dict( ret_row ))
+                ret_row = dict( ret_row )
+                ret_row["summary"] = json.loads( ret_row["summary"] )
+                ret_row["rating"]  = json.loads( ret_row["rating"]  )
+                ret_datas.append( ret_row )
                 
         return ret_datas
 

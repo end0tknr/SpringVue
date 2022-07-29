@@ -479,10 +479,13 @@ class NewBuild extends AppBase {
 	    
             {"key_name":"sold_onsale_count", "max":0,
              "atri_keys":['sold_onsale_count']},
+            {"key_name":"sold_onsale_shop", "max":0,
+             "atri_keys":['sold_onsale_shop']},
             {"key_name":"family",      "max":0,"atri_keys":['家族世帯']},
             {"key_name":"family_diff", "max":0,"atri_keys":['家族世帯_変動']},
             {"key_name":"sold_count",  "max":0,"atri_keys":['sold_count']},
             {"key_name":"discuss_days","max":0,"atri_keys":['discuss_days']},
+            {"key_name":"land_price", "max":0, "atri_keys":['land_price']}
         ];
         return max_sets;
     }

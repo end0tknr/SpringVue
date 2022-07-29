@@ -22,6 +22,7 @@ class CityRatingService(CityProfileService):
         profiles_hash = self.calc_city_profiles()
         profiles_hash = self.calc_fudousan_torihiki( profiles_hash )
         profiles_hash = self.calc_sales_count_by_city( profiles_hash )
+        profiles_hash = self.calc_sales_count_by_shop( profiles_hash )
 
         profiles_list = self.conv_ratings_to_list(profiles_hash)
         
@@ -44,6 +45,11 @@ class CityRatingService(CityProfileService):
                 "summary"           : city_profile["summary"],
                 "build_year_summary": city_profile["build_year_summary"],
                 "rating"            : city_profile["rating"] }
+
+            profiles_hash[pref_city]["rating"]["land_price"] = 0
+            if "地価_万円_m2_住居系" in city_profile["summary"]:
+                profiles_hash[pref_city]["rating"]["land_price"] = \
+                    city_profile["summary"]["地価_万円_m2_住居系"]
 
             for atri_key in ["家族世帯","家族世帯_変動"]:
                 if atri_key in city_profile["summary"]:
@@ -86,7 +92,27 @@ class CityRatingService(CityProfileService):
             ret_datas.append( ret_data )
 
         return ret_datas
+    
+    
+    def calc_sales_count_by_shop(self, profiles_hash):
+        newbuild_service = NewBuildService()
+        sales_counts = newbuild_service.get_newest_sales_count_by_shop_city()
         
+        for sales_count in sales_counts:
+            pref_city = sales_count["pref"] +"\t"+ sales_count["city"]
+
+            if not pref_city in profiles_hash:
+                continue
+
+            if not "sold_count" in profiles_hash[pref_city]["rating"]:
+                continue
+            
+            sold_count = profiles_hash[pref_city]["rating"]["sold_count"]
+            onsale_shop = sales_count["shop"]
+            
+            profiles_hash[pref_city]["rating"]["sold_onsale_shop"] = \
+                round(sold_count*5 / onsale_shop,2)
+        return profiles_hash
 
         
     def calc_sales_count_by_city(self, profiles_hash):
