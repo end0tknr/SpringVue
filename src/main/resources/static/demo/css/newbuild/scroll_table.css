@@ -22,6 +22,12 @@
                         position: sticky;
                         top:  0;
                         left: 0;}
+/* ヘッダ2行目をスクロール固定する為 */
+.scroll_tbl2 tr:nth-child(2) th {
+                        position: sticky;
+                        top:  22px;
+                        left: 0;
+                }
 
 .scroll_tbl2 td {       padding: 0 10px;
                         white-space:nowrap;
