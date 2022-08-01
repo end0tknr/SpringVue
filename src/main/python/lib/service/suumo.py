@@ -63,7 +63,8 @@ re_compile_licenses = [
 
 re_compile_house_count_1 = re.compile(
     "販売.{0,10}?数.{0,10}?(\d+)\s*(戸|室|棟|区画)")
-re_compile_house_count_2 = re.compile("総.*?数.*?(\d+)\s*(戸|室|棟|区画)")
+re_compile_house_count_2 = re.compile(
+    "総.{0,10}?数.{0,10}?(\d+)\s*(戸|室|棟|区画)")
 re_compile_show_date = re.compile("情報提供日.{0,10}(20\d+)年(\d+)月(\d+)日")
 
 parallel_size = 4  # 並列処理用
