@@ -2,7 +2,18 @@
 /* refer to https://csshtml.work/table-scroll/ */
 /* .scroll_tbl2 は、ヘッダが 2行               */
 
+@media screen and (max-width: 700px) {
+    .scroll_tbl2 {      width: 100%;
+                        height: 250px;
+                        overflow: auto;}
+}
+
 .scroll_tbl2 {          width: 100%;
+                        height: 250px;
+                        overflow: auto;}
+
+.two_cols_layout .scroll_tbl2 {
+                        width: 600px;
                         height: 250px;
                         overflow: auto;}
 

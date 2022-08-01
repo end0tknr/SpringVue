@@ -35,7 +35,7 @@
         <span class="sub">競合会社</span></th>
     </tr>
     <tr v-for="town_rating in town_ratings">
-      <th>{{ town_rating.town }}</th>
+      <th><div>{{ town_profile.town }}</div></th>
       <td class="graph_bar"
           v-bind:style="{backgroundSize:town_rating['sold_family_setai_px']+'px 3px'}">
         {{town_rating["sold_family_setai"]}}</td>
