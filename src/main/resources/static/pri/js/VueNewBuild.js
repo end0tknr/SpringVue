@@ -17,6 +17,7 @@ let vue_newbuild = Vue.createApp({
             near_city_sales       : [],
             city_profile          : {},
             city_ratings          : [],
+            town_profile          : [],
             town_profiles         : [],
             town_ratings          : [],
             near_city_profiles    : [],
@@ -646,9 +647,9 @@ class NewBuild extends AppBase {
             //最大値算出
             for( let max_set of max_sets ) {
                 for( let atri_key of max_set.atri_keys ){
-		    if( isNaN( town_rating[atri_key] ) ){
-			town_rating[atri_key] = 0;
-		    }
+                    if( isNaN( town_rating[atri_key] ) ){
+                        town_rating[atri_key] = 0;
+                    }
                     if( town_rating[atri_key] <= max_set.max ){
                         continue
                     }
@@ -657,7 +658,6 @@ class NewBuild extends AppBase {
             }
             town_ratings_tmp.push(town_rating);
         }
-        
         town_ratings_tmp = town_ratings_tmp.sort(function(a, b) {
             return b["sold_family_setai"] - a["sold_family_setai"];
         });
@@ -684,7 +684,6 @@ class NewBuild extends AppBase {
                         Number(town_rating[atri_key]).toLocaleString();
                 }
             }
-            
             vue_obj.town_ratings.push( town_rating );
         }
     }
