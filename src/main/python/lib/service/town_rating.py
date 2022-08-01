@@ -63,10 +63,9 @@ class TownRatingService(TownService):
         if  1<=tmp_date.month and tmp_date.month<=3:
             pre_year -= 1
 
-        year_q = [pre_year*10+1,pre_year*10+4]
+        years = [pre_year-1, pre_year]
         fudousan_torihikis = \
-            fudousan_torihiki_service.get_town_sumed_summaries("newbuild",
-                                                               year_q )
+            fudousan_torihiki_service.get_town_years("newbuild",years )
         for fudousan_torihiki in fudousan_torihikis:
             pref_city_town = "\t".join([fudousan_torihiki["pref"],
                                         fudousan_torihiki["city"],
@@ -75,24 +74,44 @@ class TownRatingService(TownService):
             if not pref_city_town in profiles_hash:
                 continue
 
-            sold_count = fudousan_torihiki["sold_count"]
             buy_new_rate = 0
             if "buy_new_rate" in profiles_hash[pref_city_town]["rating"]:
-                buy_new_rate = profiles_hash[pref_city_town]["rating"]["buy_new_rate"]
+                buy_new_rate = \
+                    profiles_hash[pref_city_town]["rating"]["buy_new_rate"]
 
-            profiles_hash[pref_city_town]["rating"]["sold_count"] = \
-                round(sold_count * buy_new_rate,1)
+            count_new = "sold_count_" + str(years[1])
+            price_new = "sold_price_" + str(years[1])
+            count_pre = "sold_count_" + str(years[0])
 
+            profiles_hash[pref_city_town]["rating"]["sold_count"] = 0
+            if count_new in fudousan_torihiki:
+                profiles_hash[pref_city_town]["rating"]["sold_count"] = \
+                    round(fudousan_torihiki[count_new] * buy_new_rate,1)
+
+            profiles_hash[pref_city_town]["rating"]["sold_price"] = 0
+            if price_new in fudousan_torihiki:
+                profiles_hash[pref_city_town]["rating"]["sold_price"] = \
+                    round(fudousan_torihiki[price_new] / 1000000)
+                
+            if count_pre in fudousan_torihiki:
+                profiles_hash[pref_city_town]["rating"]["sold_count_diff"] = \
+                    profiles_hash[pref_city_town]["rating"]["sold_count"] - \
+                    fudousan_torihiki[count_pre] * buy_new_rate
+                profiles_hash[pref_city_town]["rating"]["sold_count_diff"] = \
+                    round(
+                        profiles_hash[pref_city_town]["rating"]["sold_count_diff"],
+                        1 )
+
+            sold_count   = profiles_hash[pref_city_town]["rating"]["sold_count"]
             family_setai = 0
             if "家族世帯" in profiles_hash[pref_city_town]["rating"]:
                 family_setai = profiles_hash[pref_city_town]["rating"]["家族世帯"]
                 
+            profiles_hash[pref_city_town]["rating"]["sold_family_setai"] = 0
             if family_setai:
                 profiles_hash[pref_city_town]["rating"]["sold_family_setai"] = \
                     round(sold_count * 1000 / family_setai,2)
-            else:
-                profiles_hash[pref_city_town]["rating"]["sold_family_setai"] = 0
-
+                
         return profiles_hash
 
 
@@ -132,11 +151,14 @@ class TownRatingService(TownService):
             pref_city = pref +"\t"+ city
 
             if pref_city in city_profiles_hash and \
-               "rating"  in city_profiles_hash[pref_city] and \
-               "buy_new_rate" in city_profiles_hash[pref_city]["rating"]:
+               "rating"  in city_profiles_hash[pref_city]:
 
-                profiles_hash[pref_city_town]["rating"]["buy_new_rate"] = \
-                    city_profiles_hash[pref_city]["rating"]["buy_new_rate"]
+                if "buy_new_rate" in city_profiles_hash[pref_city]["rating"]:
+                    profiles_hash[pref_city_town]["rating"]["buy_new_rate"] = \
+                        city_profiles_hash[pref_city]["rating"]["buy_new_rate"]
+                if "kodate_rate" in city_profiles_hash[pref_city]["rating"]:
+                    profiles_hash[pref_city_town]["rating"]["kodate_rate"] = \
+                        city_profiles_hash[pref_city]["rating"]["kodate_rate"]
                 
         return profiles_hash
                 
@@ -206,10 +228,10 @@ class TownRatingService(TownService):
                 continue
             
             sold_count = profiles_hash[pref_city]["rating"]["sold_count"]
-            onsale_shop = sales_count["shop"]
+            profiles_hash[pref_city]["rating"]["onsale_shop"] = sales_count["shop"]
             
             profiles_hash[pref_city]["rating"]["sold_onsale_shop"] = \
-                round(sold_count*5 / onsale_shop,2)
+                round(sold_count*5 / sales_count["shop"], 2)
         return profiles_hash
 
     

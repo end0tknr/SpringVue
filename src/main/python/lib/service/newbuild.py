@@ -421,8 +421,9 @@ class NewBuildService(appbase.AppBase):
         today = datetime.datetime.today().date()
         calc_date_from, calc_date_to = self.get_weekly_period(today)
 
-        ret_datas_tmp = self.calc_sales_count_by_shop_scale_sub(calc_date_from,
-                                                                calc_date_to)
+        ret_datas_tmp = \
+            self.calc_sales_count_by_shop_scale_sub(calc_date_from,
+                                                    calc_date_to)
         ret_datas = self.conv_scale_sales_to_list( ret_datas_tmp,
                                                    ["pref","shop"],
                                                    calc_date_to )
@@ -828,8 +829,8 @@ class NewBuildService(appbase.AppBase):
         # 直近から3Q以内で最も新しい summaryを取得
         fudousantorihiki_service = MlitFudousanTorihikiService()
         sold_summaries = \
-            fudousantorihiki_service.get_city_summaries(self.tbl_name_header(),
-                                                        year_quatars )
+            fudousantorihiki_service.get_city_quarters(self.tbl_name_header(),
+                                                       year_quatars )
         for sold_summary in sold_summaries:
             pref_city = sold_summary["pref"]+"\t"+sold_summary["city"]
             
@@ -839,7 +840,6 @@ class NewBuildService(appbase.AppBase):
                     "discuss_count":0, "discuss_price":0, "discuss_days":0,
                     "sold_count"   :0, "sold_price"    :0}
             
-            ret_datas_tmp[pref_city]["sold_page"]  = sold_summary["sold_count"]
             ret_datas_tmp[pref_city]["sold_count"] = sold_summary["sold_count"]
             ret_datas_tmp[pref_city]["sold_price"] = sold_summary["sold_price"]
             
@@ -861,7 +861,7 @@ class NewBuildService(appbase.AppBase):
         
         fudousantorihiki_service = MlitFudousanTorihikiService()
         sold_summaries = \
-            fudousantorihiki_service.get_town_summaries(self.tbl_name_header(),
+            fudousantorihiki_service.get_town_quarters(self.tbl_name_header(),
                                                         year_quatars )
         for sold_summary in sold_summaries:
             pref_city_town = "%s\t%s\t%s" % (sold_summary["pref"],
@@ -899,10 +899,10 @@ class NewBuildService(appbase.AppBase):
             fudousantorihiki_service.get_city_price_summaries(
                 self.tbl_name_header(), year_quatars )
         
-        re_compile = re.compile("_sold_price_m_(\d+)_count")
+        re_compile = re.compile("m_yen_(\d+)")
 
         for sold_summary in sold_summaries:
-            
+
             pref_city_price = "\t".join([sold_summary["pref"],
                                          sold_summary["city"],
                                          sold_summary["price"] ])
@@ -911,9 +911,12 @@ class NewBuildService(appbase.AppBase):
                 ret_datas_tmp[pref_city_price] = {
                     "discuss_count":0, "discuss_days":0,
                     "onsale_count" :0, "onsale_days" :0,
-                    "sold_count"   :0}
-            
+                    "sold_count"   :0, "sold_count_q":0}
+
+            # 3ケ月計を週の値に除算
             ret_datas_tmp[pref_city_price]["sold_count"] = \
+                round(sold_summary["sold_count"]/12,2)
+            ret_datas_tmp[pref_city_price]["sold_count_q"] = \
                 sold_summary["sold_count"]
 
         return ret_datas_tmp
@@ -1190,19 +1193,21 @@ ORDER BY pref,city,town
             # postgresの型制限(制約?)が厳しい為
             city_price_info["price"] = float( city_price_info["price"] )
 
+            # city_price_info["sold_count_q"] = city_price_info["sold_count"]
+            # # 3ケ月計の値を週次の値に
+            # city_price_info["sold_count"] = \
+            #     round(city_price_info["sold_count"] / 12, 2)
+
             # postgresはdate型の制約が厳しいのですが
             # pythonが内部的に、datetime.date(2022,7,3) のようにcastしれくれます
             city_price_info["calc_date"]  = calc_date_to
 
             for calc_key in ["onsale","discuss","sold"]:
-                page_key  = calc_key+"_page"
                 count_key = calc_key+"_count"
                 days_key  = calc_key+"_days"
                 
                 tmp_size = 0
-                if page_key in city_price_info and city_price_info[page_key]:
-                    tmp_size = city_price_info[page_key]
-                elif city_price_info[count_key]:
+                if city_price_info[count_key]:
                     tmp_size = city_price_info[count_key]
 
                 if not tmp_size:
@@ -1211,6 +1216,9 @@ ORDER BY pref,city,town
                 if calc_key != "sold":
                     avg_days  = city_price_info[days_key] / tmp_size
                     city_price_info[days_key]  = avg_days
+                    
+            if not "sold_count_q" in city_price_info:
+                city_price_info["sold_count_q"] = 0
 
             ret_datas.append(city_price_info)
 
@@ -1221,10 +1229,10 @@ ORDER BY pref,city,town
             ["pref","city","price","calc_date",
              "discuss_count", "discuss_days",
              "onsale_count",  "onsale_days",
-             "sold_count"],
+             "sold_count",    "sold_count_q"],
             ["discuss_count", "discuss_days",
              "onsale_count",  "onsale_days",
-             "sold_count"],
+             "sold_count",    "sold_count_q"],
             ret_datas )
         
         return ret_datas

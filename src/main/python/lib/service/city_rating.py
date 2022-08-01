@@ -56,6 +56,23 @@ class CityRatingService(CityProfileService):
                     profiles_hash[pref_city]["rating"][atri_key] = \
                         city_profile["summary"][atri_key]
 
+            kodate  = 0
+            if "世帯_戸建" in city_profile["summary"] and \
+               city_profile["summary"]["世帯_戸建"]:
+                kodate = city_profile["summary"]["世帯_戸建"]
+            tmp_sum = 0
+            for atri_key in ["世帯_戸建","世帯_集合"]:
+                if not atri_key in city_profile["summary"]:
+                    continue
+                tmp_sum += city_profile["summary"][atri_key]
+            
+            if tmp_sum :
+                profiles_hash[pref_city]["rating"]["kodate_rate"] = \
+                    round(kodate/tmp_sum, 2)
+            else:
+                profiles_hash[pref_city]["rating"]["kodate_rate"] = 0
+
+            
             buy_new = 0
             if "入手_分譲" in city_profile["summary"] and \
                city_profile["summary"]["入手_分譲"]:
@@ -108,10 +125,11 @@ class CityRatingService(CityProfileService):
                 continue
             
             sold_count = profiles_hash[pref_city]["rating"]["sold_count"]
-            onsale_shop = sales_count["shop"]
+            
+            profiles_hash[pref_city]["rating"]["onsale_shop"] = sales_count["shop"]
             
             profiles_hash[pref_city]["rating"]["sold_onsale_shop"] = \
-                round(sold_count*5 / onsale_shop,2)
+                round(sold_count*5 / sales_count["shop"],2)
         return profiles_hash
 
         
@@ -152,28 +170,44 @@ class CityRatingService(CityProfileService):
         if  1<=tmp_date.month and tmp_date.month<=3:
             pre_year -= 1
 
-        year_q = [pre_year*10+1,pre_year*10+4]
+        years = [pre_year-1, pre_year]
         fudousan_torihikis = \
-            fudousan_torihiki_service.get_city_sumed_summaries("newbuild",
-                                                               year_q )
+            fudousan_torihiki_service.get_city_years("newbuild",years )
         for fudousan_torihiki in fudousan_torihikis:
             pref_city = fudousan_torihiki["pref"] +"\t"+ fudousan_torihiki["city"]
 
             if not pref_city in profiles_hash:
                 continue
 
-            sold_count = fudousan_torihiki["sold_count"]
             buy_new_rate = profiles_hash[pref_city]["rating"]["buy_new_rate"]
 
-            profiles_hash[pref_city]["rating"]["sold_count"] = \
-                round(sold_count * buy_new_rate,1)
+            count_new = "sold_count_" + str(years[1])
+            price_new = "sold_price_" + str(years[1])
+            count_pre = "sold_count_" + str(years[0])
 
+            profiles_hash[pref_city]["rating"]["sold_count"] = 0
+            if count_new in fudousan_torihiki:
+                profiles_hash[pref_city]["rating"]["sold_count"] = \
+                    round(fudousan_torihiki[count_new] * buy_new_rate,1)
+
+            profiles_hash[pref_city]["rating"]["sold_price"] = 0
+            if price_new in fudousan_torihiki:
+                profiles_hash[pref_city]["rating"]["sold_price"] = \
+                    round(fudousan_torihiki[price_new] / 1000000)
+                
+            if count_pre in fudousan_torihiki:
+                profiles_hash[pref_city]["rating"]["sold_count_diff"] = \
+                    profiles_hash[pref_city]["rating"]["sold_count"] - \
+                    fudousan_torihiki[count_pre] * buy_new_rate
+                profiles_hash[pref_city]["rating"]["sold_count_diff"] = \
+                    round(profiles_hash[pref_city]["rating"]["sold_count_diff"],1)
+
+            sold_count   = profiles_hash[pref_city]["rating"]["sold_count"]
             family_setai = profiles_hash[pref_city]["summary"]["家族世帯"]
 
+            profiles_hash[pref_city]["rating"]["sold_family_setai"] = 0
             if family_setai:
                 profiles_hash[pref_city]["rating"]["sold_family_setai"] = \
                     round(sold_count * 1000 / family_setai,2)
-            else:
-                profiles_hash[pref_city]["rating"]["sold_family_setai"] = 0
-
+                
         return profiles_hash

@@ -28,14 +28,24 @@ COMMENT ON COLUMN mlit_fudousantorihiki.chiiki IS '住宅地, 宅地見込地';
 CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki_by_city (
 pref                    varchar(4),
 city                    varchar(16),
-summary                 varchar(20480),
+newbuild_quarter        varchar(10240),
+newbuild_year           varchar(10240),
+newbuild_price          varchar(10240),
+sumstock_quarter        varchar(10240),
+sumstock_year           varchar(10240),
+sumstock_price          varchar(10240),
 primary key(pref,city) );
 
 CREATE TABLE IF NOT EXISTS mlit_fudousantorihiki_by_town (
 pref                    varchar(4),
 city                    varchar(16),
 town                    varchar(64),
-summary                 varchar(20480),
+newbuild_quarter        varchar(10240),
+newbuild_year           varchar(10240),
+newbuild_price          varchar(10240),
+sumstock_quarter        varchar(10240),
+sumstock_year           varchar(10240),
+sumstock_price          varchar(10240),
 primary key(pref,city,town) );
 
 
@@ -774,6 +784,7 @@ onsale_days             int,
 discuss_count           int,
 discuss_days            int,
 sold_count              numeric,
+sold_count_q            numeric,
 primary key(pref,city,price,calc_date) );
 
 CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_shop_scale (

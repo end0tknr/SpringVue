@@ -382,7 +382,7 @@ class NewBuild extends AppBase {
         
         let res = await fetch(req_url);
         let price_sales = await res.json();
-        price_sales = this.conv_counts_for_disp( price_sales );
+        price_sales = this.conv_price_counts_for_disp( price_sales );
         vue_obj.price_sales = price_sales;
     }
     
@@ -476,7 +476,6 @@ class NewBuild extends AppBase {
         let max_sets = [
             {"key_name":"sold_family_setai", "max":0,
              "atri_keys":['sold_family_setai']},
-	    
             {"key_name":"sold_onsale_count", "max":0,
              "atri_keys":['sold_onsale_count']},
             {"key_name":"sold_onsale_shop", "max":0,
@@ -484,8 +483,12 @@ class NewBuild extends AppBase {
             {"key_name":"family",      "max":0,"atri_keys":['家族世帯']},
             {"key_name":"family_diff", "max":0,"atri_keys":['家族世帯_変動']},
             {"key_name":"sold_count",  "max":0,"atri_keys":['sold_count']},
+            {"key_name":"sold_count_diff","max":0,"atri_keys":['sold_count_diff']},
+            {"key_name":"sold_price",  "max":0,"atri_keys":['sold_price']},
             {"key_name":"discuss_days","max":0,"atri_keys":['discuss_days']},
-            {"key_name":"land_price", "max":0, "atri_keys":['land_price']}
+            {"key_name":"land_price",  "max":0,"atri_keys":['land_price']},
+            {"key_name":"kodate_rate", "max":0,"atri_keys":['kodate_rate']},
+            {"key_name":"buy_new_rate","max":0,"atri_keys":['buy_new_rate']},
         ];
         return max_sets;
     }
@@ -587,6 +590,9 @@ class NewBuild extends AppBase {
             //最大値算出
             for( let max_set of max_sets ) {
                 for( let atri_key of max_set.atri_keys ){
+		    if( isNaN( city_rating[atri_key] ) ){
+			city_rating[atri_key] = 0;
+		    }
                     if( city_rating[atri_key] > max_set.max ){
 			max_set.max = city_rating[atri_key];
                     }
@@ -640,6 +646,9 @@ class NewBuild extends AppBase {
             //最大値算出
             for( let max_set of max_sets ) {
                 for( let atri_key of max_set.atri_keys ){
+		    if( isNaN( town_rating[atri_key] ) ){
+			town_rating[atri_key] = 0;
+		    }
                     if( town_rating[atri_key] <= max_set.max ){
                         continue
                     }
@@ -888,6 +897,52 @@ class NewBuild extends AppBase {
                     Math.round(sales_count[atri_key] /1000000)
             }
             
+            for( let atri_key of atri_keys ) {
+                atri_sets[atri_key].add( sales_count[atri_key] );
+            }
+        }
+        
+        // sort
+        sales_counts = sales_counts.sort(function(a, b) {
+            return b["onsale_count"] - a["onsale_count"];
+        });
+        
+        let atri_min_max = {}
+        for( let atri_key of atri_keys ) {
+            let atri_list = Array.from( atri_sets[atri_key] );
+            atri_min_max[atri_key] =
+                [Math.min(...atri_list), Math.max(...atri_list)]
+        }
+        
+        for( let sales_count of sales_counts ) {
+            for( let atri_key of atri_keys ) {
+                
+                let graph_bar_key = atri_key + "_px";
+                sales_count[graph_bar_key] =
+                    this.calc_graph_bar_px(sales_count[atri_key],
+                                           atri_min_max[atri_key][0],
+                                           atri_min_max[atri_key][1],
+                                           50 );
+                //数値の3桁区切り化
+                sales_count[atri_key] =
+                    Number(sales_count[atri_key]).toLocaleString();
+            }
+        }
+        return sales_counts;
+    }
+    
+    conv_price_counts_for_disp( sales_counts ){
+        // 最大/最小値を算出する為の準備
+        let atri_sets = {}
+        const atri_keys = ["onsale_count", "onsale_days",
+                           "discuss_count","discuss_days",
+                           "sold_count",   "sold_count_q"  ]
+        
+        for( let atri_key of atri_keys ) {
+            atri_sets[atri_key] = new Set();
+        }
+        
+        for( let sales_count of sales_counts ) {
             for( let atri_key of atri_keys ) {
                 atri_sets[atri_key].add( sales_count[atri_key] );
             }

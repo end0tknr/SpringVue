@@ -20,24 +20,16 @@ def main():
 
     # 物件情報の集計 新築
     newbuild_service = NewBuildService()
-    newbuild_service.calc_save_sales_count_by_shop()
-    newbuild_service.calc_save_sales_count_by_shop_scale()
-    newbuild_service.calc_save_sales_count_by_shop_city()
-    newbuild_service.calc_save_sales_count_by_shop_town()
-    newbuild_service.calc_save_sales_count_by_shop_city_scale()
-    newbuild_service.calc_save_sales_count_by_city()
-    newbuild_service.calc_save_sales_count_by_city_scale()
-    newbuild_service.calc_save_sales_count_by_town()
-    newbuild_service.calc_save_sales_count_by_town_scale()
+    #newbuild_service.calc_save_sales_count_by_shop()
+    #newbuild_service.calc_save_sales_count_by_shop_scale()
+    # newbuild_service.calc_save_sales_count_by_shop_city()
+    # newbuild_service.calc_save_sales_count_by_shop_town()
+    # newbuild_service.calc_save_sales_count_by_shop_city_scale()
+    # newbuild_service.calc_save_sales_count_by_city()
+    # newbuild_service.calc_save_sales_count_by_city_scale()
+    # newbuild_service.calc_save_sales_count_by_town()
+    # newbuild_service.calc_save_sales_count_by_town_scale()
     newbuild_service.calc_save_sales_count_by_price()
-
-    # 物件情報の集計 中古
-    sumstock_service = SumStockService()
-    sumstock_service.calc_save_sales_count_by_shop()
-    sumstock_service.calc_save_sales_count_by_shop_city()
-    sumstock_service.calc_save_sales_count_by_city()
-    sumstock_service.calc_save_sales_count_by_town()
-    sumstock_service.calc_save_sales_count_by_price()
     
 if __name__ == '__main__':
     main()

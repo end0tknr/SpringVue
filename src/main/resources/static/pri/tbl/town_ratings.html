@@ -1,11 +1,11 @@
-<h2>{{city_name}}内 地区別</h2>
+<h2>{{city_name}}内 地区</h2>
 
 <div class="scroll_tbl2">
   <table>
     <tr>
       <th></th>
-      <th colspan="3">Rating</th>
-      <th colspan="3">他 参考</th>
+      <th colspan="4">Rating</th>
+      <th colspan="9">他 参考</th>
     </tr>
     <tr class="sort_keys">
       <th v-on:click="sort_tbl('town_ratings','town')">地区</th>
@@ -16,16 +16,31 @@
       <th v-on:click="sort_tbl('town_ratings','sold_onsale_shop')">
         競合会社 少</th>
       <th v-on:click="sort_tbl('town_ratings','sold_count')">
-        <div class="sub">販売数/年</div></th>
+        <span class="sub">売約数/年</span></th>
+      <th v-on:click="sort_tbl('town_ratings','sold_count_diff')">
+        <span class="sub">対前年</span></th>
+      <th v-on:click="sort_tbl('town_ratings','kodate_rate')">
+        <span class="sub">戸建率</span></th>
+      <th v-on:click="sort_tbl('town_ratings','buy_new_rate')">
+        <span class="sub">分譲率</span></th>
+      <th v-on:click="sort_tbl('town_ratings','sold_price')">
+        <span class="sub">価格(百万)</span></th>
       <th v-on:click="sort_tbl('town_ratings','land_price')">
-        <span class="sub">地価</span></th>
+        <span class="sub">地価(万/㎡)</span></th>
       <th v-on:click="sort_tbl('town_ratings','家族世帯')">
-	<div class="sub">家族世帯</div></th>
+        <span class="sub">家族世帯</span></th>
       <th v-on:click="sort_tbl('town_ratings','家族世帯_変動')">
-        <div class="sub">対2015</div></th>
+        <span class="sub">対2015</span></th>
+      <th v-on:click="sort_tbl('town_ratings','onsale_shop')">
+        <span class="sub">競合会社</span></th>
     </tr>
     <tr v-for="town_rating in town_ratings">
-      <th><div>{{ town_rating.town }}</div></th>
+      <th>
+        <div class="col_key"
+             v-on:click="load_town_datas(town_rating.pref,town_rating.town )">
+          {{ town_rating.town }}
+        </div>
+      </th>
       <td class="graph_bar"
           v-bind:style="{backgroundSize:town_rating['sold_family_setai_px']+'px 3px'}">
         {{town_rating["sold_family_setai"]}}</td>
@@ -42,6 +57,18 @@
           v-bind:style="{backgroundSize:town_rating['sold_count_px']+'px 3px'}">
         {{town_rating["sold_count"]}}</td>
       <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_rating['sold_count_diff_px']+'px 3px'}">
+        {{town_rating["sold_count_diff"]}}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_rating['kodate_rate_px']+'px 3px'}">
+        {{Math.round(town_rating["kodate_rate"]*100)}}%</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_rating['buy_new_rate_px']+'px 3px'}">
+        {{Math.round(town_rating["buy_new_rate"]*100)}}%</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_rating['sold_price_px']+'px 3px'}">
+        {{town_rating["sold_price"]}}</td>
+      <td class="graph_bar"
           v-bind:style="{backgroundSize:town_rating['land_price_px']+'px 3px'}">
         {{town_rating["land_price"]}}</td>
       <td class="graph_bar"
@@ -50,6 +77,9 @@
       <td class="graph_bar"
           v-bind:style="{backgroundSize:town_rating['家族世帯_変動_px']+'px 3px'}">
         {{town_rating["家族世帯_変動"]}}</td>
+      <td class="graph_bar"
+          v-bind:style="{backgroundSize:town_rating['on_sale_shop_px']+'px 3px'}">
+        {{town_rating["onsale_shop"]}}</td>
     </tr>
   </table>
   
