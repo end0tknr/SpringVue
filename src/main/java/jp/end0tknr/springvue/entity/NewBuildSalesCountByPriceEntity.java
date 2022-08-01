@@ -13,6 +13,7 @@ public class NewBuildSalesCountByPriceEntity {
     private Integer discuss_count;
     private Integer discuss_days;
     private Float   sold_count;
+    private Integer sold_count_q;
 
     public String getPref() {          return pref;         }
     public String getCity() {          return city;         }
@@ -23,5 +24,6 @@ public class NewBuildSalesCountByPriceEntity {
     public Integer getDiscuss_count(){ return discuss_count;}
     public Integer getDiscuss_days() { return discuss_days; }
     public Float   getSold_count(){    return sold_count;   }
+    public Integer getSold_count_q(){  return sold_count_q; }
 
 }

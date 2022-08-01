@@ -27,7 +27,7 @@
 	<!-- <table schema="" tableName="gis_youto_chiiki" domainObjectName="GisYoutoChiikiEntity">
 		<property name="useActualColumnNames" value="true" /> </table> -->
 
-    <table schema="" tableName="city"
+    <table schema="" tableName="newbuild_sales_count_by_city_price"
 	domainObjectName="CityEntity">
 		<property name="useActualColumnNames" value="true" />
     </table>
