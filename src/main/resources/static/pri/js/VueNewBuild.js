@@ -475,21 +475,18 @@ class NewBuild extends AppBase {
 
     ratings_max_sets(){
         let max_sets = [
-            {"key_name":"sold_family_setai", "max":0,
-             "atri_keys":['sold_family_setai']},
-            {"key_name":"sold_onsale_count", "max":0,
-             "atri_keys":['sold_onsale_count']},
-            {"key_name":"sold_onsale_shop", "max":0,
-             "atri_keys":['sold_onsale_shop']},
-            {"key_name":"family",      "max":0,"atri_keys":['家族世帯']},
-            {"key_name":"family_diff", "max":0,"atri_keys":['家族世帯_変動']},
-            {"key_name":"sold_count",  "max":0,"atri_keys":['sold_count']},
+            {"key_name":"ss_sold_count",  "max":0,"atri_keys":['ss_sold_count']},
+            {"key_name":"ss_onsale_shop", "max":0,"atri_keys":['ss_onsale_shop']},
+            {"key_name":"ss_onsale_count","max":0,"atri_keys":['ss_onsale_count']},
+            {"key_name":"ss_discuss_days","max":0,"atri_keys":['ss_discuss_days']},
+            {"key_name":"family",         "max":0,"atri_keys":['家族世帯']},
+            {"key_name":"family_diff",    "max":0,"atri_keys":['家族世帯_変動']},
+            {"key_name":"sold_count",     "max":0,"atri_keys":['sold_count']},
             {"key_name":"sold_count_diff","max":0,"atri_keys":['sold_count_diff']},
-            {"key_name":"sold_price",  "max":0,"atri_keys":['sold_price']},
-            {"key_name":"discuss_days","max":0,"atri_keys":['discuss_days']},
-            {"key_name":"land_price",  "max":0,"atri_keys":['land_price']},
-            {"key_name":"kodate_rate", "max":0,"atri_keys":['kodate_rate']},
-            {"key_name":"buy_new_rate","max":0,"atri_keys":['buy_new_rate']},
+            {"key_name":"sold_price",     "max":0,"atri_keys":['sold_price']},
+            {"key_name":"land_price",     "max":0,"atri_keys":['land_price']},
+            {"key_name":"kodate_rate",    "max":0,"atri_keys":['kodate_rate']},
+            {"key_name":"buy_new_rate",   "max":0,"atri_keys":['buy_new_rate']},
         ];
         return max_sets;
     }
@@ -603,7 +600,7 @@ class NewBuild extends AppBase {
         }
 
         city_ratings_tmp = city_ratings_tmp.sort(function(a, b) {
-            return b["sold_family_setai"] - a["sold_family_setai"];
+            return b["ss_sold_count"] - a["ss_sold_count"];
         });
         
         vue_obj.city_ratings = [];
@@ -659,7 +656,7 @@ class NewBuild extends AppBase {
             town_ratings_tmp.push(town_rating);
         }
         town_ratings_tmp = town_ratings_tmp.sort(function(a, b) {
-            return b["sold_family_setai"] - a["sold_family_setai"];
+            return b["ss_sold_count"] - a["ss_sold_count"];
         });
         
         vue_obj.town_ratings = [];

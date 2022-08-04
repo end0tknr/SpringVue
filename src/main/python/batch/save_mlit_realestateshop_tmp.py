@@ -9,7 +9,7 @@ from service.mlit_realestateshop import MlitRealEstateShopService
 def main():
     real_estate_shop_service = MlitRealEstateShopService()
 
-    shops = real_estate_shop_service.find_licence_def("第000501号")
+    shops = real_estate_shop_service.find_licence_def("第005707号")
     print( shops )
     
 

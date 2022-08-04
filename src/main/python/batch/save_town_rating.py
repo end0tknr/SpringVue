@@ -8,7 +8,8 @@ from service.town_rating import TownRatingService
 
 def main():
     town_rating_service = TownRatingService()
-    town_rating_service.calc_save_ratings()
+    town_rating_service.calc_save_ratings_2()
+    #town_rating_service.calc_save_ratings()
 
 if __name__ == '__main__':
     main()

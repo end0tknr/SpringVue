@@ -11,7 +11,8 @@ from service.city_rating import CityRatingService
 def main():
     city_rating_service = CityRatingService()
     
-    city_rating_service.calc_save_ratings()
+    city_rating_service.calc_save_ratings_2()
+    #city_rating_service.calc_save_ratings()
     
 
 if __name__ == '__main__':
