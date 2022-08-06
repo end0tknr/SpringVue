@@ -22,7 +22,7 @@ public interface CityProfileRepository {
   		   " WHERE tbl2.pref='${prefName}' AND tbl2.city='${cityName}' ")
      List<String> getNearCityProfiles(String prefName,String cityName);
 
-    @Select("SELECT rating FROM city_profile "+
+    @Select("SELECT newbuild_rating FROM city_profile "+
     		" WHERE pref='${prefName}' ")
-    List<String> getCityRatings(String prefName);
+    List<String> getCityNewBuildRatings(String prefName);
 }

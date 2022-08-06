@@ -13,8 +13,8 @@ public interface TownProfileRepository {
   		   " ORDER BY town ")
     List<String> getTownProfiles(String prefName,String cityName);
 
-    @Select("SELECT rating FROM town_profile"+
+    @Select("SELECT newbuild_rating FROM town_profile"+
  		   " WHERE pref='${prefName}' AND city='${cityName}' "+
  		   " ORDER BY town ")
-    List<String> getTownRatings(String prefName,String cityName);
+    List<String> getTownNewbuildRatings(String prefName,String cityName);
 }

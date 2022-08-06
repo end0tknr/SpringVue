@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,6 +25,7 @@ import jp.end0tknr.springvue.entity.SumStockSalesCountByShopCityEntity;
 import jp.end0tknr.springvue.entity.SumStockSalesCountByShopEntity;
 import jp.end0tknr.springvue.entity.SumStockSalesCountByTownEntity;
 import jp.end0tknr.springvue.service.CityProfileService;
+import jp.end0tknr.springvue.service.ClientIpPosService;
 import jp.end0tknr.springvue.service.SumStockService;
 
 @RestController
@@ -32,6 +36,8 @@ public class SumStockRestController {
     SumStockService sumStockService;
     @Autowired
     CityProfileService cityProfileService;
+    @Autowired
+    ClientIpPosService clientIpPosService;
 
     List<String> convStr2CalcDate(String dateStr) {
         SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -52,6 +58,30 @@ public class SumStockRestController {
         return Arrays.asList(
         		sdFormat.format(dateFrom),
         		sdFormat.format(dateTo) );
+    }
+
+    @RequestMapping("/api/sumstock/CityProfileByBuildYear/{prefCityName}")
+    public String buildYearCityProfile(
+    		@PathVariable("prefCityName") String prefCityName ){
+
+    	try {
+			prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	String[] names = prefCityName.split("_");
+
+    	String cityProfile =
+    			cityProfileService.getBuildYearProfile(names[0],names[1]);
+
+    	return cityProfile;
+    }
+
+
+    @RequestMapping("/api/sumstock/ClientIp")
+    public Map<String, String> clientIp(HttpServletRequest request){
+    	Map<String, String> ipInfo = clientIpPosService.getClientIp(request);
+    	return ipInfo;
     }
 
     @RequestMapping("/api/sumstock/DispDateRange")

@@ -29,12 +29,12 @@ public class CityProfileService {
         return cityProfileRepository.getNearCityProfiles(prefName, cityName);
     }
 
-    public  List<String> getCityRatings( String prefName) {
-        return cityProfileRepository.getCityRatings(prefName);
+    public  List<String> getCityNewBuildRatings( String prefName) {
+        return cityProfileRepository.getCityNewBuildRatings(prefName);
     }
 
-    public  List<String> getTownRatings( String prefName, String cityName) {
-        return townProfileRepository.getTownRatings(prefName, cityName);
+    public  List<String> getTownNewbuildRatings( String prefName, String cityName) {
+        return townProfileRepository.getTownNewbuildRatings(prefName, cityName);
     }
 
     public  List<String> getTownProfiles(

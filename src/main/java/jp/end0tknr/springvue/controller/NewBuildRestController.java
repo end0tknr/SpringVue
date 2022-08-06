@@ -316,7 +316,7 @@ public class NewBuildRestController {
     		@PathVariable("prefName") String prefName ){
 
     	List<String> cityProfile =
-    			cityProfileService.getCityRatings( prefName );
+    			cityProfileService.getCityNewBuildRatings( prefName );
     	return cityProfile;
     }
 
@@ -332,7 +332,7 @@ public class NewBuildRestController {
     	String[] names = prefCityName.split("_");
 
     	List<String> townRatings =
-    			cityProfileService.getTownRatings(names[0],names[1] );
+    			cityProfileService.getTownNewbuildRatings(names[0],names[1] );
     	return townRatings;
     }
 
