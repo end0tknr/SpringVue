@@ -70,7 +70,8 @@ pref                    varchar(4),
 city                    varchar(8),
 summary                 varchar(4096),
 build_year_summary      varchar(4096),
-rating                  varchar(4096),
+newbuild_rating         varchar(4096),
+sumstock_rating         varchar(4096),
 primary key(pref,city));
 
 CREATE TABLE IF NOT EXISTS near_city (
@@ -87,7 +88,8 @@ town            varchar(64),
 lng             double precision,
 lat             double precision,
 summary         varchar(4096),
-rating          varchar(4096),
+newbuild_rating varchar(4096),
+sumstock_rating varchar(4096),
 primary key(pref,city,town) );
 
 -- 2015年の古いデータの為、対象外
@@ -842,6 +844,20 @@ discuss_price           bigint,
 discuss_days            int,
 primary key(pref,city,shop,calc_date) );
 
+CREATE TABLE IF NOT EXISTS sumstock_sales_count_by_shop_town(
+pref                    varchar(4),
+city                    varchar(16),
+town                    varchar(64),
+shop                    varchar(64),
+calc_date               date,
+onsale_count            int,
+onsale_price            bigint,
+onsale_days             int,
+discuss_count           int,
+discuss_price           bigint,
+discuss_days            int,
+primary key(pref,city,town,shop,calc_date) );
+
 CREATE TABLE IF NOT EXISTS sumstock_sales_count_by_city (
 pref                    varchar(4),
 city                    varchar(16),
@@ -881,8 +897,8 @@ onsale_days             int,
 discuss_count           int,
 discuss_days            int,
 sold_count              numeric,
+sold_count_q            numeric,
 primary key(pref,city,price,calc_date) );
-
 
 CREATE TABLE IF NOT EXISTS kokusei_population_h03 (
 pref            varchar(4),

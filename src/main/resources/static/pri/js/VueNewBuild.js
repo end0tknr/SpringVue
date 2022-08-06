@@ -51,22 +51,13 @@ let vue_newbuild = Vue.createApp({
     },
     methods : {
 
-        init_page_by_disp_date(){
-            newbuild.load_shops_data(this.pref_name,this);
-            newbuild.load_shop_scale_data(this.pref_name,this);
-            newbuild.load_cities_data(this.pref_name,this);
-            newbuild.load_city_scale_data(this.pref_name,this);
-	    
-            this.load_city_datas(this.pref_name, this.city_name );
-        },
-        
         load_city_datas(pref_name, city_name){
             
             if ( this.pref_name != pref_name){
                 this.pref_name = pref_name;
                 newbuild.load_shops_data(pref,this);
                 newbuild.load_shop_scale_data(pref,this);
-                newbuild.load_cities_data(pref,city,this);
+                newbuild.load_cities_data(pref,this);
                 return;
             }
             

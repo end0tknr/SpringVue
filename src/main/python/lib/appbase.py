@@ -36,6 +36,8 @@ class AppBase():
     def get_logger(self):
         return logger
 
+    # 以下の db_cursor()と db_connect() は、
+    # util/db.py への実装した方がよかったのかも
     def db_cursor(self,db_conn):
         return db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         
@@ -53,6 +55,7 @@ class AppBase():
             port        = conf["db"]["db_port"] )
         return db_conn
 
+    # selenium を使用する場合、browser(driver)を返します
     def get_browser(self):
         selenium_conf = conf["selenium"]
         browser_service = \
@@ -78,7 +81,8 @@ class AppBase():
         
         return browser
 
-
+    # http get は、様々なclassから scrayping で利用しますので
+    # ここへ、実装します
     def get_http_requests(self, req_url):
         i = 0
         while i < http_conf["retry_limit"]:

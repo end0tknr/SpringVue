@@ -49,7 +49,8 @@ ORDER BY pref,city,town
             for ret_row in  db_cur.fetchall():
                 ret_row = dict( ret_row )
                 ret_row["summary"] = json.loads( ret_row["summary"] )
-                ret_row["rating"]  = json.loads( ret_row["rating"]  )
+                ret_row["newbuild_rating"]  = \
+                    json.loads( ret_row["newbuild_rating"] or "{}" )
                 ret_datas.append( ret_row )
                 
         return ret_datas

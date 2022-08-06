@@ -6,13 +6,11 @@ import os
 import sys
 sys.path.append( os.path.join(os.path.dirname(__file__), '../lib') )
 
-from service.city_rating import CityRatingService
+from service.city_newbuild_rating import CityNewbuildRatingService
 
 def main():
-    city_rating_service = CityRatingService()
-    
-    city_rating_service.calc_save_ratings_2()
-    #city_rating_service.calc_save_ratings()
+    city_rating_service = CityNewbuildRatingService()
+    city_rating_service.calc_save_ratings()
     
 
 if __name__ == '__main__':

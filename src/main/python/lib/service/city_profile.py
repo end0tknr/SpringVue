@@ -86,7 +86,7 @@ SELECT * from city_profile
             ret_datas = []
             for ret_row in  db_cur.fetchall():
                 ret_row = dict( ret_row )
-                for atri_key in ["summary","rating"]:
+                for atri_key in ["summary","newbuild_rating"]:
                     if ret_row[atri_key]:
                         ret_row[atri_key] = json.loads( ret_row[atri_key] )
                     else:
