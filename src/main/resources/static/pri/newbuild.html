@@ -29,7 +29,7 @@
   <div id="vueapp">
     
     <div class="container_title">
-      <h1 id="pref_name">戸建分譲 週次速報 - {{pref_name}}</h1>
+      <h1 id="pref_name">戸建分譲 販売偏差値 - {{pref_name}}</h1>
       <div class="container_title_sub">
         <div>
           <input type="date"
@@ -44,6 +44,21 @@
           <a class="open_modal_link" v-on:click="show_jpn_map_modal">
             都道府県選択</a>
         </div>
+      </div>
+    </div><!--.container_title-->
+    
+    <div class="page_middle">
+      <div class="page_middle_container">
+	<!--#include virtual="./tbl/city_ratings.html" -->
+        
+	<!--#include virtual="./tbl/town_ratings.html" -->
+	
+      </div><!--.page_middle_container-->
+    </div><!--.page_middle-->
+
+    <div class="container_title">
+      <h1 id="pref_name">戸建分譲 週次速報</h1>
+      <div class="container_title_sub">
       </div>
     </div><!--.container_title-->
     
@@ -142,23 +157,6 @@
           <!--#include file="./tbl/build_year_profiles.html" -->
         </div><!--.column_right-->
       </div><!--.two_cols_layout-->
-      
-    </div><!--.page_middle_container-->
-  </div><!--.page_middle-->
-
-  <div class="container_title">
-    <h1 id="pref_name">戸建分譲 販売偏差値</h1>
-    <div class="container_title_sub">
-      <div>独自AIによる販売評価指数</div>
-      <div class="container_title_sub_right"></div>
-    </div>
-  </div><!--.container_title-->
-
-  <div class="page_middle">
-    <div class="page_middle_container">
-      <!--#include virtual="./tbl/city_ratings.html" -->
-          
-      <!--#include virtual="./tbl/town_ratings.html" -->
       
     </div><!--.page_middle_container-->
   </div><!--.page_middle-->
