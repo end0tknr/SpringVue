@@ -2,34 +2,20 @@
 # -*- coding: utf-8 -*-
 
 from bs4 import BeautifulSoup
-from psycopg2  import extras # for bulk insert
-from selenium import webdriver # ex. pip install selenium==4.1.3
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from service.city                import CityService
 from service.mlit_realestateshop import MlitRealEstateShopService
 from util.db import Db
 
 import appbase
-import concurrent.futures
+import concurrent.futures # 並列処理用
 import datetime
 import json
 import re
 import sys
 import time
-import unicodedata   # 標準module
+import unicodedata   # 全角→半角変換や、normalize用. 標準module
 import urllib.parse
 import urllib.request
-
-browser_conf = {
-    "browser_options" : [
-        "--headless",
-        "--enable-logging=False",
-        #以下、3行はSSLエラー対策らしい
-        "--ignore-certificate-errors",
-        "--disable-extensions",
-        "--disable-print-preview"],
-    "implicitly_wait": 10 }
 
 pref_names = [
     "hokkaido","aomori","iwate","miyagi","akita","yamagata",
@@ -50,11 +36,14 @@ base_host = "https://suumo.jp"
 base_urls = [
     [base_host+"/ikkodate/",       "新築戸建"],
     [base_host+"/chukoikkodate/",  "中古戸建"],
-    #[base_host+"/ms/chuko/",       "中古マンション"],
     # 新築マンションは価格等が記載されていないことが多い為、無視
     #[base_host+"/ms/shinchiku/",  "新築マンション"]
+    # 上記の通り、新築マンションを対象外とするなら
+    # 中古マンションを取得する意味がないので、無視
+    #[base_host+"/ms/chuko/",       "中古マンション"],
 ]
 
+# 宅建業者の免許番号等から、不動産会社を抽出
 re_compile_licenses = [
     re.compile("会社概要.+?((国土交通大臣).{0,6}第(\d\d+)号)"),
     # refer to https://techacademy.jp/magazine/20932
@@ -63,10 +52,9 @@ re_compile_licenses = [
 
 re_compile_house_count_1 = re.compile(
     "販売.{0,2}?数\s*ヒント\s*(\d+)\s*(戸|室|棟|区画)")
-#    "販売.{0,2}?数.{0,10}?(\d+)\s*(戸|室|棟|区画)")
 re_compile_house_count_2 = re.compile(
     "総.{0,2}?数\s*ヒント\s*(\d+)\s*(戸|室|棟|区画)")
-#    "総.{0,2}?数.{0,10}?(\d+)\s*(戸|室|棟|区画)")
+
 re_compile_show_date = re.compile("情報提供日.{0,10}(20\d+)年(\d+)月(\d+)日")
 
 parallel_size = 4  # 並列処理用
@@ -79,69 +67,6 @@ class SuumoService(appbase.AppBase):
     def __init__(self):
         pass
 
-    def modify_pref_city(self,address_org,pref,city,other):
-        sql = """
-UPDATE suumo_bukken
-SET pref=%s, city=%s, address=%s
-WHERE address=%s
-"""
-        sql_args = (pref,city,other,address_org)
-        
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-                try:
-                    db_cur.execute(sql,sql_args)
-                    db_conn.commit()
-                except Exception as e:
-                    logger.error(e)
-                    logger.error(sql)
-                    return False
-
-        return True
-        
-    def load_all_bukkens(self):
-        ret_rows = []
-        sql = """
-SELECT * FROM suumo_bukken where pref =''
-"""
-        
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-                try:
-                    db_cur.execute(sql)
-                except Exception as e:
-                    logger.error(e)
-                    logger.error(sql)
-                    return []
-
-                ret_rows = db_cur.fetchall()
-                
-        for ret_row in ret_rows:
-            ret_row = dict( ret_row )
-            
-        return ret_rows
-        
-    def load_search_result_list_urls(self):
-        logger.info("start")
-
-        sql = "SELECT * FROM suumo_search_result_url"
-        ret_rows = []
-
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-
-                    try:
-                        db_cur.execute(sql)
-                    except Exception as e:
-                        logger.error(e)
-                        logger.error(sql)
-                        return []
-
-                    for row in db_cur.fetchall():
-                        ret_rows.append( [row["build_type"],row["url"]] )
-                        #ret_rows.append( dict(row) )
-        return ret_rows
-    
     def save_bukken_infos_main(self):
         logger.info("start")
         
@@ -189,6 +114,140 @@ SELECT * FROM suumo_bukken where pref =''
                 bukken_infos )
 
 
+    def save_bukken_details(self,build_type,other_where):
+        org_bukkens = self.get_bukkens_for_detail(build_type,other_where)
+        org_size = len(org_bukkens)
+
+        new_bukkens = []
+        bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
+        
+        while len(org_bukkens) >= parallel_size:
+            parallels = []
+            i = 0
+            while i < parallel_size:
+
+                calced = org_size - len(org_bukkens)
+                if calced % 100 == 0:
+                    logger.info("%s %d/%d" % (build_type,calced,org_size))
+
+                # refer to https://pystyle.info/python-concurrent-futures/
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                # with concurrent.futures.ProcessPoolExecutor() as executor:
+                    future = executor.submit(self.parse_bukken_detail,
+                                             org_bukkens.pop() )
+                    parallels.append(future)
+                    i += 1
+
+            datetime_now = datetime.datetime.now()
+            
+            for parallel in parallels:
+                bukken_detail = parallel.result()
+                if not bukken_detail:
+                    continue
+
+                bukken_detail["update_time"] = datetime_now
+                new_bukkens.append( bukken_detail )
+
+            if len(new_bukkens) >= bulk_insert_size:
+                util_db = Db()
+                util_db.bulk_update(
+                    "suumo_bukken",
+                    ["url"],
+                    ["url","shop","total_house","house_for_sale",
+                     "show_date","update_time"],
+                    new_bukkens )
+                new_bukkens = []
+                
+
+        if len(org_bukkens):
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(self.parse_bukken_detail,
+                                         org_bukkens.pop() )
+                parallels.append(future)
+            i += 1
+
+        datetime_now = datetime.datetime.now()
+        
+        for parallel in parallels:
+            bukken_detail = parallel.result()
+            if not bukken_detail:
+                continue
+
+            bukken_detail["update_time"] = datetime_now
+            new_bukkens.append( bukken_detail )
+            
+        if len(new_bukkens):
+            util_db = Db()
+            util_db.bulk_update(
+                "suumo_bukken",
+                ["url"],
+                ["url","shop","total_house","house_for_sale",
+                 "show_date","update_time"],
+                new_bukkens )
+            
+            
+    def modify_pref_city(self,address_org,pref,city,other):
+        sql = """
+UPDATE suumo_bukken
+SET pref=%s, city=%s, address=%s
+WHERE address=%s
+"""
+        sql_args = (pref,city,other,address_org)
+        
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql,sql_args)
+                db_conn.commit()
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return False
+
+        return True
+        
+    def load_all_bukkens(self):
+        ret_rows = []
+        sql = """
+SELECT * FROM suumo_bukken where pref =''
+"""
+        
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+
+            ret_rows = db_cur.fetchall()
+                
+        for ret_row in ret_rows:
+            ret_row = dict( ret_row )
+            
+        return ret_rows
+        
+    def load_search_result_list_urls(self):
+        logger.info("start")
+
+        sql = "SELECT * FROM suumo_search_result_url"
+        ret_rows = []
+
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
+            
+            for row in db_cur.fetchall():
+                ret_rows.append( [row["build_type"],row["url"]] )
+                
+        return ret_rows
+    
     def conv_bukken_infos_for_upsert(self, build_type, bukken_infos ):
         datetime_now = datetime.datetime.now()
             
@@ -210,25 +269,21 @@ SELECT * FROM suumo_bukken where pref =''
                 bukken_info["update_time"]= datetime_now
         return bukken_infos
     
-    
     def del_search_result_list_urls(self):
         logger.info("start")
 
         sql = "delete from suumo_search_result_url"
 
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-                try:
-                    db_cur.execute(sql)
-                except Exception as e:
-                    logger.error(e)
-                    logger.error(sql)
-                    return False
-                
-            db_conn.commit()
-            
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return False
+        db_conn.commit()
         return True
-
         
     def save_search_result_list_urls(self, build_type, urls):
         logger.info("start "+ build_type)
@@ -547,25 +602,25 @@ group by pref,city,build_type
 order by build_type, count(*) desc
 """
         ret_data_tmp = {}
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-                try:
-                    db_cur.execute(sql, (start_date_str, end_date_str))
-                except Exception as e:
-                    logger.error(e)
-                    logger.error(sql)
-                    return []
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql, (start_date_str, end_date_str))
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
 
-                for ret_row in  db_cur.fetchall():
-                    ret_row= dict( ret_row )
-                    pref_city = "%s\t%s" % (ret_row['pref'],ret_row['city'])
-                    
-                    if not pref_city in ret_data_tmp:
-                        ret_data_tmp[pref_city] = {}
+            for ret_row in  db_cur.fetchall():
+                ret_row= dict( ret_row )
+                pref_city = "%s\t%s" % (ret_row['pref'],ret_row['city'])
+                
+                if not pref_city in ret_data_tmp:
+                    ret_data_tmp[pref_city] = {}
                         
-                    build_type = ret_row['build_type']
-                    ret_data_tmp[pref_city][build_type+"_count"]=ret_row['count']
-                    ret_data_tmp[pref_city][build_type+"_price"]=ret_row['price']
+                build_type = ret_row['build_type']
+                ret_data_tmp[pref_city][build_type+"_count"]=ret_row['count']
+                ret_data_tmp[pref_city][build_type+"_price"]=ret_row['price']
                     
         ret_data = []
         for pref_city_str,key_vals in ret_data_tmp.items():
@@ -586,17 +641,17 @@ order by check_date desc
 limit 1
 """
         ret_data_tmp = {}
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-                try:
-                    db_cur.execute(sql)
-                except Exception as e:
-                    logger.error(e)
-                    logger.error(sql)
-                    return None
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return None
 
-                ret_row = db_cur.fetchone()
-                return ret_row[0]
+            ret_row = db_cur.fetchone()
+            return ret_row[0]
         
     def get_stock_vals(self):
         check_date = self.get_last_check_date()
@@ -613,77 +668,6 @@ limit 1
         return self.get_vals_group_by_city_sub(start_date_str,end_date_str)
 
 
-    def save_bukken_details(self,build_type,other_where):
-        org_bukkens = self.get_bukkens_for_detail(build_type,other_where)
-        org_size = len(org_bukkens)
-
-        new_bukkens = []
-        bulk_insert_size = self.get_conf()["common"]["bulk_insert_size"]
-        
-        while len(org_bukkens) >= parallel_size:
-            parallels = []
-            i = 0
-            while i < parallel_size:
-
-                calced = org_size - len(org_bukkens)
-                if calced % 100 == 0:
-                    logger.info("%s %d/%d" % (build_type,calced,org_size))
-
-                # refer to https://pystyle.info/python-concurrent-futures/
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                # with concurrent.futures.ProcessPoolExecutor() as executor:
-                    future = executor.submit(self.parse_bukken_detail,
-                                             org_bukkens.pop() )
-                    parallels.append(future)
-                    i += 1
-
-            datetime_now = datetime.datetime.now()
-            
-            for parallel in parallels:
-                bukken_detail = parallel.result()
-                if not bukken_detail:
-                    continue
-
-                bukken_detail["update_time"] = datetime_now
-                new_bukkens.append( bukken_detail )
-
-            if len(new_bukkens) >= bulk_insert_size:
-                util_db = Db()
-                util_db.bulk_update(
-                    "suumo_bukken",
-                    ["url"],
-                    ["url","shop","total_house","house_for_sale",
-                     "show_date","update_time"],
-                    new_bukkens )
-                new_bukkens = []
-                
-
-        if len(org_bukkens):
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                future = executor.submit(self.parse_bukken_detail,
-                                         org_bukkens.pop() )
-                parallels.append(future)
-            i += 1
-
-        datetime_now = datetime.datetime.now()
-        
-        for parallel in parallels:
-            bukken_detail = parallel.result()
-            if not bukken_detail:
-                continue
-
-            bukken_detail["update_time"] = datetime_now
-            new_bukkens.append( bukken_detail )
-            
-        if len(new_bukkens):
-            util_db = Db()
-            util_db.bulk_update(
-                "suumo_bukken",
-                ["url"],
-                ["url","shop","total_house","house_for_sale",
-                 "show_date","update_time"],
-                new_bukkens )
-            
     
     def parse_bukken_detail(self, org_bukken):
         if not "url" in org_bukken or not org_bukken["url"]:
@@ -819,16 +803,16 @@ WHERE build_type=%s and (check_date BETWEEN %s AND %s)
 """
         sql_args = (build_type, date_from, date_to )
         
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-                try:
-                    db_cur.execute(sql,sql_args)
-                except Exception as e:
-                    logger.error(e)
-                    logger.error(sql)
-                    return []
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql,sql_args)
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
 
-                ret_rows = db_cur.fetchall()
+            ret_rows = db_cur.fetchall()
                 
         ret_datas = []
         for ret_row in ret_rows:
@@ -853,18 +837,18 @@ WHERE build_type=%s and check_date >= %s
         
         logger.info("limit_date:"+ limit_date_str)
         
-        with self.db_connect() as db_conn:
-            with self.db_cursor(db_conn) as db_cur:
-                try:
-                    db_cur.execute(sql,
-                                   (build_type,
-                                    limit_date_str))
-                except Exception as e:
-                    logger.error(e)
-                    logger.error(sql)
-                    return []
+        db_conn = self.db_connect()
+        with self.db_cursor(db_conn) as db_cur:
+            try:
+                db_cur.execute(sql,
+                               (build_type,
+                                limit_date_str))
+            except Exception as e:
+                logger.error(e)
+                logger.error(sql)
+                return []
 
-                ret_rows = db_cur.fetchall()
+            ret_rows = db_cur.fetchall()
                 
         ret_datas = []
         for ret_row in ret_rows:

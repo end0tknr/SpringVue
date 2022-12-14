@@ -1,7 +1,6 @@
 #!python
 # -*- coding: utf-8 -*-
 
-from bs4                           import BeautifulSoup
 from selenium.webdriver.common.by  import By
 from selenium.webdriver.support.ui import Select
 from util.db import Db
@@ -12,8 +11,8 @@ import jaconv        # pip install jaconv
 import re
 import time
 import unicodedata   # 標準module
-import urllib.request
 
+# 国土交通省の宅地建物取引業者検索システム用
 url_base = "https://etsuran.mlit.go.jp/TAKKEN/takkenKensaku.do"
 api_args_tmpl = \
     "CMD=search&sv_rdoSelect=1&sv_rdoSelectJoken=1&sv_rdoSelectSort=1&"+\
@@ -34,17 +33,11 @@ class MlitRealEstateShopService(appbase.AppBase):
     def __init__(self):
         pass
 
-    def del_tbl_rows(self):
-        logger.info("start")
-        util_db = Db()
-        util_db.del_tbl_rows("real_estate_shop")
-
-    def save_tbl_rows(self, rows):
-        logger.info("start")
-        util_db = Db()
-        util_db.save_tbl_rows("real_estate_shop",insert_cols,rows )
-        
-
+    # 宅地建物取引業者検索システムを 免許番号で検索し
+    # 不動産会社の名称をDBへ登録します。
+    # なぜか、BeautifulSoup では動作しなかった為、seleniumを使用.
+    # しかも、宅地建物取引業者検索システムは、
+    # 元々、不安定? リソース不足? の為、動作が固まります。
     def find_licence_def(self,licence_no):
 
         licence_no = licence_no.replace("第","").replace("号","")
@@ -109,7 +102,7 @@ class MlitRealEstateShopService(appbase.AppBase):
             select_elms = browser.find_elements(by=By.CSS_SELECTOR,
                                                 value="#pageListNo1")
             if len(select_elms) == 0:
-                tmp_msg = "fail find_elements() for " +_browser.current_url
+                tmp_msg = "fail find_elements() for " + browser.current_url
                 logger.error( tmp_msg )
                 i += 1
                 continue
@@ -240,3 +233,15 @@ where government=%s and  licence=%s
 
             logger.warning("Not found %s %s" % (government,licence))
             return None
+        
+    def del_tbl_rows(self):
+        logger.info("start")
+        util_db = Db()
+        util_db.del_tbl_rows("real_estate_shop")
+
+    def save_tbl_rows(self, rows):
+        logger.info("start")
+        util_db = Db()
+        util_db.save_tbl_rows("real_estate_shop",insert_cols,rows )
+        
+

@@ -42,6 +42,9 @@ let vue_sumstock = Vue.createApp({
         sumstock.chk_client(this);
     },
     methods : {
+	init_page_by_disp_date(){
+	    this.load_city_datas(this.pref_name, this.city_name);
+	},
 
         load_city_datas(pref_name, city_name){
             if ( this.pref_name != pref_name){
@@ -55,7 +58,9 @@ let vue_sumstock = Vue.createApp({
             sumstock.load_shop_city_data(pref_name,city_name,this);
             sumstock.load_near_city_data(pref_name,city_name,this);
             sumstock.load_price_data(pref_name,city_name,this);
+	    console.log("HOGE 1");
             sumstock.load_city_profile(pref_name,city_name,this);
+	    console.log("HOGE 2");
             sumstock.load_city_ratings(pref_name,this);
             sumstock.load_town_data(pref_name,city_name,this);
             sumstock.load_town_profiles(pref_name,city_name,this);
@@ -144,10 +149,12 @@ class SumStock extends NewBuild {
         this.load_near_city_data(pref_name,city_name,vue_obj);
         this.load_price_data(pref_name,city_name,vue_obj);
         this.load_city_profile(pref_name,city_name,vue_obj);
+        this.load_city_ratings(pref_name,vue_obj);
         this.load_near_city_profiles(pref_name,city_name,vue_obj);
         this.load_town_data(pref_name,city_name,vue_obj);
         this.load_build_year_profiles(pref_name,city_name,vue_obj);
         this.load_town_profiles(pref_name,city_name,vue_obj);
+        this.load_town_ratings(pref_name,city_name,vue_obj);
     }
     
     build_year_profiles_max_sets(){
@@ -206,7 +213,6 @@ class SumStock extends NewBuild {
                         Number(city_profile[atri_key]).toLocaleString();
                 }
             }
-
             vue_obj.build_year_profiles.push( city_profile );
         }
     }
