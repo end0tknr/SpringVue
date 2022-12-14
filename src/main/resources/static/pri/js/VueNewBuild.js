@@ -50,7 +50,9 @@ let vue_newbuild = Vue.createApp({
         newbuild.chk_client(this);
     },
     methods : {
-
+	init_page_by_disp_date(){
+	    this.load_city_datas(this.pref_name, this.city_name);
+	},
         load_city_datas(pref_name, city_name){
             
             if ( this.pref_name != pref_name){

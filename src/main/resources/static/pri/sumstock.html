@@ -29,7 +29,7 @@
   <div id="vueapp">
     
     <div class="container_title">
-      <h1 id="pref_name">中古戸建 週次速報 - {{pref_name}}</h1>
+      <h1 id="pref_name">中古戸建 販売偏差値 - {{pref_name}}</h1>
       <div class="container_title_sub">
         <div>
           <input type="date"
@@ -38,7 +38,7 @@
                  :max="disp_date_max"
                  :step="7"
                  v-on:change="init_page_by_disp_date">
-          不動産会社、市区町村、開発規模別
+          独自AIによる「販売しやすさ」でランキング
         </div>
         <div class="container_title_sub_right">
           <a class="open_modal_link" v-on:click="show_jpn_map_modal">
@@ -47,58 +47,31 @@
       </div>
     </div><!--.container_title-->
     
+    <div class="page_middle">
+      <div class="page_middle_container">
+	<!--#include virtual="./tbl/city_ratings.html" -->
+	
+      </div><!--.page_middle_container-->
+    </div><!--.page_middle-->
 
-  <div class="page_middle">
-    <div class="page_middle_container">
-
-      <div class="two_cols_layout">
-        <div class="column_left">
-          <!--#include virtual="./tbl/sales_counts_by_shop.html" -->
-        </div><!-- .column_left -->
-        
-        <div class="column_right">
-          <!--#include virtual="./tbl/sales_counts_by_city.html" -->
-        </div><!-- .column_right -->
-
-      </div><!--.two_cols_layout-->
-    </div><!--.page_middle_container-->
-  </div><!--.page_middle-->
-  
-  <div class="container_title">
-    <h1 id="pref_name">中古戸建 週次速報 - {{city_name}}</h1>
-    <div class="container_title_sub">
-      <div></div>
-      <div class="container_title_sub_right"></div>
-    </div>
-  </div><!--.container_title-->
+    <div class="container_title">
+      <h1 id="pref_name">中古戸建 販売偏差値 - {{city_name}}</h1>
+      <div class="container_title_sub">
+        <div>
+          先程のランキングの市区町村内 版
+        </div>
+        <div class="container_title_sub_right"></div>
+      </div>
+    </div><!--.container_title-->
     
-  <div class="page_middle">
-    <div class="page_middle_container">
-
-      <div class="two_cols_layout">
-        <div class="column_left">
-          <!--#include virtual="./tbl/sales_counts_by_city_shop.html" -->
-        </div><!--.column_left-->
-        
-        <div class="column_right">
-          <!--#include virtual="./tbl/sales_counts_by_town.html" -->
-        </div><!--.column_right-->
-
-        <div class="column_left">
-          <!--#include virtual="./tbl/sales_counts_by_near_city.html" -->
-        </div><!--.column_left-->
-        
-        <div class="column_right">
-          <!--#include virtual="./tbl/sales_counts_by_city_price.html" -->
-        </div><!--.column_right-->
-        
-      </div><!--.two_cols_layout-->
-
-    </div><!--.page_middle_container-->
-  </div><!--.page_middle-->
+    <div class="page_middle">
+      <div class="page_middle_container">
+	<!--#include virtual="./tbl/town_ratings.html" -->
+      </div><!--.page_middle_container-->
+    </div><!--.page_middle-->
 
   <div class="container_title">
-    <h1 id="pref_name">人口 地価 持家率 他 - {{city_name}}</h1>
+    <h1 id="pref_name">{{city_name}}の 人口 地価 持家率 他</h1>
     <div class="container_title_sub">
       <div></div>
       <div class="container_title_sub_right"></div>
@@ -130,20 +103,62 @@
     </div><!--.page_middle_container-->
   </div><!--.page_middle-->
 
-  <div class="container_title">
-    <h1 id="pref_name">戸建戸建 販売偏差値</h1>
-    <div class="container_title_sub">
-      <div>独自AIによる販売評価指数</div>
-      <div class="container_title_sub_right"></div>
-    </div>
-  </div><!--.container_title-->
+    <div class="container_title">
+      <h1 id="pref_name">{{pref_name}}内 販売ランキング</h1>
+      <div class="container_title_sub">
+	不動産会社や市区町村別の「商談に至る」までのランキング
+      </div>
+    </div><!--.container_title-->
+    
 
   <div class="page_middle">
     <div class="page_middle_container">
-      <!--#include virtual="./tbl/city_ratings.html" -->
-          
-      <!--#include virtual="./tbl/town_ratings.html" -->
-      
+
+      <div class="two_cols_layout">
+        <div class="column_left">
+          <!--#include virtual="./tbl/sales_counts_by_shop.html" -->
+        </div><!-- .column_left -->
+        
+        <div class="column_right">
+          <!--#include virtual="./tbl/sales_counts_by_city.html" -->
+        </div><!-- .column_right -->
+
+      </div><!--.two_cols_layout-->
+    </div><!--.page_middle_container-->
+  </div><!--.page_middle-->
+  
+  <div class="container_title">
+    <h1 id="pref_name">{{city_name}}内 販売ランキング</h1>
+    <div class="container_title_sub">
+      <div>
+	先程のランキングの市区町村内 版
+      </div>
+      <div class="container_title_sub_right"></div>
+    </div>
+  </div><!--.container_title-->
+    
+  <div class="page_middle">
+    <div class="page_middle_container">
+
+      <div class="two_cols_layout">
+        <div class="column_left">
+          <!--#include virtual="./tbl/sales_counts_by_city_shop.html" -->
+        </div><!--.column_left-->
+        
+        <div class="column_right">
+          <!--#include virtual="./tbl/sales_counts_by_town.html" -->
+        </div><!--.column_right-->
+
+        <div class="column_left">
+          <!--#include virtual="./tbl/sales_counts_by_near_city.html" -->
+        </div><!--.column_left-->
+        
+        <div class="column_right">
+          <!--#include virtual="./tbl/sales_counts_by_city_price.html" -->
+        </div><!--.column_right-->
+        
+      </div><!--.two_cols_layout-->
+
     </div><!--.page_middle_container-->
   </div><!--.page_middle-->
 

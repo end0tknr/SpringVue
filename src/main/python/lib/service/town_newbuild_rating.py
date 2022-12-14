@@ -13,11 +13,14 @@ import json
 import numpy as np
 
 logger = appbase.AppBase().get_logger()
+calc_type = "newbuild"
 
-class TownNewbuildRatingService(TownService):
+class TownNewBuildRatingService(TownService):
     
     def __init__(self):
-        pass
+        self.calc_type   = calc_type
+        self.rating_type = calc_type + "_rating"
+        self.sales_result_class = NewBuildService()
 
     def calc_save_ratings(self):
         profiles_hash = self.calc_town_profiles()
@@ -32,7 +35,7 @@ class TownNewbuildRatingService(TownService):
         util_db = Db()
         util_db.bulk_update("town_profile",
                             ["pref","city","town"],
-                            ["pref","city","town","newbuild_rating"],
+                            ["pref","city","town",self.rating_type],
                             profiles_list )
         
 
@@ -41,7 +44,7 @@ class TownNewbuildRatingService(TownService):
 
         for pref_city_town in profiles_hash.keys():
             (pref,city,town) = pref_city_town.split("\t")
-            rating = profiles_hash[pref_city_town]["newbuild_rating"]
+            rating = profiles_hash[pref_city_town][self.rating_type]
             rating["pref"] = pref
             rating["city"] = city
             rating["town"] = town
@@ -50,11 +53,12 @@ class TownNewbuildRatingService(TownService):
                 "pref" : pref,
                 "city" : city,
                 "town" : town,
-                "newbuild_rating":json.dumps(rating, ensure_ascii=False) }
+                self.rating_type:json.dumps(rating, ensure_ascii=False) }
             ret_datas.append( ret_data )
 
         return ret_datas
     
+    #「顧客 多」に関する偏差値
     def calc_fudousan_torihiki(self, profiles_hash):
         fudousan_torihiki_service = MlitFudousanTorihikiService()
         
@@ -66,7 +70,7 @@ class TownNewbuildRatingService(TownService):
 
         years = [pre_year-1, pre_year]
         fudousan_torihikis = \
-            fudousan_torihiki_service.get_town_years("newbuild",years )
+            fudousan_torihiki_service.get_town_years(self.calc_type,years )
         # 差値算出用
         sold_counts = []
 
@@ -79,59 +83,59 @@ class TownNewbuildRatingService(TownService):
                 continue
 
             buy_new_rate = 0
-            if "buy_new_rate" in profiles_hash[pref_city_town]["newbuild_rating"]:
+            if "buy_new_rate" in profiles_hash[pref_city_town][self.rating_type]:
                 buy_new_rate = \
-                    profiles_hash[pref_city_town]["newbuild_rating"]["buy_new_rate"]
+                    profiles_hash[pref_city_town][self.rating_type]["buy_new_rate"]
 
             count_new = "sold_count_" + str(years[1])
             price_new = "sold_price_" + str(years[1])
             count_pre = "sold_count_" + str(years[0])
 
-            profiles_hash[pref_city_town]["newbuild_rating"]["sold_count"] = 0
+            profiles_hash[pref_city_town][self.rating_type]["sold_count"] = 0
             if count_new in fudousan_torihiki:
-                profiles_hash[pref_city_town]["newbuild_rating"]["sold_count"] = \
+                profiles_hash[pref_city_town][self.rating_type]["sold_count"] = \
                     round(fudousan_torihiki[count_new] * buy_new_rate,1)
 
-            profiles_hash[pref_city_town]["newbuild_rating"]["sold_price"] = 0
+            profiles_hash[pref_city_town][self.rating_type]["sold_price"] = 0
             if price_new in fudousan_torihiki:
-                profiles_hash[pref_city_town]["newbuild_rating"]["sold_price"] = \
+                profiles_hash[pref_city_town][self.rating_type]["sold_price"] = \
                     round(fudousan_torihiki[price_new] / 1000000)
                 
             if count_pre in fudousan_torihiki:
-                profiles_hash[pref_city_town]["newbuild_rating"]["sold_count_diff"] = \
-                    profiles_hash[pref_city_town]["newbuild_rating"]["sold_count"] - \
+                profiles_hash[pref_city_town][self.rating_type]["sold_count_diff"] = \
+                    profiles_hash[pref_city_town][self.rating_type]["sold_count"] - \
                     fudousan_torihiki[count_pre] * buy_new_rate
-                profiles_hash[pref_city_town]["newbuild_rating"]["sold_count_diff"] = \
+                profiles_hash[pref_city_town][self.rating_type]["sold_count_diff"] = \
                     round(
-                        profiles_hash[pref_city_town]["newbuild_rating"]["sold_count_diff"],
+                        profiles_hash[pref_city_town][self.rating_type]["sold_count_diff"],
                         1 )
 
             family_setai = 0
-            if not "家族世帯" in profiles_hash[pref_city_town]["newbuild_rating"] or \
-               not profiles_hash[pref_city_town]["newbuild_rating"]["家族世帯"]:
+            if not "家族世帯" in profiles_hash[pref_city_town][self.rating_type] or \
+               not profiles_hash[pref_city_town][self.rating_type]["家族世帯"]:
                 continue
                 
             # 以下の 1000は、標準偏差算出で桁溢れ?を防ぐ為のものです
             sold_counts.append(
-                profiles_hash[pref_city_town]["newbuild_rating"]["sold_count"] * 1000 / \
-                profiles_hash[pref_city_town]["newbuild_rating"]["家族世帯"] )
+                profiles_hash[pref_city_town][self.rating_type]["sold_count"] * 1000 / \
+                profiles_hash[pref_city_town][self.rating_type]["家族世帯"] )
                 
         np_scores = np.array( sold_counts )
         tmp_mean = np.mean(np_scores)   # 平均
         tmp_std = np.std( sold_counts ) # 標準偏差
         
         for pref_city_town, profile_tmp in profiles_hash.items():
-            if not "sold_count" in profile_tmp["newbuild_rating"] or \
-               not "家族世帯" in profile_tmp["newbuild_rating"] or \
-               not profile_tmp["newbuild_rating"]["家族世帯"] :
+            if not "sold_count" in profile_tmp[self.rating_type] or \
+               not "家族世帯" in profile_tmp[self.rating_type] or \
+               not profile_tmp[self.rating_type]["家族世帯"] :
                 continue
             
             # 以下の 1000は、標準偏差算出で桁溢れ?を防ぐ為のものです
             tmp_count = \
-                profile_tmp["newbuild_rating"]["sold_count"] * 1000 / \
-                profile_tmp["newbuild_rating"]["家族世帯"]
+                profile_tmp[self.rating_type]["sold_count"] * 1000 / \
+                profile_tmp[self.rating_type]["家族世帯"]
             # 偏差値算出
-            profile_tmp["newbuild_rating"]["ss_sold_count"] = \
+            profile_tmp[self.rating_type]["ss_sold_count"] = \
                 round( (tmp_count - tmp_mean) / tmp_std * 10 + 50 )
     
         return profiles_hash
@@ -148,9 +152,9 @@ class TownNewbuildRatingService(TownService):
             if not pref_city_town in profiles_hash:
                 continue
             
-            profiles_hash[pref_city_town]["newbuild_rating"]["家族世帯"] = \
+            profiles_hash[pref_city_town][self.rating_type]["家族世帯"] = \
                 setai_info["family_setai"]
-            profiles_hash[pref_city_town]["newbuild_rating"]["家族世帯_変動"] = \
+            profiles_hash[pref_city_town][self.rating_type]["家族世帯_変動"] = \
                 setai_info["family_setai"] - setai_info["family_setai_2015"]
 
         return profiles_hash
@@ -166,21 +170,21 @@ class TownNewbuildRatingService(TownService):
             city_profiles_hash[pref_city] = {
                 "summary"           : city_profile["summary"],
                 "build_year_summary": city_profile["build_year_summary"],
-                "newbuild_rating"   : city_profile["newbuild_rating"] }
+                self.rating_type    : city_profile[self.rating_type] }
 
         for pref_city_town in profiles_hash:
             (pref,city,town) = pref_city_town.split("\t")
             pref_city = pref +"\t"+ city
 
             if pref_city in city_profiles_hash and \
-               "newbuild_rating"  in city_profiles_hash[pref_city]:
+               self.rating_type in city_profiles_hash[pref_city]:
 
-                if "buy_new_rate" in city_profiles_hash[pref_city]["newbuild_rating"]:
-                    profiles_hash[pref_city_town]["newbuild_rating"]["buy_new_rate"] = \
-                        city_profiles_hash[pref_city]["newbuild_rating"]["buy_new_rate"]
-                if "kodate_rate" in city_profiles_hash[pref_city]["newbuild_rating"]:
-                    profiles_hash[pref_city_town]["newbuild_rating"]["kodate_rate"] = \
-                        city_profiles_hash[pref_city]["newbuild_rating"]["kodate_rate"]
+                if "buy_new_rate" in city_profiles_hash[pref_city][self.rating_type]:
+                    profiles_hash[pref_city_town][self.rating_type]["buy_new_rate"] = \
+                        city_profiles_hash[pref_city][self.rating_type]["buy_new_rate"]
+                if "kodate_rate" in city_profiles_hash[pref_city][self.rating_type]:
+                    profiles_hash[pref_city_town][self.rating_type]["kodate_rate"] = \
+                        city_profiles_hash[pref_city][self.rating_type]["kodate_rate"]
                 
         return profiles_hash
                 
@@ -197,19 +201,20 @@ class TownNewbuildRatingService(TownService):
 
             profiles_hash[pref_city_town] = {
                 "summary"        :town_profile["summary"],
-                "newbuild_rating":{"land_price":0} }
+                self.rating_type :{"land_price":0} }
 
             if "price" in profiles_hash[pref_city_town]["summary"]:
-                profiles_hash[pref_city_town]["newbuild_rating"]["land_price"] = \
-                    round(profiles_hash[pref_city_town]["summary"]["price"] / 10000)
+                profiles_hash[pref_city_town][self.rating_type]["land_price"] = \
+                    round(profiles_hash[pref_city_town]["summary"]["price"]
+                          / 10000)
             
         return profiles_hash
 
-
+    # 「競合物件 少」「商談化 早」に関する偏差値
     def calc_sales_count_by_town(self, profiles_hash):
-        newbuild_service = NewBuildService()
-        sales_counts = newbuild_service.get_newest_sales_count_by_town()
-        # 差値算出用
+        sales_result_class = self.sales_result_class
+        sales_counts = sales_result_class.get_newest_sales_count_by_town()
+        # 偏差値算出用
         standard_score ={
             "discuss_days":{"scores":[],"no_scores":[],"mean":None,"std":None},
             "onsale_count":{"scores":[],"no_scores":[],"mean":None,"std":None} }
@@ -221,12 +226,13 @@ class TownNewbuildRatingService(TownService):
             if not pref_city_town in profiles_hash:
                 continue
             
-            if not "sold_count" in profiles_hash[pref_city_town]["newbuild_rating"]:
+            if not "sold_count" in profiles_hash[pref_city_town][self.rating_type]:
                 continue
-            sold_count = profiles_hash[pref_city_town]["newbuild_rating"]["sold_count"]
+            sold_count = \
+                profiles_hash[pref_city_town][self.rating_type]["sold_count"]
 
             for atri_key in ["discuss_days","onsale_count"]:
-                profiles_hash[pref_city_town]["newbuild_rating"][atri_key] = \
+                profiles_hash[pref_city_town][self.rating_type][atri_key] = \
                     sales_count[atri_key]
                 
                 if atri_key in ["onsale_count"]:
@@ -244,16 +250,16 @@ class TownNewbuildRatingService(TownService):
 
         for pref_city, profile_tmp in profiles_hash.items():
 
-            if not "sold_count" in profiles_hash[pref_city]["newbuild_rating"]:
+            if not "sold_count" in profiles_hash[pref_city][self.rating_type]:
                 continue
-            sold_count = profiles_hash[pref_city]["newbuild_rating"]["sold_count"]
+            sold_count = profiles_hash[pref_city][self.rating_type]["sold_count"]
             
             for atri_key,ss_score in standard_score.items():
-                if not atri_key in profile_tmp["newbuild_rating"]:
+                if not atri_key in profile_tmp[self.rating_type]:
                     continue
                 tmp_mean  = ss_score["mean"]
                 tmp_std   = ss_score["std"]
-                tmp_count = profile_tmp["newbuild_rating"][atri_key]
+                tmp_count = profile_tmp[self.rating_type][atri_key]
                 if not tmp_count:
                     continue
 
@@ -261,15 +267,17 @@ class TownNewbuildRatingService(TownService):
                     tmp_count = sold_count / tmp_count
                 
                 # 偏差値算出
-                profile_tmp["newbuild_rating"]["ss_"+atri_key] = \
+                profile_tmp[self.rating_type]["ss_"+atri_key] = \
                     round( (tmp_count - tmp_mean) / tmp_std * 10 + 50 )
-                    
+
         return profiles_hash
 
 
+    # 「競合会社 少」に関する偏差値
     def calc_sales_count_by_shop(self, profiles_hash):
-        newbuild_service = NewBuildService()
-        sales_counts = newbuild_service.get_newest_sales_count_by_shop_town()
+        sales_result_class = self.sales_result_class
+
+        sales_counts = sales_result_class.get_newest_sales_count_by_shop_town()
         # 差値算出用
         standard_score ={
             "onsale_shop":{"scores":[],"no_scores":[],"mean":None,"std":None} }
@@ -282,15 +290,15 @@ class TownNewbuildRatingService(TownService):
             if not pref_city in profiles_hash:
                 continue
 
-            if not "sold_count" in profiles_hash[pref_city]["newbuild_rating"]:
+            if not "sold_count" in profiles_hash[pref_city][self.rating_type]:
                 continue
             
-            sold_count = profiles_hash[pref_city]["newbuild_rating"]["sold_count"]
-            profiles_hash[pref_city]["newbuild_rating"]["onsale_shop"] = sales_count["shop"]
+            sold_count = profiles_hash[pref_city][self.rating_type]["sold_count"]
+            profiles_hash[pref_city][self.rating_type]["onsale_shop"] = sales_count["shop"]
             
             for atri_key,ss_score in standard_score.items():
                 ss_score["scores"].append(
-                    sold_count/profiles_hash[pref_city]["newbuild_rating"]["onsale_shop"])
+                    sold_count/profiles_hash[pref_city][self.rating_type]["onsale_shop"])
 
             for atri_key,ss_score in standard_score.items():
                 ss_score["np_scores"] = np.array( ss_score["scores"] )
@@ -299,21 +307,19 @@ class TownNewbuildRatingService(TownService):
 
         for pref_city, profile_tmp in profiles_hash.items():
 
-            if not "sold_count" in profiles_hash[pref_city]["newbuild_rating"]:
+            if not "sold_count" in profiles_hash[pref_city][self.rating_type]:
                 continue
-            sold_count = profiles_hash[pref_city]["newbuild_rating"]["sold_count"]
+            sold_count = profiles_hash[pref_city][self.rating_type]["sold_count"]
             
             for atri_key,ss_score in standard_score.items():
-                if not atri_key in profile_tmp["newbuild_rating"]:
+                if not atri_key in profile_tmp[self.rating_type]:
                     continue
                 tmp_mean  = ss_score["mean"]
                 tmp_std   = ss_score["std"]
-                tmp_count = sold_count / profile_tmp["newbuild_rating"][atri_key]
+                tmp_count = sold_count / profile_tmp[self.rating_type][atri_key]
                 
                 # 偏差値算出
-                profile_tmp["newbuild_rating"]["ss_"+atri_key] = \
+                profile_tmp[self.rating_type]["ss_"+atri_key] = \
                     round( (tmp_count - tmp_mean) / tmp_std * 10 + 50 )
 
         return profiles_hash
-
-    

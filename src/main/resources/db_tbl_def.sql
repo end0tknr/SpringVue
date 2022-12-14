@@ -707,7 +707,9 @@ licence                 varchar(16),
 shop                    varchar(64),
 primary key(government,licence)
 );
-
+COMMENT ON COLUMN real_estate_shop.government
+     IS '例; 国土交通大臣、東京都';
+     
 CREATE TABLE IF NOT EXISTS newbuild_sales_count_by_shop (
 pref                    varchar(4),
 shop                    varchar(64),

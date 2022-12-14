@@ -70,6 +70,7 @@ class AppBase():
         # 要素が見つかるまで、最大 ?秒 待つ
         browser.implicitly_wait( selenium_conf["implicitly_wait"] )
 
+        # 以下は、headless modeでもdownloadする為のもの。
         # refer to https://qiita.com/memakura/items/f80d2e2c59514cfc14c9
         browser.command_executor._commands["send_command"] = (
             "POST",
