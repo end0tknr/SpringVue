@@ -37,6 +37,14 @@ public class CityProfileService {
         return townProfileRepository.getTownNewbuildRatings(prefName, cityName);
     }
 
+    public  List<String> getCitySumStockRatings( String prefName) {
+        return cityProfileRepository.getCitySumStockRatings(prefName);
+    }
+
+    public  List<String> getTownSumStockRatings( String prefName, String cityName) {
+        return townProfileRepository.getTownSumStockRatings(prefName, cityName);
+    }
+
     public  List<String> getTownProfiles(
     		String prefName, String cityName) {
         return townProfileRepository.getTownProfiles(prefName, cityName);
