@@ -17,4 +17,9 @@ public interface TownProfileRepository {
  		   " WHERE pref='${prefName}' AND city='${cityName}' "+
  		   " ORDER BY town ")
     List<String> getTownNewbuildRatings(String prefName,String cityName);
+
+    @Select("SELECT sumstock_rating FROM town_profile"+
+ 		   " WHERE pref='${prefName}' AND city='${cityName}' "+
+ 		   " ORDER BY town ")
+    List<String> getTownSumStockRatings(String prefName,String cityName);
 }

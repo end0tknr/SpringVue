@@ -25,4 +25,8 @@ public interface CityProfileRepository {
     @Select("SELECT newbuild_rating FROM city_profile "+
     		" WHERE pref='${prefName}' ")
     List<String> getCityNewBuildRatings(String prefName);
+
+    @Select("SELECT sumstock_rating FROM city_profile "+
+    		" WHERE pref='${prefName}' ")
+    List<String> getCitySumStockRatings(String prefName);
 }

@@ -258,4 +258,32 @@ public class SumStockRestController {
     	return townProfile;
     }
 
+
+    @RequestMapping("/api/sumstock/CityRatings/{prefName}")
+    public List<String> nearCityRatings (
+    		@PathVariable("prefName") String prefName ){
+
+    	List<String> cityProfile =
+    			cityProfileService.getCitySumStockRatings( prefName );
+    	return cityProfile;
+    }
+
+    @RequestMapping("/api/sumstock/TownRatings/{prefCityName}")
+    public List<String> townRatings (
+    		@PathVariable("prefCityName") String prefCityName ){
+
+    	try {
+			prefCityName = URLDecoder.decode(prefCityName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+    	String[] names = prefCityName.split("_");
+
+    	List<String> townRatings =
+    			cityProfileService.getTownSumStockRatings(names[0],names[1] );
+    	return townRatings;
+    }
+
+
+
 }
