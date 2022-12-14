@@ -62,8 +62,8 @@ class TownNewBuildRatingService(TownService):
     def calc_fudousan_torihiki(self, profiles_hash):
         fudousan_torihiki_service = MlitFudousanTorihikiService()
         
-        # 6ケ月前を基準に、年度の販売棟数を取得
-        tmp_date = datetime.date.today() - datetime.timedelta(days=(30*6))
+        # 約1年前を基準に、年度の販売棟数を取得
+        tmp_date = datetime.date.today() - datetime.timedelta(days=(400))
         pre_year = tmp_date.year
         if  1<=tmp_date.month and tmp_date.month<=3:
             pre_year -= 1

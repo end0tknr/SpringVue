@@ -29,20 +29,15 @@
   <div id="vueapp">
     
     <div class="container_title">
-      <h1 id="pref_name">中古戸建 販売偏差値 - {{pref_name}}</h1>
+      <h1 id="pref_name">中古戸建 販売偏差値 - {{pref_name}}
+	<button type="button" v-on:click="show_jpn_map_modal">
+	  都道府県選択</button>
+      </h1>
       <div class="container_title_sub">
         <div>
-          <input type="date"
-                 v-model="disp_date"
-                 :min="disp_date_min"
-                 :max="disp_date_max"
-                 :step="7"
-                 v-on:change="init_page_by_disp_date">
-          独自AIによる「販売しやすさ」でランキング
+          独自AIによる「販売しやすさ」ランキング
         </div>
         <div class="container_title_sub_right">
-          <a class="open_modal_link" v-on:click="show_jpn_map_modal">
-            都道府県選択</a>
         </div>
       </div>
     </div><!--.container_title-->
@@ -58,7 +53,7 @@
       <h1 id="pref_name">中古戸建 販売偏差値 - {{city_name}}</h1>
       <div class="container_title_sub">
         <div>
-          先程のランキングの市区町村内 版
+          先程のランキングの市区町村 版
         </div>
         <div class="container_title_sub_right"></div>
       </div>
@@ -104,12 +99,18 @@
   </div><!--.page_middle-->
 
     <div class="container_title">
-      <h1 id="pref_name">{{pref_name}}内 販売ランキング</h1>
+      <h1 id="pref_name">週次 販売状況 - {{pref_name}}</h1>
       <div class="container_title_sub">
-	不動産会社や市区町村別の「商談に至る」までのランキング
+        <div>
+          <input type="date"
+                 v-model="disp_date"
+                 :min="disp_date_min"
+                 :max="disp_date_max"
+                 :step="7"
+                 v-on:change="init_page_by_disp_date">
+	  </div>
       </div>
     </div><!--.container_title-->
-    
 
   <div class="page_middle">
     <div class="page_middle_container">
@@ -128,10 +129,9 @@
   </div><!--.page_middle-->
   
   <div class="container_title">
-    <h1 id="pref_name">{{city_name}}内 販売ランキング</h1>
+    <h1 id="pref_name">週次販売状況 - {{city_name}}</h1>
     <div class="container_title_sub">
       <div>
-	先程のランキングの市区町村内 版
       </div>
       <div class="container_title_sub_right"></div>
     </div>
